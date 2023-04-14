@@ -49,7 +49,7 @@ def userBorrowedBooks(userId):
                 LEFT OUTER JOIN borrow ON \"user\".userId = borrow.borrowerId\
                 JOIN item USING (itemId)\
                 JOIN book USING (isbn)\
-                WHERE UPPER_INF(period)")
+                WHERE userId = %s AND UPPER_INF(borrow.period)", (userId,))
         return cur.fetchall()
 
 import datetime
