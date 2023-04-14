@@ -43,6 +43,14 @@ def returnBorrow(itemId):
                 WHERE itemId = %s AND UPPER_INF(period)", (itemId,))
         conn.commit()
 
+def userBorrowedBooks(userId):
+    with conn.cursor() as cur:
+        cur.execute("SELECT book.title FROM \"user\"\
+                LEFT OUTER JOIN borrow ON \"user\".userId = borrow.borrowerId\
+                JOIN item USING (itemId)\
+                JOIN book USING (isbn)\
+                WHERE userId = %s AND UPPER_INF(borrow.period)", (userId,))
+        return cur.fetchall()
 
 import datetime
 
@@ -72,7 +80,11 @@ userId = insertUser(
         )
 
 insertBorrow(itemId=itemId, borrowerId=userId, expectedReturn=datetime.date(2024,12,1))
+print(userBorrowedBooks(userId))
 returnBorrow(itemId=itemId)
+
 insertBorrow(itemId=itemId, borrowerId=userId, expectedReturn=datetime.date(2024,12,1))
+print(userBorrowedBooks(userId))
 returnBorrow(itemId=itemId)
+
 
