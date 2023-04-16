@@ -134,6 +134,9 @@ def update_book():
             cur.execute(query, tuple(data["new_book"].values())+tuple(data["old_book"].values()))
             conn.commit()
             return {"success": True, "num_updated": cur.rowcount}, 200
+    except psycopg2.IntegrityError as err:
+        conn.rollback()
+        return {"success": False, "error": err.pgerror}, 400
     except psycopg2.Error as err:
         print(err.pgerror)
         return {"success": False, "error": "unknown"}
