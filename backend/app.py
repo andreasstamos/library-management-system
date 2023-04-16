@@ -3,6 +3,7 @@ import configparser
 
 import psycopg2
 import psycopg2.extras
+import psycopg2.sql
 
 from flask import Flask, request
 import jsonschema
@@ -20,7 +21,7 @@ conn = psycopg2.connect(
         password=   config["DATABASE"]["DB_PASSWORD"],
 )
 
-insert_book_jsonschema = {
+book_jsonschema = {
         "type": "object",
         "properties": {
             "isbn": {"type": "string", "pattern": "^[0-9]{13}$"},
@@ -33,22 +34,26 @@ insert_book_jsonschema = {
             "keywords": {"type": "array", "items": {"type": "string"}},
             "categories": {"type": "array", "items": {"type": "string"}},
             },
-        "required": ["isbn", "title", "publisher", "pageNumber", "summary", "language", "authors", "keywords", "categories"],
+        "additionalProperties": False,
         }
+
+insert_book_jsonschema = dict(book_jsonschema)
+insert_book_jsonschema["required"] = ["isbn", "title", "publisher", "pageNumber", "summary", "language", "authors", "keywords", "categories"]
+
 
 @app.route("/book/", methods=["POST"])
 def insert_book():
     data = request.get_json()
     try:
-        jsonschema.validate(data, insert_book_jsonschema)
+        jsonschema.validate(data, book_jsonschema)
     except jsonschema.ValidationError as err:
         return {"success": False, "error": err.message}, 400
 
     try:
         with conn.cursor() as cur:
             cur.execute("INSERT INTO book (isbn, title, publisher, pageNumber, summary, language)\
-                VALUES (%s, %s, %s, %s, %s, %s)",\
-                (data["isbn"], data["title"], data["publisher"], data["pageNumber"], data["summary"], data["language"]))
+                    VALUES (%s, %s, %s, %s, %s, %s)",\
+                    (data["isbn"], data["title"], data["publisher"], data["pageNumber"], data["summary"], data["language"]))
 
             for author in data["authors"]:
                 cur.execute("INSERT INTO bookAuthor (isbn, author) VALUES (%s, %s)",\
@@ -65,8 +70,32 @@ def insert_book():
         return {"success": False, "error": err.pgerror}, 400
     except psycopg2.Error as err:
         conn.rollback()
-        return {"success": False, "error": "unknown"}
+        return {"success": False, "error": "unknown"}, 400
 
     return {"success": True}, 201
+
+@app.route("/book/", methods=["GET"])
+def get_book():
+    data = request.get_json()
+    try:
+        jsonschema.validate(data, book_jsonschema)
+    except jsonschema.ValidationErorr as err:
+        return {"success": False, "error": err.message}, 400
+
+    try:
+        with conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
+            query = psycopg2.sql.SQL("SELECT * FROM book")
+            if len(data) > 0:
+                query += psycopg2.sql.SQL(" WHERE{}").format(
+                        psycopg2.sql.SQL(" AND ").join(
+                            psycopg2.sql.SQL("{} = %s").format(psycopg2.sql.Identifier(fieldName)) for fieldName in data.keys()
+                            )
+                        )
+            cur.execute(query, tuple(data.values()))
+            results = cur.fetchall()
+            return {"success": True, "books": results}, 200
+    except psycopg2.Error as err:
+        print(err.pgerror)
+        return {"success": False, "error": "unknown"}
 
 app.run(host='0.0.0.0', port=5000)
