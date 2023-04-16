@@ -1,90 +1,102 @@
 import psycopg2
 
-def insertBook(isbn, title, authors, publisher, pageNumber, summary, language, keywords, categories):
+def insertBook(isbn, title, authors, publisher, page_number, summary, language, keywords, categories):
     with conn.cursor() as cur:
-        cur.execute("INSERT INTO book (isbn, title, publisher, pageNumber, summary, language)\
-                VALUES (%s, %s, %s, %s, %s, %s)", (isbn, title, publisher, pageNumber, summary, language))
+        cur.execute("INSERT INTO book (isbn, title, publisher, page_number, summary, language)\
+                VALUES (%s, %s, %s, %s, %s, %s)", (isbn, title, publisher, page_number, summary, language))
         for author in authors:
-            cur.execute("INSERT INTO bookAuthor (isbn, author) VALUES (%s, %s)", (isbn, author))
+            cur.execute("INSERT INTO book_author (isbn, author) VALUES (%s, %s)", (isbn, author))
         for keyword in keywords:
-            cur.execute("INSERT INTO bookKeyword (isbn, keyword) VALUES (%s, %s)", (isbn, keyword))
+            cur.execute("INSERT INTO book_keyword (isbn, keyword) VALUES (%s, %s)", (isbn, keyword))
         for category in categories:
-            cur.execute("INSERT INTO bookCategory (isbn, category) VALUES (%s, %s)", (isbn, category))
+            cur.execute("INSERT INTO book_category (isbn, category) VALUES (%s, %s)", (isbn, category))
         conn.commit()
 
 def insertSchool():
     with conn.cursor() as cur:
-        cur.execute("INSERT INTO school DEFAULT VALUES RETURNING schoolId")
+        cur.execute("INSERT INTO school DEFAULT VALUES RETURNING school_id")
         conn.commit()
         return cur.fetchone()[0]
 
-def insertItem(isbn, schoolId):
+def insertItem(isbn, school_id):
     with conn.cursor() as cur:
-        cur.execute("INSERT INTO item (isbn, schoolId) VALUES (%s, %s) RETURNING itemId", (isbn,schoolId))
+        cur.execute("INSERT INTO item (isbn, school_id) VALUES (%s, %s) RETURNING item_id", (isbn,school_id))
         conn.commit()
         return cur.fetchone()[0]
 
-def insertUser(schoolId, username, firstName, lastName, email, passwordHash):
+def insertUser(school_id, username, first_name, last_name, email, password_hash):
     with conn.cursor() as cur:
-        cur.execute("INSERT INTO \"user\" (schoolId, username, firstName, lastName, email, passwordHash) VALUES\
-                (%s, %s, %s, %s, %s, %s) RETURNING schoolId", (schoolId, username, firstName, lastName, email, passwordHash))
+        cur.execute("INSERT INTO \"user\" (school_id, username, first_name, last_name, email, password_hash) VALUES\
+                (%s, %s, %s, %s, %s, %s) RETURNING user_id", (school_id, username, first_name, last_name, email, password_hash))
         conn.commit()
         return cur.fetchone()[0]
 
-def insertBorrow(itemId, borrowerId, expectedReturn):
+def insertBorrow(item_id, borrower_id, expected_return):
     with conn.cursor() as cur:
-        cur.execute("INSERT INTO borrow (itemId, borrowerId, expectedReturn) VALUES\
-                (%s, %s, %s)", (itemId, borrowerId, expectedReturn))
+        cur.execute("INSERT INTO borrow (item_id, borrower_id, expected_return) VALUES\
+                (%s, %s, %s)", (item_id, borrower_id, expected_return))
         conn.commit()
 
-def returnBorrow(itemId):
+def returnBorrow(item_id):
     with conn.cursor() as cur:
         cur.execute("UPDATE borrow SET period = TSTZRANGE(LOWER(period), NOW(),  '[]')\
-                WHERE itemId = %s AND UPPER_INF(period)", (itemId,))
+                WHERE item_id = %s AND UPPER_INF(period)", (item_id,))
         conn.commit()
 
-def userBorrowedBooks(userId):
+def userBorrowedBooks(user_id):
     with conn.cursor() as cur:
         cur.execute("SELECT book.title FROM \"user\"\
-                LEFT OUTER JOIN borrow ON \"user\".userId = borrow.borrowerId\
-                JOIN item USING (itemId)\
+                LEFT OUTER JOIN borrow ON \"user\".user_id = borrow.borrower_id\
+                JOIN item USING (item_id)\
                 JOIN book USING (isbn)\
-                WHERE userId = %s AND UPPER_INF(borrow.period)", (userId,))
+                WHERE user_id = %s AND UPPER_INF(borrow.period)", (user_id,))
         return cur.fetchall()
 
 import datetime
 
-conn = psycopg2.connect(dbname="library", user="libraryapi")
+import configparser
+
+config = configparser.ConfigParser()
+config.read("secrets.ini")
+
+conn = psycopg2.connect(
+        host    =   config["DATABASE"]["DB_HOST"],
+        port    =   config["DATABASE"].getint("DB_PORT"),
+        database=   config["DATABASE"]["DB_NAME"],
+        user    =   config["DATABASE"]["DB_USER"],
+        password=   config["DATABASE"]["DB_PASSWORD"],
+)
+
 
 insertBook(
         isbn="1234567890123",
         title="TestBook",
         authors=["TestAuthor"],
         publisher="TestPublisher",
-        pageNumber=123,
+        page_number=123,
         summary="testSummary",
         language="testLanguage",
         keywords=["testKeyword"],
         categories=["testCategory"]
         )
 
-schoolId = insertSchool()
-itemId = insertItem(isbn="1234567890123", schoolId=schoolId)
-userId = insertUser(
-        schoolId=schoolId,
+school_id = insertSchool()
+item_id = insertItem(isbn="1234567890123", school_id=school_id)
+user_id = insertUser(
+        school_id=school_id,
         username="TestUsername",
-        firstName="TestFirstname",
-        lastName="TestLastname",
+        first_name="TestFirstname",
+        last_name="TestLastname",
         email="testemail@testdomain.com",
-        passwordHash="testPasswordhash"
+        password_hash="testPasswordhash"
         )
 
-insertBorrow(itemId=itemId, borrowerId=userId, expectedReturn=datetime.date(2024,12,1))
-print(userBorrowedBooks(userId))
-returnBorrow(itemId=itemId)
+insertBorrow(item_id=item_id, borrower_id=user_id, expected_return=datetime.date(2024,12,1))
+print(userBorrowedBooks(user_id))
+returnBorrow(item_id=item_id)
 
-insertBorrow(itemId=itemId, borrowerId=userId, expectedReturn=datetime.date(2024,12,1))
-print(userBorrowedBooks(userId))
-returnBorrow(itemId=itemId)
+insertBorrow(item_id=item_id, borrower_id=user_id, expected_return=datetime.date(2024,12,1))
+print(userBorrowedBooks(user_id))
+returnBorrow(item_id=item_id)
 
 
