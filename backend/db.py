@@ -54,7 +54,19 @@ def userBorrowedBooks(userId):
 
 import datetime
 
-conn = psycopg2.connect(dbname="library", user="libraryapi")
+import configparser
+
+config = configparser.ConfigParser()
+config.read("secrets.ini")
+
+conn = psycopg2.connect(
+        host    =   config["DATABASE"]["DB_HOST"],
+        port    =   config["DATABASE"].getint("DB_PORT"),
+        database=   config["DATABASE"]["DB_NAME"],
+        user    =   config["DATABASE"]["DB_USER"],
+        password=   config["DATABASE"]["DB_PASSWORD"],
+)
+
 
 insertBook(
         isbn="1234567890123",
