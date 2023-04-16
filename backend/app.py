@@ -14,11 +14,11 @@ config.read("secrets.ini")
 
 app = Flask(__name__)
 conn = psycopg2.connect(
-        host    =   config["DATABASE"]["DB_HOST"],
-        port    =   config["DATABASE"].getint("DB_PORT"),
-        database=   config["DATABASE"]["DB_NAME"],
-        user    =   config["DATABASE"]["DB_USER"],
-        password=   config["DATABASE"]["DB_PASSWORD"],
+        host        =   config["DATABASE"]["DB_HOST"],
+        port        =   config["DATABASE"].getint("DB_PORT"),
+        database    =   config["DATABASE"]["DB_NAME"],
+        user        =   config["DATABASE"]["DB_USER"],
+        password    =   config["DATABASE"]["DB_PASSWORD"],
 )
 
 book_jsonschema = {
