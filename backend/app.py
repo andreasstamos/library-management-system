@@ -27,7 +27,7 @@ book_jsonschema = {
             "isbn": {"type": "string", "pattern": "^[0-9]{13}$"},
             "title": {"type": "string"},
             "publisher": {"type": "string"},
-            "pageNumber": {"type": "integer", "minimum": 0},
+            "page_number": {"type": "integer", "minimum": 0},
             "summary": {"type": "string"},
             "language": {"type": "string"},
             "authors": {"type": "array", "items": {"type": "string"}, "minItems": 1},
@@ -38,7 +38,7 @@ book_jsonschema = {
         }
 
 insert_book_jsonschema = dict(book_jsonschema)
-insert_book_jsonschema["required"] = ["isbn", "title", "publisher", "pageNumber", "summary", "language", "authors", "keywords", "categories"]
+insert_book_jsonschema["required"] = ["isbn", "title", "publisher", "page_number", "summary", "language", "authors", "keywords", "categories"]
 
 
 @app.route("/book/", methods=["POST"])
@@ -51,18 +51,18 @@ def insert_book():
 
     try:
         with conn.cursor() as cur:
-            cur.execute("INSERT INTO book (isbn, title, publisher, pageNumber, summary, language)\
+            cur.execute("INSERT INTO book (isbn, title, publisher, page_number, summary, language)\
                     VALUES (%s, %s, %s, %s, %s, %s)",\
-                    (data["isbn"], data["title"], data["publisher"], data["pageNumber"], data["summary"], data["language"]))
+                    (data["isbn"], data["title"], data["publisher"], data["page_number"], data["summary"], data["language"]))
 
             for author in data["authors"]:
-                cur.execute("INSERT INTO bookAuthor (isbn, author) VALUES (%s, %s)",\
+                cur.execute("INSERT INTO book_author (isbn, author) VALUES (%s, %s)",\
                         (data["isbn"], author))
             for keyword in data["keywords"]:
-                cur.execute("INSERT INTO bookKeyword (isbn, keyword) VALUES (%s, %s)",\
+                cur.execute("INSERT INTO book_keyword (isbn, keyword) VALUES (%s, %s)",\
                         (data["isbn"], keyword))
             for category in data["categories"]:
-                cur.execute("INSERT INTO bookCategory (isbn, category) VALUES (%s, %s)",\
+                cur.execute("INSERT INTO book_category (isbn, category) VALUES (%s, %s)",\
                         (data["isbn"], category))
             conn.commit()
     except psycopg2.IntegrityError as err:
@@ -86,7 +86,7 @@ def get_book():
         with conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
             query = psycopg2.sql.SQL("SELECT * FROM book")
             if len(data) > 0:
-                query += psycopg2.sql.SQL(" WHERE{}").format(
+                query += psycopg2.sql.SQL("WHERE {}").format(
                         psycopg2.sql.SQL(" AND ").join(
                             psycopg2.sql.SQL("{} = %s").format(psycopg2.sql.Identifier(fieldName)) for fieldName in data.keys()
                             )
@@ -97,5 +97,46 @@ def get_book():
     except psycopg2.Error as err:
         print(err.pgerror)
         return {"success": False, "error": "unknown"}
+
+@app.route("/book/", methods=["PATCH"])
+def update_book():
+    update_book_jsonschema = {
+            "type": "object",
+            "properties": {
+                "old_book": dict(book_jsonschema),
+                "new_book": dict(book_jsonschema),
+                },
+            "required": ["old_book", "new_book"],
+            "additionalProperties": False
+            }
+    data = request.get_json()
+    try:
+        jsonschema.validate(data, update_book_jsonschema)
+    except jsonschema.ValidationError as err:
+        return {"success": False, "error": err.message}, 400
+
+    try:
+        with conn.cursor() as cur:
+            if len(data["new_book"]) == 0: return {"success": True}, 200
+            
+            query = psycopg2.sql.SQL("UPDATE book SET {}").format(
+                    psycopg2.sql.SQL(", ").join(
+                        psycopg2.sql.SQL("{} = %s").format(psycopg2.sql.Identifier(fieldName)) for fieldName in data["new_book"].keys()
+                        )
+                    )
+
+            if len(data["old_book"]) > 0:
+                query += psycopg2.sql.SQL(" WHERE {}").format(
+                        psycopg2.sql.SQL(" AND ").join(
+                            psycopg2.sql.SQL("{} = %s").format(psycopg2.sql.Identifier(fieldName)) for fieldName in data["old_book"].keys()
+                            )
+                        )
+            cur.execute(query, tuple(data["new_book"].values())+tuple(data["old_book"].values()))
+            conn.commit()
+            return {"success": True, "num_updated": cur.rowcount}, 200
+    except psycopg2.Error as err:
+        print(err.pgerror)
+        return {"success": False, "error": "unknown"}
+
 
 app.run(host='0.0.0.0', port=5000)
