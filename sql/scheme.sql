@@ -5,51 +5,41 @@ DROP TABLE IF EXISTS book_publisher;
 DROP TABLE IF EXISTS book_category;
 DROP TABLE IF EXISTS book_keyword;
 DROP TABLE IF EXISTS book;
-DROP TABLE IF EXISTS "user";
-DROP TABLE IF EXISTS school;
 DROP TABLE IF EXISTS category;
 DROP TABLE IF EXISTS publisher;
+DROP TABLE IF EXISTS "user";
+DROP TABLE IF EXISTS school;
+
+CREATE TABLE publisher (
+	publisher_name VARCHAR(50) PRIMARY KEY
+);
 
 CREATE TABLE book (
 	isbn VARCHAR(13) PRIMARY KEY CHECK (isbn ~ '^[0-9]{13}'),
 	title VARCHAR(200),
 	page_number SMALLINT CHECK (page_number > 0),
 	summary VARCHAR(10000),
-	language VARCHAR(10)
+	language VARCHAR(30),
+	publisher_name VARCHAR(50) REFERENCES publisher ON UPDATE CASCADE
 );
 
 CREATE TABLE book_author (
-	isbn varchar(13) REFERENCES book ON DELETE CASCADE,
-	author VARCHAR(100) NOT NULL
+	isbn varchar(13) REFERENCES book ON DELETE CASCADE ON UPDATE CASCADE,
+	author_name VARCHAR(100) NOT NULL
 );
-
-CREATE TABLE publisher (
-	name VARCHAR(50) PRIMARY KEY
-);
-
-CREATE TABLE book_publisher (
-	book_isbn VARCHAR(13) NOT NULL,
-	publisher_name VARCHAR(50) NOT NULL,
-	FOREIGN KEY (book_isbn) REFERENCES book(isbn) ON DELETE CASCADE,
-	FOREIGN KEY (publisher_name) REFERENCES publisher(name) ON DELETE CASCADE
-);
-
 
 CREATE TABLE category (
-	name VARCHAR(20) PRIMARY KEY
+	category_name VARCHAR(20) PRIMARY KEY
 );
-
 
 CREATE TABLE book_category (
 	isbn varchar(13) REFERENCES book ON DELETE CASCADE,
-	category_name VARCHAR(20) NOT NULL,
-	FOREIGN KEY (category_name) REFERENCES category(name) ON DELETE CASCADE
+	category_name VARCHAR(20) REFERENCES category ON UPDATE CASCADE
 );
-
 
 CREATE TABLE book_keyword (
 	isbn varchar(13) REFERENCES book ON DELETE CASCADE,
-	keyword VARCHAR(20) NOT NULL
+	keyword_name VARCHAR(20) NOT NULL
 );
 
 CREATE TABLE school (
