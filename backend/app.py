@@ -153,42 +153,60 @@ def get_book():
         print(err.pgerror)
         return {"success": False, "error": "unknown"}
 
+UPDATE_BOOK_JSONSCHEMA = {
+        "type": "object",
+        "properties": {
+            "old_isbn": {"type": "string", "pattern": "^[0-9]{13}$"},
+            "isbn": {"type": "string", "pattern": "^[0-9]{13}$"},
+            "title": {"type": "string"},
+            "publisher": {"type": "string"},
+            "page_number": {"type": "integer", "minimum": 0},
+            "summary": {"type": "string"},
+            "language": {"type": "string"},
+            "authors": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+            "keywords": {"type": "array", "items": {"type": "string"}},
+            "categories": {"type": "array", "items": {"type": "string"}},
+        },
+        "required": ["old_isbn"],
+        "additionalProperties": False
+        }
+
 @app.route("/book/", methods=["PATCH"])
 def update_book():
-    update_book_jsonschema = {
-            "type": "object",
-            "properties": {
-                "old_book": dict(book_jsonschema),
-                "new_book": dict(book_jsonschema),
-                },
-            "required": ["old_book", "new_book"],
-            "additionalProperties": False
-            }
     data = request.get_json()
     try:
-        jsonschema.validate(data, update_book_jsonschema)
+        jsonschema.validate(data, UPDATE_BOOK_JSONSCHEMA)
     except jsonschema.ValidationError as err:
         return {"success": False, "error": err.message}, 400
-
+    
     try:
         with g.db_conn.cursor() as cur:
-            if len(data["new_book"]) == 0: return {"success": True}, 200
-            
-            query = psycopg2.sql.SQL("UPDATE book SET {}").format(
-                    psycopg2.sql.SQL(", ").join(
-                        psycopg2.sql.SQL("{} = %s").format(psycopg2.sql.Identifier(fieldName)) for fieldName in data["new_book"].keys()
-                        )
-                    )
+            if "authors" in data.keys():
+                cur.execute("DELETE FROM book_author WHERE isbn = %s", (data["old_isbn"],))
+                psycopg2.extras.execute_batch(cur, "INSERT INTO book_author (isbn, author_name) VALUES (%s, %s)",\
+                        [(data["old_isbn"], author) for author in data["authors"]])
+            if "keywords" in data.keys():
+                cur.execute("DELETE FROM book_keyword WHERE isbn = %s", (data["old_isbn"],))
+                psycopg2.extras.execute_batch(cur, "INSERT INTO book_keyword (isbn, keyword_name) VALUES (%s, %s)",\
+                        [(data["old_isbn"], keyword) for keyword in data["keywords"]])            
+            if "categories" in data.keys():
+                cur.execute("DELETE FROM book_category WHERE isbn = %s", (data["old_isbn"],))
+                psycopg2.extras.execute_batch(cur, "INSERT INTO book_category (isbn, category_name) VALUES (%s, %s)",\
+                        [(data["old_isbn"], category) for category in data["categories"]])
 
-            if len(data["old_book"]) > 0:
-                query += psycopg2.sql.SQL(" WHERE {}").format(
-                        psycopg2.sql.SQL(" AND ").join(
-                            psycopg2.sql.SQL("{} = %s").format(psycopg2.sql.Identifier(fieldName)) for fieldName in data["old_book"].keys()
-                            )
-                        )
-            cur.execute(query, tuple(data["new_book"].values())+tuple(data["old_book"].values()))
+
+            book_fields = {fieldName: value for fieldName, value in data.items()
+                if fieldName in {"isbn", "title", "publisher", "page_number", "summary", "language"}}
+            if len(book_fields) > 0:
+                query = psycopg2.sql.SQL("UPDATE book SET {} WHERE isbn={}").format(
+                        psycopg2.sql.SQL(", ").join(
+                            psycopg2.sql.SQL("{} = {}").format(
+                                psycopg2.sql.Identifier(fieldName), psycopg2.sql.Literal(value))
+                            for fieldName, value in book_fields.items()),
+                        psycopg2.sql.Literal(data["old_isbn"]))
+                cur.execute(query)
             g.db_conn.commit()
-            return {"success": True, "num_updated": cur.rowcount}, 200
+            return {"success": True}, 200
     except psycopg2.IntegrityError as err:
         g.db_conn.rollback()
         return {"success": False, "error": err.pgerror}, 400
