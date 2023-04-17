@@ -1,5 +1,5 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React from 'react';
+import { Link } from 'react-router-dom';
 function Login() {
   return (
     <>
@@ -14,7 +14,7 @@ function Login() {
             <label for='password'>Password:</label>
             <input type='password' name='password' />
         </div>
-        <p className='auth-alternate'>Forgot your password? Click <Link to='/auth/register/' >here</Link>.</p>
+        <p className='auth-alternate'>Forgot your password? Click <Link to='/auth/forgot-password/' >here</Link>.</p>
         <button type='submit'>Login</button>
         <p className='auth-alternate'>Don't have an account? Please register <Link to='/auth/register/' >here</Link>.</p>
 

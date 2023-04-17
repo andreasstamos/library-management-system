@@ -5,9 +5,9 @@ import psycopg2
 import psycopg2.extras
 import psycopg2.sql
 
-from flask import Flask, request
+from flask import Flask, request, jsonify
 import jsonschema
-
+from .utils import serializer
 
 config = configparser.ConfigParser()
 config.read("secrets.ini")
@@ -141,5 +141,53 @@ def update_book():
         print(err.pgerror)
         return {"success": False, "error": "unknown"}
 
+
+
+
+# This should be called when a db user tries to add a new book
+# and has to select a publisher
+@app.route("/get-publishers/", methods=['GET'])
+def get_publishers():
+    query = psycopg2.sql.SQL("SELECT * FROM publisher")
+    try:
+        with conn.cursor() as cur:
+            cur.execute(query)
+            results = cur.fetchall()
+            return {"success": True, "publishers": serializer(results, cur.description)}, 200
+
+    except psycopg2.Error as err:
+        print(err.pgerror)
+        return {"success": False, "error": "unknown"}
+    
+# PUBLISHER STUFF GOING ON FROM NOW ON
+# Add a publisher
+@app.route("/new-publisher/", methods=["POST"])
+def new_publisher():
+    new_publisher_schema = {
+        "type": "object",
+        "properties": {
+            "name": {'type':'string', 'maxLength': 50},
+            },
+        "required": ["name"],
+        "additionalProperties": False,
+        }
+    data = request.get_json()
+    try:
+        jsonschema.validate(data, new_publisher_schema)
+    except jsonschema.ValidationError as err:
+        return {"success": False, "error": err.message}, 400
+    
+    try:
+        with conn.cursor() as cur:
+            cur.execute("INSERT INTO publisher (name) VALUES (%s)", [data['name']])
+            conn.commit()
+    except psycopg2.IntegrityError as err:
+        conn.rollback()
+        return {"success": False, "error": err.pgerror}, 400
+    except psycopg2.Error as err:
+        conn.rollback()
+        return {"success": False, "error": "unknown"}, 400
+    
+    return {"success": True}, 201
 
 app.run(host='0.0.0.0', port=5000)

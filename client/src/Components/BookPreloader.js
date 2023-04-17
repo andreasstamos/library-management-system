@@ -5,7 +5,7 @@ import './BookPreloader.css'
 
 function BookPreloader() {
   return (
-    <div class="loader">
+    <div className="loader">
   <div>
     <ul>
       <li>

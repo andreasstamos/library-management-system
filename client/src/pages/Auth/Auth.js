@@ -10,7 +10,8 @@ import {useLocation} from 'react-router-dom'
 function Auth() {
     const location = useLocation();
 
-    const match = matchPath({path:"/auth/login", exact:true}, location.pathname) || matchPath({path:"/auth/register", exact:true}, location.pathname);
+    const match = matchPath({path:"/auth/login", exact:true}, location.pathname) || matchPath({path:"/auth/register", exact:true}, location.pathname) 
+    || matchPath({path:"/auth/forgot-password", exact:true}, location.pathname);
 
 
   return (

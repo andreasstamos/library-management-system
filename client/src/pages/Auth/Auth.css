@@ -112,3 +112,21 @@
 .auth-container .auth-alternate a:hover {
     color: #23C4F8;
 }
+
+
+@media screen and (max-height:680px) {
+    .auth-container {
+        margin-top: 150px;
+    }
+}
+
+@media screen and (max-height:590px) {
+
+    .cool-background-seperator {
+        height: 35vh;
+        height: 35dvh;
+    }
+    .auth-container {
+        margin-top: 80px;
+    }
+}

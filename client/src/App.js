@@ -3,6 +3,7 @@ import Auth from './pages/Auth/Auth';
 import Login from './pages/Auth/Login';
 import Register from './pages/Auth/Register';
 import './App.css';
+import ForgotPassword from './pages/Auth/ForgotPassword';
 
 
 
@@ -15,6 +16,7 @@ function App() {
             <Route path='/auth' element={<Auth></Auth>} >
                 <Route path='login/' element={<Login />} />
                 <Route path='register/' element={<Register />} />
+                <Route path='forgot-password/' element={<ForgotPassword />} />
 
             </Route>
 
