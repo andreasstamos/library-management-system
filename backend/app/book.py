@@ -1,44 +1,16 @@
-import configparser
-
-import psycopg2
-import psycopg2.extras
-import psycopg2.sql
-import psycopg2.pool
-
-from flask import Flask, request, g
+from flask import Blueprint, request, g
 import jsonschema
+import psycopg2.sql
+import psycopg2.extras
 
-config = configparser.ConfigParser()
-config.read("secrets.ini")
-
-app = Flask(__name__)
-db_pool = psycopg2.pool.SimpleConnectionPool(
-        minconn     =   config["DATABASE"].getint("DB_MIN_CONNECTIONS"),
-        maxconn     =   config["DATABASE"].getint("DB_MAX_CONNECTIONS"),
-        host        =   config["DATABASE"]["DB_HOST"],
-        port        =   config["DATABASE"].getint("DB_PORT"),
-        database    =   config["DATABASE"]["DB_NAME"],
-        user        =   config["DATABASE"]["DB_USER"],
-        password    =   config["DATABASE"]["DB_PASSWORD"],
-)
-
-
-@app.before_request
-def before_request():
-    g.db_conn = db_pool.getconn()
-
-@app.teardown_request
-def teardown_request(exception=None):
-    db_pool.putconn(g.db_conn)
-
-
+bp = Blueprint("book", __name__)
 
 INSERT_BOOK_JSONSCHEMA = {
         "type": "object",
         "properties": {
             "isbn": {"type": "string", "pattern": "^[0-9]{13}$"},
             "title": {"type": "string"},
-            "publisher": {"type": "string"},
+            "publisher_name": {"type": "string"},
             "page_number": {"type": "integer", "minimum": 0},
             "summary": {"type": "string"},
             "language": {"type": "string"},
@@ -47,11 +19,11 @@ INSERT_BOOK_JSONSCHEMA = {
             "categories": {"type": "array", "items": {"type": "string"}},
             },
         "additionalProperties": False,
-        "required": ["isbn", "title", "publisher", "page_number", "summary", "language", "authors", "keywords", "categories"]
+        "required": ["isbn", "title", "publisher_name", "page_number", "summary", "language", "authors", "keywords", "categories"]
         }
 
 
-@app.route("/book/", methods=["POST"])
+@bp.route("/", methods=["POST"])
 def insert_book():
     data = request.get_json()
     try:
@@ -63,7 +35,7 @@ def insert_book():
         with g.db_conn.cursor() as cur:
             cur.execute("INSERT INTO book (isbn, title, page_number, summary, language, publisher_name)\
                     VALUES (%s, %s, %s, %s, %s, %s)",\
-                    (data["isbn"], data["title"], data["page_number"], data["summary"], data["language"], data["publisher"]))
+                    (data["isbn"], data["title"], data["page_number"], data["summary"], data["language"], data["publisher_name"]))
 
             psycopg2.extras.execute_batch(cur, "INSERT INTO book_author (isbn, author_name) VALUES (%s, %s)",\
                         [(data["isbn"], author) for author in data["authors"]])
@@ -87,7 +59,7 @@ GET_BOOK_JSONSCHEMA = {
         "properties": {
             "isbn": {"type": "string", "pattern": "^[0-9]{13}$"},
             "title": {"type": "string"},
-            "publisher": {"type": "string"},
+            "publisher_name": {"type": "string"},
             "page_number": {"type": "integer", "minimum": 0},
             "summary": {"type": "string"},
             "language": {"type": "string"},
@@ -98,7 +70,7 @@ GET_BOOK_JSONSCHEMA = {
         "additionalProperties": False,
         }
 
-@app.route("/book/", methods=["GET"])
+@bp.route("/", methods=["GET"])
 def get_book():
     data = request.get_json()
     try:
@@ -159,7 +131,7 @@ UPDATE_BOOK_JSONSCHEMA = {
             "old_isbn": {"type": "string", "pattern": "^[0-9]{13}$"},
             "isbn": {"type": "string", "pattern": "^[0-9]{13}$"},
             "title": {"type": "string"},
-            "publisher": {"type": "string"},
+            "publisher_name": {"type": "string"},
             "page_number": {"type": "integer", "minimum": 0},
             "summary": {"type": "string"},
             "language": {"type": "string"},
@@ -171,7 +143,7 @@ UPDATE_BOOK_JSONSCHEMA = {
         "additionalProperties": False
         }
 
-@app.route("/book/", methods=["PATCH"])
+@bp.route("/", methods=["PATCH"])
 def update_book():
     data = request.get_json()
     try:
@@ -196,7 +168,7 @@ def update_book():
 
 
             book_fields = {fieldName: value for fieldName, value in data.items()
-                if fieldName in {"isbn", "title", "publisher", "page_number", "summary", "language"}}
+                if fieldName in {"isbn", "title", "publisher_name", "page_number", "summary", "language"}}
             if len(book_fields) > 0:
                 query = psycopg2.sql.SQL("UPDATE book SET {} WHERE isbn={}").format(
                         psycopg2.sql.SQL(", ").join(
@@ -215,44 +187,45 @@ def update_book():
         return {"success": False, "error": "unknown"}
 
 
-
-
 # This should be called when a db user tries to add a new book
 # and has to select a publisher
-@app.route("/get-publishers/", methods=['GET'])
+@bp.route("/publisher/", methods=['GET'])
 def get_publishers():
-    query = psycopg2.sql.SQL("SELECT * FROM publisher")
+    query = psycopg2.sql.SQL("SELECT publisher_name FROM publisher")
     try:
-        with g.db_conn.cursor() as cur:
+        with g.db_conn.cursor(psycopg2.extras.RealDictCursor) as cur:
             cur.execute(query)
             results = cur.fetchall()
-            return {"success": True, "publishers": serializer(results, cur.description)}, 200
+            return {"success": True, "publishers": results}, 200
 
     except psycopg2.Error as err:
         print(err.pgerror)
         return {"success": False, "error": "unknown"}
-    
-# PUBLISHER STUFF GOING ON FROM NOW ON
-# Add a publisher
-@app.route("/new-publisher/", methods=["POST"])
-def new_publisher():
-    new_publisher_schema = {
+
+
+INSERT_PUBLISHER_JSONSCHEMA = {
         "type": "object",
         "properties": {
-            "name": {'type':'string', 'maxLength': 50},
+            "publisher_name": {'type':'string', 'maxLength': 50},
             },
-        "required": ["name"],
+        "required": ["publisher_name"],
         "additionalProperties": False,
         }
+
+
+# PUBLISHER STUFF GOING ON FROM NOW ON
+# Add a publisher
+@bp.route("/publisher/", methods=["POST"])
+def insert_publisher():
     data = request.get_json()
     try:
-        jsonschema.validate(data, new_publisher_schema)
+        jsonschema.validate(data, INSERT_PUBLISHER_JSONSCHEMA)
     except jsonschema.ValidationError as err:
         return {"success": False, "error": err.message}, 400
-    
+
     try:
         with g.db_conn.cursor() as cur:
-            cur.execute("INSERT INTO publisher (name) VALUES (%s)", [data['name']])
+            cur.execute("INSERT INTO publisher (publisher_name) VALUES (%s)", (data['publisher_name'],))
             g.db_conn.commit()
     except psycopg2.IntegrityError as err:
         g.db_conn.rollback()
@@ -260,7 +233,6 @@ def new_publisher():
     except psycopg2.Error as err:
         g.db_conn.rollback()
         return {"success": False, "error": "unknown"}, 400
-    
+
     return {"success": True}, 201
 
-app.run(host='0.0.0.0', port=5000)
