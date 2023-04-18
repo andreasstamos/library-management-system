@@ -1,10 +1,18 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 function Login() {
+
+
+
+async function handleLogin(e) {
+  e.preventDefault();
+  e.target.reset();
+}
+
   return (
     <>
     <h3 className='auth-title'>Login</h3>
-    <form className='auth-inputs'>
+    <form className='auth-inputs' onSubmit={(e) => handleLogin(e)}>
         <div className='auth-input'>
             <label for='username'>Username:</label>
             <input type='text' name='username' />

@@ -39,8 +39,8 @@ function ForgotPassword() {
 
 
         
-        <button type='submit'>Send Link</button>
-        <p className='auth-alternate'>We will send you a link to change your password. Please check your spam!</p>
+        <button type='submit'>Change Password</button>
+        {/* <p className='auth-alternate'>We will send you a link to change your password. Please check your spam!</p> */}
 
     </form>
 

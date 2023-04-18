@@ -90,6 +90,7 @@
     padding: 0.4rem 0.7rem;
     font-weight: 700;
     cursor: pointer;
+    margin-bottom: 5px;
 }
 
 .auth-container button:hover {
@@ -111,6 +112,10 @@
 
 .auth-container .auth-alternate a:hover {
     color: #23C4F8;
+}
+
+.auth-container .form-error {
+    color:#d94159
 }
 
 

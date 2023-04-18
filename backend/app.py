@@ -8,11 +8,18 @@ import psycopg2.sql
 from flask import Flask, request, jsonify
 import jsonschema
 from .utils import serializer
+import bcrypt
+from flask_cors import CORS
+
+
 
 config = configparser.ConfigParser()
 config.read("secrets.ini")
 
 app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "*"}})
+app.config['CORS_ALLOW_ALL_ORIGINS'] = True
+
 conn = psycopg2.connect(
         host        =   config["DATABASE"]["DB_HOST"],
         port        =   config["DATABASE"].getint("DB_PORT"),
@@ -189,5 +196,139 @@ def new_publisher():
         return {"success": False, "error": "unknown"}, 400
     
     return {"success": True}, 201
+
+
+
+
+
+
+
+
+
+# AUTH STUFF GOING ON DOWN THERE
+# DOENS'T CHECK IF USER IS ACTIVE. MUST CHANGE LATER
+@app.route('/login-student/', methods=['POST'])
+def login():
+    login_json_schema = {
+        'type': 'object',
+        'properties' : {
+            'username': {'type': 'string', 'maxLength': 50, 'minLength': 3},
+            'password': {'type': 'string', 'minLength': 3},
+        },
+        "required": ["username", "password"],
+        "additionalProperties": False,
+    }
+    data = request.get_json()
+
+    try:
+        jsonschema.validate(data, login_json_schema)
+    except jsonschema.ValidationError as err:
+        return {"success": False, "error": err.message}, 400
+    
+    username = data['username'].lower()
+    
+    with conn.cursor() as cur:
+        # will need to modify what we fetch 
+        # so as to changes access token field
+ 
+        cur.execute('SELECT "user".user_id, "user".password_hash FROM "user" WHERE username = (%s)', [username])
+        row = cur.fetchone()
+
+        if row and bcrypt.checkpw(data['password'].encode('utf-8'), row[1].encode('utf-8')):
+            print("LOGGED IN!")
+            return {"success":True} ,200
+        else:
+            print("DIDN'T FIND SUCH USER")
+            return {"success":False, "error":"Wrong username or password."}, 400
+
+
+
+
+# Different route for student registering... 
+# Helps keep code simpler.
+
+@app.route('/register-student/', methods=['POST'])
+def register():
+
+    # THE USER IS ACTIVE ON REGISTER. WE NEED TO FIX THAT LATER.
+    # THE USER NEEDS TO BE ACTIVATE THROUGH LIBRARY_EDITOR
+    register_json_schema = {
+        'type': 'object',
+        'properties' : {
+            'first_name': {'type': 'string', 'maxLength': 50, 'minLength': 3},
+            'last_name': {'type': 'string', 'maxLength': 50, 'minLength': 3},
+            'email': {'type': 'string', 'maxLength': 256, 'minLength':6},
+            'password': {'type': 'string', 'minLength':8},
+            'confirm_password': {'type': 'string', 'minLength':8},
+            'username': {'type': 'string', 'maxLength': 50},
+            'school_id': {'type': 'integer'}
+        },
+        "required": ["username", "password", "first_name", "last_name", "email", "school_id"],
+        "additionalProperties": False,
+    }
+    data = request.get_json()
+    
+    try:
+        jsonschema.validate(data, register_json_schema)
+    except jsonschema.ValidationError as err:
+        return {"success": False, "error": err.message}, 400
+
+
+
+
+    # Might be vulnerable to SQL Injections... will check later.
+    # Try block is outside covers 2 queries. Hope there aren't any weird bugs with that in case 1 of them fails...
+    try:
+        with conn.cursor() as cur:
+
+            # Check if the school exists
+            check_school_query = psycopg2.sql.SQL(f"SELECT EXISTS(SELECT 1 FROM school WHERE school_id = {data['school_id']})")
+            cur.execute(check_school_query)
+            school_id_exists = cur.fetchone()[0]
+
+            if not school_id_exists:
+                return {"success": False, "error": "Such a school doesn't exist :("}, 400
+            
+            # Now we hash the password.
+            password = data['password'].encode("utf-8")
+            salt = bcrypt.gensalt(12)
+            hashed_password = bcrypt.hashpw(password, salt).decode("utf-8")
+
+            # normalize inputs
+            username = data['username'].lower()
+            email = data['email'].lower()
+            first_name = data['first_name'].title()
+            last_name = data['last_name'].title()
+            cur.execute('INSERT INTO "user" (first_name, last_name, username, email, password_hash, school_id) VALUES (%s, %s, %s, %s, %s, %s)', 
+                        (first_name, last_name, username, email, hashed_password, data['school_id']))
+            conn.commit()
+    except psycopg2.IntegrityError as err:
+        conn.rollback()
+        return {"success": False, "error": err.pgerror}, 400
+    except psycopg2.Error as err:
+        conn.rollback()
+        print(err)
+        return {"success": False, "error": "unknown"}, 400
+    
+    return {"success": True}, 201
+
+    
+    
+
+
+
+# WHEN A STUDENT TRIES TO MAKE AN ACCOUNT
+# THIS IS THE ENDPOINT THAT SENDS SCHOOL LIST TO THE DROPDOWN IN THE REGISTER FORM
+@app.route('/get-schools/', methods=['GET'])
+def get_schools():
+    query = psycopg2.sql.SQL("SELECT school.name, school.school_id FROM school")
+    try:
+        with conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
+            cur.execute(query)
+            results = cur.fetchall()
+            return {"success": True, "schools": results}, 200
+    except psycopg2.Error as err:
+        print(err.pgerror)
+        return {"success": False, "error": "unknown"}
 
 app.run(host='0.0.0.0', port=5000)

@@ -15,10 +15,10 @@
 .loader:before, .loader:after {
   --r: -6deg;
   content: "";
-  position: absolute;
+  /* position: absolute; */
   bottom: 8px;
   width: 120px;
-  top: 80%;
+  /* top: 80%; */
   box-shadow: 0 16px 12px var(--shadow);
   transform: rotate(var(--r));
 }

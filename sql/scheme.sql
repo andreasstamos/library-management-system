@@ -12,10 +12,10 @@ DROP TABLE IF EXISTS publisher;
 
 CREATE TABLE book (
 	isbn VARCHAR(13) PRIMARY KEY CHECK (isbn ~ '^[0-9]{13}'),
-	title VARCHAR(200),
-	page_number SMALLINT CHECK (page_number > 0),
-	summary VARCHAR(10000),
-	language VARCHAR(10)
+	title VARCHAR(200) NOT NULL,
+	page_number SMALLINT NOT NULL CHECK (page_number > 0),
+	summary VARCHAR(10000) NOT NULL,
+	language VARCHAR(10) NOT NULL
 );
 
 CREATE TABLE book_author (
@@ -54,21 +54,36 @@ CREATE TABLE book_keyword (
 
 CREATE TABLE school (
 	school_id SERIAL PRIMARY KEY,
-	name TEXT,
-	address TEXT,
-	city TEXT,
-	phone TEXT CHECK (phone ~ '^\+[0-9]+'),
-	email TEXT UNIQUE CHECK (email ~ '^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-z]{2,}$')
+	name VARCHAR(150) NOT NULL,
+	address VARCHAR(20) NOT NULL,
+	city VARCHAR(50) NOT NULL,
+	phone VARCHAR(15) CHECK (phone ~ '^\+[0-9]+'),
+	email VARCHAR(256) UNIQUE CHECK (email ~ '^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-z]{2,}$')
 );
 
 CREATE TABLE "user" (
 	user_id SERIAL PRIMARY KEY,
 	school_id SERIAL REFERENCES school,
-	first_name TEXT,
-	last_name TEXT,
-	email TEXT UNIQUE CHECK (email ~ '^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-z]{2,}$'),
-	username TEXT NOT NULL UNIQUE,
-	password_hash TEXT
+	first_name VARCHAR(50) NOT NULL,
+	last_name VARCHAR(50) NOT NULL,
+	email VARCHAR(256) UNIQUE CHECK (email ~ '^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-z]{2,}$'),
+	username VARCHAR(50) NOT NULL UNIQUE,
+	password_hash VARCHAR(500) NOT NULL
+);
+
+CREATE TABLE "admin" (
+	admin_id SERIAL PRIMARY KEY,
+	user_id INT NOT NULL REFERENCES "user" ON DELETE CASCADE
+);
+
+CREATE TABLE lib_user (
+	lib_id SERIAL PRIMARY KEY,
+	user_id INT NOT NULL REFERENCES "user" ON DELETE CASCADE
+);
+
+CREATE TABLE student (
+	student_id SERIAL PRIMARY KEY,
+	user_id INT NOT NULL REFERENCES "user" ON DELETE CASCADE
 );
 
 CREATE TABLE item (
