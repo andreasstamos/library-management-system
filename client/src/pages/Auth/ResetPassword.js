@@ -28,7 +28,7 @@ function ResetPassword() {
             confirm_password: passwordConfirm,
         }
 
-        const response = await axios.post('http://127.0.0.1:5000/reset-password/', payload, {headers:{
+        const response = await axios.post('http://127.0.0.1:5000/auth/reset-password/', payload, {headers:{
             'Content-Type': 'application/json',
         }})
         

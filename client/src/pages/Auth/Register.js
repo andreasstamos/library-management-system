@@ -52,7 +52,7 @@ function Register() {
       confirm_password: confirmPassword,
       school_id: parseInt(schoolID),
     }
-    const response = await axios.post('http://127.0.0.1:5000/register-student/', payload, {headers: {
+    const response = await axios.post('http://127.0.0.1:5000/auth/register-student/', payload, {headers: {
       'Content-Type': 'application/json'
     }})
     
@@ -68,7 +68,7 @@ function Register() {
 
 
   async function fetchSchools() {
-    const response = await axios.get('http://127.0.0.1:5000/get-schools/');
+    const response = await axios.get('http://127.0.0.1:5000/auth/get-schools/');
     console.log(response);
     setLoadingSchools(false);
     setSchools(response?.data?.schools);

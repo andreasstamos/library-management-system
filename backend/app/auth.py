@@ -8,7 +8,7 @@ bp = Blueprint("auth", __name__)
 
 # AUTH STUFF GOING ON DOWN THERE
 # DOENS'T CHECK IF USER IS ACTIVE. MUST CHANGE LATER
-@bp.route('/login-student', methods=['POST'])
+@bp.route('/login-student/', methods=['POST'])
 def login():
     login_json_schema = {
         'type': 'object',

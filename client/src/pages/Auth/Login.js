@@ -23,7 +23,7 @@ function Login() {
     }
     
     try {
-      const response = await axios.post('http://127.0.0.1:5000/login-student/',payload, {
+      const response = await axios.post('http://127.0.0.1:5000/auth/login-student/',payload, {
         headers: {
           'Content-Type': 'application/json',
         }

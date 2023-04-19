@@ -17,7 +17,7 @@ function ForgotPassword() {
         // post email to the server here...
         e.preventDefault();
 
-        const response = await axios.post('http://127.0.0.1:5000/forgot-password/', { email: email }, {headers: {
+        const response = await axios.post('http://127.0.0.1:5000/auth/forgot-password/', { email: email }, {headers: {
             'Content-Type': 'application/json'
           }})
           console.log(response);
