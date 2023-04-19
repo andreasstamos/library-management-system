@@ -2,12 +2,14 @@ from flask import Blueprint, request, g
 import psycopg2.sql
 import jsonschema
 import bcrypt
+from flask_jwt_extended import create_access_token, decode_token
+import datetime
+
 
 bp = Blueprint("auth", __name__)
-
 # AUTH STUFF GOING ON DOWN THERE
 # DOENS'T CHECK IF USER IS ACTIVE. MUST CHANGE LATER
-@bp.route('/login-student', methods=['POST'])
+@bp.route('/login-student/', methods=['POST'])
 def login():
     login_json_schema = {
         'type': 'object',
@@ -27,7 +29,7 @@ def login():
     
     username = data['username'].lower()
     
-    with conn.cursor() as cur:
+    with g.db_conn.cursor() as cur:
         # will need to modify what we fetch 
         # so as to changes access token field
  
@@ -81,7 +83,7 @@ def register():
     # Might be vulnerable to SQL Injections... will check later.
     # Try block is outside covers 2 queries. Hope there aren't any weird bugs with that in case 1 of them fails...
     try:
-        with conn.cursor() as cur:
+        with g.db_conn.cursor() as cur:
 
             # Check if the school exists
             check_school_query = psycopg2.sql.SQL(f"SELECT EXISTS(SELECT 1 FROM school WHERE school_id = {data['school_id']})")
@@ -103,12 +105,12 @@ def register():
             last_name = data['last_name'].title()
             cur.execute('INSERT INTO "user" (first_name, last_name, username, email, password_hash, school_id) VALUES (%s, %s, %s, %s, %s, %s)', 
                         (first_name, last_name, username, email, hashed_password, data['school_id']))
-            conn.commit()
+            g.db_conn.commit()
     except psycopg2.IntegrityError as err:
-        conn.rollback()
+        g.db_conn.rollback()
         return {"success": False, "error": err.pgerror}, 400
     except psycopg2.Error as err:
-        conn.rollback()
+        g.db_conn.rollback()
         print(err)
         return {"success": False, "error": "unknown"}, 400
     
@@ -183,11 +185,11 @@ def reset_password():
     hashed_password = bcrypt.hashpw(password, salt).decode("utf-8")
 
     try:
-        with conn.cursor() as cur:
+        with g.db_conn.cursor() as cur:
             cur.execute('UPDATE "user" SET password_hash = (%s) WHERE email = (%s)', [hashed_password, email])
-            conn.commit()
+            g.db_conn.commit()
     except psycopg2.IntegrityError as err:
-        conn.rollback()
+        g.db_conn.rollback()
         return {"success": False, "error": err.pgerror}, 400
     except psycopg2.Error as err:
         print(err.pgerror)

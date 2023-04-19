@@ -193,7 +193,7 @@ def update_book():
 def get_publishers():
     query = psycopg2.sql.SQL("SELECT publisher_name FROM publisher")
     try:
-        with g.db_conn.cursor(psycopg2.extras.RealDictCursor) as cur:
+        with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
             cur.execute(query)
             results = cur.fetchall()
             return {"success": True, "publishers": results}, 200
