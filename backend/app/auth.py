@@ -4,12 +4,11 @@ import jsonschema
 import bcrypt
 from flask_jwt_extended import create_access_token, decode_token
 import datetime
-
-
 bp = Blueprint("auth", __name__)
+
 # AUTH STUFF GOING ON DOWN THERE
 # DOENS'T CHECK IF USER IS ACTIVE. MUST CHANGE LATER
-@bp.route('/login-student/', methods=['POST'])
+@bp.route('/login-student', methods=['POST'])
 def login():
     login_json_schema = {
         'type': 'object',
@@ -103,9 +102,12 @@ def register():
             email = data['email'].lower()
             first_name = data['first_name'].title()
             last_name = data['last_name'].title()
-            cur.execute('INSERT INTO "user" (first_name, last_name, username, email, password_hash, school_id) VALUES (%s, %s, %s, %s, %s, %s)', 
+            cur.execute('INSERT INTO "user" (first_name, last_name, username, email, password_hash, school_id)\
+                    VALUES (%s, %s, %s, %s, %s, %s) RETURNING user_id', 
                         (first_name, last_name, username, email, hashed_password, data['school_id']))
             g.db_conn.commit()
+            user_id = cur.fetchone()[0]
+            return {"success": True, "user_id": user_id}, 201
     except psycopg2.IntegrityError as err:
         g.db_conn.rollback()
         return {"success": False, "error": err.pgerror}, 400
@@ -114,7 +116,6 @@ def register():
         print(err)
         return {"success": False, "error": "unknown"}, 400
     
-    return {"success": True}, 201
 
     
     
@@ -196,4 +197,3 @@ def reset_password():
         return {"success": False, "error": "unknown"}
 
     return {'success': True }, 200
-
