@@ -101,18 +101,20 @@ def register():
             email = data['email'].lower()
             first_name = data['first_name'].title()
             last_name = data['last_name'].title()
-            cur.execute('INSERT INTO "user" (first_name, last_name, username, email, password_hash, school_id) VALUES (%s, %s, %s, %s, %s, %s)', 
+            cur.execute('INSERT INTO "user" (first_name, last_name, username, email, password_hash, school_id)\
+                    VALUES (%s, %s, %s, %s, %s, %s) RETURNING user_id', 
                         (first_name, last_name, username, email, hashed_password, data['school_id']))
-            conn.commit()
+            g.db_conn.commit()
+            user_id = cur.fetchone()[0]
+            return {"success": True, "user_id": user_id}, 201
     except psycopg2.IntegrityError as err:
-        conn.rollback()
+        g.db_conn.rollback()
         return {"success": False, "error": err.pgerror}, 400
     except psycopg2.Error as err:
-        conn.rollback()
+        g.db_conn.rollback()
         print(err)
         return {"success": False, "error": "unknown"}, 400
     
-    return {"success": True}, 201
 
     
     
@@ -183,11 +185,11 @@ def reset_password():
     hashed_password = bcrypt.hashpw(password, salt).decode("utf-8")
 
     try:
-        with conn.cursor() as cur:
+        with g.db_conn.cursor() as cur:
             cur.execute('UPDATE "user" SET password_hash = (%s) WHERE email = (%s)', [hashed_password, email])
             conn.commit()
     except psycopg2.IntegrityError as err:
-        conn.rollback()
+        g.db_conn.rollback()
         return {"success": False, "error": err.pgerror}, 400
     except psycopg2.Error as err:
         print(err.pgerror)
