@@ -1,6 +1,9 @@
 from flask import Flask, g
 from flask_cors import CORS
 import psycopg2.pool
+from flask_jwt_extended import create_access_token, JWTManager, decode_token
+import datetime
+
 
 def setup_database(app): 
     db_pool = psycopg2.pool.SimpleConnectionPool(
@@ -23,17 +26,20 @@ def setup_database(app):
 
 def register_blueprints(app):
     from . import book, auth, school
-    app.register_blueprint(book.bp,     url_prefix="/book")
-    app.register_blueprint(auth.bp,     url_prefix="/auth")
-    app.register_blueprint(school.bp,   url_prefix="/school")
+    app.register_blueprint(book.bp,   url_prefix="/book")
+    app.register_blueprint(auth.bp,   url_prefix="/auth"   )
+    app.register_blueprint(school.bp, url_prefix="/school" )
 
 def create_app(test_config=None):
     app = Flask(__name__)
-    CORS(app)
-
+    CORS(app, resources={r'/*': {'origins': '*'}})
+    JWTManager(app)
+    
     app.config.from_object('config')
     app.config.from_mapping(test_config)
     
+
+
     setup_database(app)
     register_blueprints(app)
 

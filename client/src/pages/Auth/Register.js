@@ -13,6 +13,7 @@ function Register() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [err, setErr] = useState('');
+  const [succ, setSucc] = useState('');
   const [loadingSchools, setLoadingSchools] = useState(true);
   const [schools, setSchools] = useState(null);
 
@@ -25,6 +26,9 @@ function Register() {
   // NEEDS MORE VALIDATION!!!!!
 
   async function handleRegister(e) {
+    setErr('');
+    setSucc('');
+
     e.preventDefault();
     if (!checkMatchingPassword()) {
       setErr("Passwords must be matching!!!");
@@ -48,16 +52,23 @@ function Register() {
       confirm_password: confirmPassword,
       school_id: parseInt(schoolID),
     }
-    axios.post('http://127.0.0.1:5000/auth/register-student/', payload, {headers: {
+    const response = await axios.post('http://127.0.0.1:5000/register-student/', payload, {headers: {
       'Content-Type': 'application/json'
     }})
     
     e.target.reset();
+
+    if (response.status === 201) {
+      setSucc("All Done! Your account will have to be activated by a library editor.")
+      return;
+    }
+
+    setErr("Something went horribly wrong :(");
   }
 
 
   async function fetchSchools() {
-    const response = await axios.get('http://127.0.0.1:5000/school/');
+    const response = await axios.get('http://127.0.0.1:5000/get-schools/');
     console.log(response);
     setLoadingSchools(false);
     setSchools(response?.data?.schools);
@@ -106,7 +117,9 @@ function Register() {
             <label for='password-conf'>Confirm Password:</label>
             <input type='password' name='password-conf' required value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}/>
         </div>
-        {err && <p className='form-error'>{err}</p>}
+        {err && <p className='form-error message'>{err}</p>}
+        {succ && <p className='form-success message'>{succ}</p>}
+
         <button type='submit'>Register</button>
         <p className='auth-alternate'>Already have an account? Please login <Link to='/auth/login/' >here</Link>.</p>
     </form>

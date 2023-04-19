@@ -1,7 +1,8 @@
 secrets.ini
 client/node_modules/
 node_modules/
-
+.venv
+venv
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

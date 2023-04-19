@@ -11,7 +11,7 @@ function Auth() {
     const location = useLocation();
 
     const match = matchPath({path:"/auth/login", exact:true}, location.pathname) || matchPath({path:"/auth/register", exact:true}, location.pathname) 
-    || matchPath({path:"/auth/forgot-password", exact:true}, location.pathname);
+    || matchPath({path:"/auth/forgot-password", exact:true}, location.pathname) || matchPath({path:"/auth/reset-password/:token", exact:true}, location.pathname);
 
 
   return (

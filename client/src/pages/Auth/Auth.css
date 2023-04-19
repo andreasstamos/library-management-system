@@ -113,11 +113,15 @@
 .auth-container .auth-alternate a:hover {
     color: #23C4F8;
 }
-
+.auth-container .message {
+    font-weight: 700;
+}
 .auth-container .form-error {
     color:#d94159
 }
-
+.auth-container .form-success {
+    color: rgb(42, 140, 42);
+}
 
 @media screen and (max-height:680px) {
     .auth-container {
