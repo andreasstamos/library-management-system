@@ -1,0 +1,103 @@
+.page-container {
+	display: flex;
+	flex-direction: column; 
+	justify-content: center;
+	align-items: center;
+	row-gap: 1vw;
+}
+
+
+.form-container {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-evenly;
+	border: 1px solid #ccc;
+	border-radius: 15px;
+	padding: 2vw;
+	}
+
+.input-container {
+	display: flex;
+	gap: 0.5vw;
+	justify-content: space-evenly;
+}
+
+.input-container input {
+	font-size: 16px;
+	border: 1px solid #ccc;
+	border-radius: 10px;
+}
+
+.page-container button {
+	color: white;
+	padding: 1vw;
+	border-radius: 10px;
+	border: 0;
+	font-size: 16px;
+	font-weight: 1000;
+	cursor: pointer;
+}
+
+
+.details-container {
+	display: flex;
+	flex-direction: column;
+}
+
+.details-property {
+	display: flex;
+	column-gap: 1em;
+	align-items: baseline;
+}
+
+.details-name {
+	font-size: 20px;
+	font-weight: 500;
+}
+
+.details-value {
+	font-size: 20px;
+}
+
+.form-container .find-button {
+	background-color: blue;
+}
+
+.form-container .next-button {
+	background-color: green;
+}
+
+.form-container .borrow-button {
+	background-color: green;
+}
+
+.form-container .back-button {
+	background-color: grey;
+}
+
+.toast-container {
+	display: flex;
+	padding: 1vw;
+	justify-content: center;
+	align-items: center;
+	background-color: green;
+	border: 1.5px solid grey;
+	border-radius: 10px;
+	column-gap: 2vw;
+}
+
+.toast-container .toast-message {
+	font-size: 20px;
+	color: white;
+	margin: 0;
+}
+
+.toast-container .toast-button {
+	background-color: orange;
+	color:white;
+	border: 0;
+	font-size: 15px;
+	border-radius: 5px;
+	padding: 0.25vw;
+	font-weight: 300;
+}

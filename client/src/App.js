@@ -9,6 +9,7 @@ import { AuthProvider } from './context/AuthContext';
 import LibraryEditorPrivateRoute from './utils/LibraryEditorPrivateRoute';
 import Dashboard from './pages/lib_editor/Dashboard';
 import UsersControl from './pages/lib_editor/UsersControl';
+import BorrowForm from './pages/Borrow';
 
 
 function App() {
@@ -17,19 +18,17 @@ function App() {
       <Router>
         <AuthProvider>
         <Routes>
- 
-            <Route path='/auth' element={<Auth></Auth>} >
+		<Route path='/auth' element={<Auth></Auth>} >
                 <Route path='login/' element={<Login />} />
                 <Route path='register/' element={<Register />} />
                 <Route path='forgot-password/' element={<ForgotPassword />} />
                 <Route path='reset-password/:token/' element={<ResetPassword />} />
             </Route>
-
             <Route path='/lib-editor' element={<LibraryEditorPrivateRoute><Dashboard /></LibraryEditorPrivateRoute>}>
               <Route path='activate-users' element={<UsersControl action={"activate"} />} />
               <Route path='deactivate-users' element={<UsersControl action={"deactivate"}/>} />
             </Route>
-
+	    <Route path='/borrow/' element={<BorrowForm />} />
         </Routes>
         </AuthProvider>
       </Router>

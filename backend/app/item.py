@@ -1,3 +1,5 @@
+import datetime
+
 from flask import Blueprint, request, g
 import jsonschema
 import psycopg2.sql
@@ -90,10 +92,10 @@ BORROW_ITEM_JSONSCHEMA = {
         "properties": {
             "item_id": {"type": "integer"},
             "borrower_id": {"type": "integer"},
-            "expected_return": {"type": "string", "format": "date"}, #date expected in ISO8601 format
+            #"expected_return": {"type": "string", "format": "date"}, #date expected in ISO8601 format
             },
         "additionalProperties": False,
-        "required": ["item_id", "borrower_id", "expected_return"]
+        "required": ["item_id", "borrower_id"] 
         }
 
 
@@ -104,11 +106,13 @@ def borrow_item():
         jsonschema.validate(data, BORROW_ITEM_JSONSCHEMA)
     except jsonschema.ValidationError as err:
         return {"success": False, "error": err.message}, 400
+    
+    expected_return = datetime.date.today() + datetime.timedelta(days=14) #TODO: CHECK/QUERY/HARDCODE/... LIBRARY POLICY FOR RETURN DATES
 
     try:
         with g.db_conn.cursor() as cur:
             cur.execute("INSERT INTO borrow (item_id, borrower_id, expected_return) VALUES (%s, %s, %s)",\
-                    (data["item_id"], data["borrower_id"], data["expected_return"]))
+                    (data["item_id"], data["borrower_id"], expected_return))
             g.db_conn.commit()
             return {"success": True}, 200
     except psycopg2.IntegrityError as err:
@@ -149,6 +153,43 @@ def return_item():
         return {"success": False, "error": err.pgerror}, 400
     except psycopg2.Error as err:
         g.db_conn.rollback()
+        print(err)
+        return {"success": False, "error": "unknown"}, 400
+
+
+GET_ITEM_DETAILS_JSONSCHEMA = {
+        "type": "object",
+        "properties": {
+            "item_id": {"type": "integer"},
+            },
+        "additionalProperties": False,
+        "required": ["item_id"]
+        }
+
+@bp.route("/get-details/", methods=["POST"])
+def get_item_details():
+    data = request.get_json()
+    try:
+        jsonschema.validate(data, GET_ITEM_DETAILS_JSONSCHEMA)
+    except jsonschema.ValidationError as err:
+        return {"success": False, "error": err.message}, 400
+
+    try:
+        with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
+            cur.execute("SELECT book.isbn, title, publisher_name,\
+                    array_remove(array_agg(DISTINCT book_author.author_name), NULL) AS authors,\
+                    array_remove(array_agg(DISTINCT book_keyword.keyword_name), NULL) AS keywords,\
+                    array_remove(array_agg(DISTINCT book_category.category_name), NULL) AS categories\
+                    FROM item\
+                    LEFT JOIN book USING (isbn)\
+                    LEFT JOIN book_author USING (isbn)\
+                    LEFT JOIN book_category USING (isbn)\
+                    LEFT JOIN book_keyword USING (isbn)\
+                    WHERE item_id = %s\
+                    GROUP BY book.isbn", (data["item_id"],))
+            item = cur.fetchone()
+            return {"success": True, "item": item}, 200
+    except psycopg2.Error as err:
         print(err)
         return {"success": False, "error": "unknown"}, 400
 

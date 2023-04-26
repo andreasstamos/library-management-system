@@ -1,3 +1,6 @@
+#vi related files
+*.sw[a-p]
+
 secrets.ini
 client/node_modules/
 node_modules/
