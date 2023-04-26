@@ -5,7 +5,7 @@ import {useContext} from "react";
 import AuthContext from '../../context/AuthContext';
 
 
-export default function UserCard({data, action}) {
+export default function UserCard({data, action, getDeactivatedUsers}) {
   let {user} = useContext(AuthContext);
   async function handleSubmit(user_id) {
       const payload = {
@@ -19,13 +19,14 @@ export default function UserCard({data, action}) {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${localStorage.getItem('authTokens')}`,
      }})
+     await getDeactivatedUsers();
   }
 
 
   return (
     <div className='user-row'>
         <h4 className='user-element'>Username: {data.username}</h4>
-        <h4 className='user-element'>First Name:{data.first_name}</h4>
+        <h4 className='user-element'>First Name: {data.first_name}</h4>
         <h4 className='user-element'>Last Name: {data.last_name}</h4>
         <h4 className='user-element'>E-mail: {data.email}</h4>
         <h4 className='user-element'>Role: {data?.role}</h4>

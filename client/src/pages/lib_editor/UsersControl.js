@@ -28,7 +28,7 @@ function UsersControl({action}) {
 
     useEffect( () => {
             getDeactivatedUsers();
-    }, [])
+    }, [action])
 
 
   return (
@@ -36,7 +36,7 @@ function UsersControl({action}) {
         <h2 className='component-title'>{action == 'deactivate' ? 'Active' : 'Deactivated'} Users</h2>
         <div className='component-details users-control'>
         
-            {data && data.map((item) => {return <UserCard data={item} action={action} />})}
+            {data && data.map((item) => {return <UserCard data={item} action={action} getDeactivatedUsers={getDeactivatedUsers} />})}
             {data && data.length == 0 && <h3>No Users</h3>}
         
 

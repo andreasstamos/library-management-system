@@ -1,11 +1,9 @@
 .user-row {
-    display: flex;
-    flex-direction: column;
-    /* justify-content: space-evenly; */
     /* width: 25%; */
     border: 2px solid #eee;
     border-radius: 4px;
     padding: 10px;
+    min-width: 340px;
 }
 .user-row .user-element {
     text-align: left;
