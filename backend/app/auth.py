@@ -4,6 +4,8 @@ import jsonschema
 import bcrypt
 from flask_jwt_extended import create_access_token, decode_token
 import datetime
+
+
 bp = Blueprint("auth", __name__)
 
 # AUTH STUFF GOING ON DOWN THERE
@@ -25,21 +27,49 @@ def login():
         jsonschema.validate(data, login_json_schema)
     except jsonschema.ValidationError as err:
         return {"success": False, "error": err.message}, 400
-    
+
     username = data['username'].lower()
     
     with g.db_conn.cursor() as cur:
         # will need to modify what we fetch 
         # so as to changes access token field
  
-        cur.execute('SELECT "user".user_id, "user".password_hash FROM "user" WHERE username = (%s)', [username])
+        cur.execute('SELECT t1.user_id, t1.password_hash, t1.username, t1.school_id, t1.active FROM "user" AS t1 WHERE t1.username = (%s)', [username])
         row = cur.fetchone()
+        print(row)
 
         if not row or not bcrypt.checkpw(data['password'].encode('utf-8'), row[1].encode('utf-8')):
             return {"success":False, "error":"Wrong username or password."}, 400
         
+        if not row[4]:
+            return {"success":False, "error":"Your account has not been activated yet. Please be patient :)"}, 400
+        
+        # check if student
+        role = None
+
+        cur.execute('SELECT EXISTS(SELECT 1 FROM "user" AS t1 INNER JOIN student AS t2 ON t1.user_id = t2.user_id WHERE t1.username = (%s))', (username, ))
+        is_student = cur.fetchone()[0]
+        if is_student:
+            role = 'student'
+        
+        cur.execute('SELECT EXISTS(SELECT 1 FROM "user" AS t1 INNER JOIN teacher AS t2 ON t1.user_id = t2.user_id WHERE t1.username = (%s))', (username, ))
+        is_teacher = cur.fetchone()[0]
+        if is_teacher:
+            role = 'teacher'
+        
+        cur.execute('SELECT EXISTS(SELECT 1 FROM "user" AS t1 INNER JOIN lib_user AS t2 ON t1.user_id = t2.user_id WHERE t1.username = (%s))', (username, ))
+        is_lib_editor = cur.fetchone()[0]
+        if is_lib_editor:
+            role = 'lib_editor'
+        
+        if not role:
+            return {"success": False, "error": 'Invalid user role'}, 400
+
+
         identity = {
             'username': username,
+            'role': role,
+            'school_id':row[3]
         }
         token = create_access_token(identity=identity,expires_delta=datetime.timedelta(hours=1))
         
@@ -64,7 +94,9 @@ def register():
             'password': {'type': 'string', 'minLength':8},
             'confirm_password': {'type': 'string', 'minLength':8},
             'username': {'type': 'string', 'maxLength': 50},
-            'school_id': {'type': 'integer'}
+            'school_id': {'type': 'integer'},
+            'user_type': {'type': 'string'},
+            'dob': {'type':'string',"format": "date",}
         },
         "required": ["username", "password", "first_name", "last_name", "email", "school_id"],
         "additionalProperties": False,
@@ -77,7 +109,7 @@ def register():
         return {"success": False, "error": err.message}, 400
 
 
-
+    print(data['user_type'])
 
     # Might be vulnerable to SQL Injections... will check later.
     # Try block is outside covers 2 queries. Hope there aren't any weird bugs with that in case 1 of them fails...
@@ -102,11 +134,25 @@ def register():
             email = data['email'].lower()
             first_name = data['first_name'].title()
             last_name = data['last_name'].title()
-            cur.execute('INSERT INTO "user" (first_name, last_name, username, email, password_hash, school_id)\
-                    VALUES (%s, %s, %s, %s, %s, %s) RETURNING user_id', 
-                        (first_name, last_name, username, email, hashed_password, data['school_id']))
-            g.db_conn.commit()
+            
+            cur.execute('INSERT INTO "user" (first_name, last_name, username, email, password_hash, school_id, dob)\
+                    VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING user_id', 
+                        (first_name, last_name, username, email, hashed_password, data['school_id'], data['dob']))
+
             user_id = cur.fetchone()[0]
+            print(user_id)
+
+            if data['user_type'].lower() == 'teacher':
+                cur.execute('INSERT INTO teacher (user_id) VALUES (%s)', (user_id,))
+            elif data['user_type'].lower() == 'student':
+                cur.execute('INSERT INTO student (user_id) VALUES (%s)', (user_id,))
+            elif data['user_type'].lower() == 'lib_editor':
+                cur.execute('INSERT INTO lib_user (user_id) VALUES (%s)', (user_id,))
+            else:
+                return {"success": False, "error": 'Wrong user type.'}, 400
+
+            g.db_conn.commit()
+
             return {"success": True, "user_id": user_id}, 201
     except psycopg2.IntegrityError as err:
         g.db_conn.rollback()
@@ -127,7 +173,7 @@ def forgot_password():
     forgot_password_request_schema = {
         'type': 'object',
         'properties': {
-    'email':{'type': 'string','minLength': 6, 'maxLength':256}},
+            'email':{'type': 'string','minLength': 6, 'maxLength':256}},
         "required": ["email"],
         "additionalProperties": False,
     }

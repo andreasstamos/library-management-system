@@ -44,7 +44,7 @@ def insert_school():
 
 # WHEN A STUDENT TRIES TO MAKE AN ACCOUNT
 # THIS IS THE ENDPOINT THAT SENDS SCHOOL LIST TO THE DROPDOWN IN THE REGISTER FORM
-@bp.route('/', methods=['GET'])
+@bp.route('/get-schools/', methods=['GET'])
 def get_school():
     query = psycopg2.sql.SQL("SELECT school.name, school.school_id FROM school")
     try:
@@ -72,7 +72,7 @@ UPDATE_SCHOOL_JSONSCHEMA = {
             },
         "required": ["school_id"],
         "additionalProperties": False,
-        }
+}
 
 @bp.route("/", methods=["PATCH"])
 def update_school():

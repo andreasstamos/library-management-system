@@ -25,7 +25,7 @@ def setup_database(app):
         db_pool.putconn(g.db_conn)
 
 def register_blueprints(app):
-    from . import book, auth, school, item, admin_ops, students_ops
+    from . import book, auth, school, item, admin_ops, students_ops, lib_ops
     app.register_blueprint(book.bp,     url_prefix="/book")
     app.register_blueprint(auth.bp,     url_prefix="/auth")
     app.register_blueprint(school.bp,   url_prefix="/school")
@@ -33,10 +33,13 @@ def register_blueprints(app):
 
     app.register_blueprint(admin_ops.bp,     url_prefix="/admin-api")
     app.register_blueprint(students_ops.bp, url_prefix='/student-api')
+    app.register_blueprint(lib_ops.bp,      url_prefix='/lib-api')
+
 
 def create_app(test_config=None):
     app = Flask(__name__)
-    CORS(app, resources={r'/*': {'origins': '*'}})
+    CORS(app, resources={r'/*': {'origins': '*'}}, 
+     expose_headers='Authorization', supports_credentials=True)
     JWTManager(app)
     
     app.config.from_object('config')
@@ -48,4 +51,3 @@ def create_app(test_config=None):
     register_blueprints(app)
 
     return app
-

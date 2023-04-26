@@ -9,8 +9,8 @@ DROP TABLE IF EXISTS publisher;
 DROP TABLE IF EXISTS lib_user;
 DROP TABLE IF EXISTS student;
 DROP TABLE IF EXISTS "admin";
-DROP TABLE IF EXISTS "user";
 DROP TABLE IF EXISTS school;
+DROP TABLE IF EXISTS "user";
 
 CREATE TABLE publisher (
 	publisher_name VARCHAR(50) PRIMARY KEY
@@ -55,12 +55,14 @@ CREATE TABLE school (
 
 CREATE TABLE "user" (
 	user_id SERIAL PRIMARY KEY,
-	school_id SERIAL REFERENCES school,
+	school_id SERIAL REFERENCES school ON DELETE CASCADE,
 	first_name VARCHAR(50) NOT NULL,
 	last_name VARCHAR(50) NOT NULL,
 	email VARCHAR(256) UNIQUE CHECK (email ~ '^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-z]{2,}$'),
 	username VARCHAR(50) NOT NULL UNIQUE,
-	password_hash VARCHAR(500) NOT NULL
+	password_hash VARCHAR(500) NOT NULL,
+	dob DATE NOT NULL,
+	active BOOLEAN DEFAULT FALSE
 );
 
 CREATE TABLE "admin" (
@@ -75,6 +77,11 @@ CREATE TABLE lib_user (
 
 CREATE TABLE student (
 	student_id SERIAL PRIMARY KEY,
+	user_id INT NOT NULL REFERENCES "user" ON DELETE CASCADE
+);
+
+CREATE TABLE teacher (
+	teacher_id SERIAL PRIMARY KEY,
 	user_id INT NOT NULL REFERENCES "user" ON DELETE CASCADE
 );
 

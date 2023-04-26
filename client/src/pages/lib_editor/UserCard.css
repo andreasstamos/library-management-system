@@ -1,0 +1,29 @@
+.user-row {
+    display: flex;
+    flex-direction: column;
+    /* justify-content: space-evenly; */
+    /* width: 25%; */
+    border: 2px solid #eee;
+    border-radius: 4px;
+    padding: 10px;
+}
+.user-row .user-element {
+    text-align: left;
+    /* font-size: clamp(1.4rem, 1vw, 3rem); */
+    font-size:1rem;
+}
+.user-row button {
+   background-color: hotpink;
+   color: #fff;
+   border: 1px solid #eee;
+   border-radius: 4px;
+   width: fit-content;
+   cursor: pointer;
+   font-size: 1rem;
+   font-weight: bold;
+}
+.user-row button:hover {
+    background-color: #fff;
+    color: hotpink;
+    transition: 150ms ease-in;
+}

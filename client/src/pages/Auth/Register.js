@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import axios from 'axios';
 import Dropdown from '../../Components/Dropdown';
-
+import UserDropdown from '../../Components/UserDropdown'
 function Register() {
 
   const [username, setUsername] = useState('');
@@ -16,7 +16,8 @@ function Register() {
   const [succ, setSucc] = useState('');
   const [loadingSchools, setLoadingSchools] = useState(true);
   const [schools, setSchools] = useState(null);
-
+  const [userSelected, setUserSelected] = useState('');
+  const [dob, setDob] = useState('');
 
   function checkMatchingPassword() {
     if (password !== confirmPassword) return false;
@@ -51,6 +52,8 @@ function Register() {
       password: password,
       confirm_password: confirmPassword,
       school_id: parseInt(schoolID),
+      user_type: userSelected,
+      dob:dob,
     }
     const response = await axios.post('http://127.0.0.1:5000/auth/register-student/', payload, {headers: {
       'Content-Type': 'application/json'
@@ -68,7 +71,7 @@ function Register() {
 
 
   async function fetchSchools() {
-    const response = await axios.get('http://127.0.0.1:5000/auth/get-schools/');
+    const response = await axios.get('http://127.0.0.1:5000/school/get-schools/');
     console.log(response);
     setLoadingSchools(false);
     setSchools(response?.data?.schools);
@@ -104,10 +107,18 @@ function Register() {
               <Dropdown schools={schools} schoolSelected={schoolID} setSchoolSelected={setSchoolID} />
         }
 
+
         <div className='auth-input'>
             <label for='email'>Email:</label>
             <input type='email' name='email' required value={email} onChange={(e) => setEmail(e.target.value)}/>
         </div>
+
+        <div className='auth-input'>
+          <label htmlFor="birthdate">Date of Birth:</label>
+          <input type="date" id="birthdate" required name="birthdate" value={dob} onChange={(e) => {setDob(e.target.value)}} />
+      </div>
+
+        <UserDropdown setUserSelected={setUserSelected} userSelected={userSelected}/>
 
         <div className='auth-input'>
             <label for='password'>Password:</label>

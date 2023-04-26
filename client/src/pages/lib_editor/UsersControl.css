@@ -1,0 +1,7 @@
+.users-control {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    margin-block: 5rem;
+    flex-wrap: wrap;
+}

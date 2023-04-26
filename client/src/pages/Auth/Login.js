@@ -1,15 +1,18 @@
 import axios from 'axios';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
-
+import AuthContext from '../../context/AuthContext';
 
 function Login() {
+
+
+  const {logoutUser, saveTokens, setAuthTokens} = useContext(AuthContext);
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [err, setErr] = useState('');
   const [succ, setSucc] = useState('');
-
+  
 
 
 
@@ -33,13 +36,17 @@ function Login() {
 
       console.log(err);
       console.log(succ)
+      logoutUser();
+      saveTokens(response?.data?.access_token);
+      setAuthTokens(response?.data?.access_token);
 
       if (response.status === 200) {
         setSucc("Logged In!");
         return;
       } 
   } catch(err) {
-    setErr("Probably wrong credentials :( .");
+    // console.log(err);
+    setErr(err?.response?.data?.error);
   }
 
     
