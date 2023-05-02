@@ -1,4 +1,4 @@
-import React, {useState, useContext} from 'react';
+import React, {useState, useEffect, useContext} from 'react';
 import axios from 'axios';
 import './Borrow.css';
 import AuthContext from '../context/AuthContext';
@@ -11,48 +11,63 @@ function DetailsProperty({name, value}) {
 		</div>);
 }
 
-function ItemIdForm({state, setState}) {
-	const handleItemIdChange = e => setState({...state, item_id: e.target.value});
-	const handleNext = e => setState({...state, step: 2});
+function ItemIdForm({itemid, setItemId, setError, handleNext}) {
+	const [inputItemId, setInputItemId] = useState(itemid || "");
+	const [item, setItem] = useState(null);
+	const [itemLoading, setItemLoading] = useState(false);
 	const auth = useContext(AuthContext);
 	
-	async function handleFind(e) {
-		const payload = {
-			item_id: parseInt(state.item_id)
-		};
-		setState((state) => ({...state, item: null, itemLoading: true, showError: false, last_error_message: null}));
-		try {
-			const response = await axios.post('http://127.0.0.1:5000/item/get-details/', payload, {headers: {
-				'Content-Type': 'application/json',
-				'Authorization': `Bearer ${auth.authTokens}`,
-			}});
-			if (!response.data.success) throw 0;
-			if (response.data.item) {
-				setState((state) => ({...state, item: {...response.data.item, itemLoading: false, item_id: state.item_id}}));
+	useEffect(() => {
+		setError(null);
+		setItem(null);
+		if (!itemid) return;
+		setItemLoading(true);
+		const fetchItem = async () => {
+			try {
+				const payload = {
+					item_id: parseInt(itemid)
+				};
+				const response = await axios.post('http://127.0.0.1:5000/item/get-details/', payload, {headers: {
+					'Content-Type': 'application/json',
+					'Authorization': `Bearer ${auth.authTokens}`,
+				}});
+				setItemLoading(false);
+				if (!response.data.success) {
+					setError("Something went wrong. Please try again.");
+				}
+
+				if (response.data.item) {
+					setItem(response.data.item);
+				}
+				else {
+					setError("No item found.");
+				}
+			} catch (e) {
+				setItemLoading(false);
 			}
-			else setState((state) => ({...state, itemLoading: false, showError: true, last_error_message: "No item found"}));
-			return;
-		} catch (e) {
-			setState((state) => ({...state, itemLoading: false, showError: true, last_error_message: "Something went wrong. Please try again."}));
-			return;
-		}
-	}
+		};
+
+		fetchItem();
+	}, [itemid])
 
 	return (
 		<div className="form-container">
+
 			<div className="input-container">
-				<input type="text" value={state.item_id} onChange={handleItemIdChange} placeholder="Enter Item ID"/>
-				<button className="find-button" onClick={handleFind}>Find</button>
+				<p className="details-name">Item ID</p>
+				<input type="text" value={inputItemId} onChange={e => {setInputItemId(e.target.value)}} placeholder="Enter Item ID"/>
+				<button className="find-button" onClick={e => {setItemId(inputItemId)}}>Find</button>
+				{itemLoading && <img className="loading-animation" src="./loading.gif"/>}
 			</div>
-			{state.item &&
+			{item &&
 			<>
 				<div className="details-container">
-					<DetailsProperty name="ISBN" 		value={state.item.isbn} />
-					<DetailsProperty name="Title" 		value={state.item.title} />
-					<DetailsProperty name="Author" 		value={state.item.authors.join(", ")} />
-					<DetailsProperty name="Publisher" 	value={state.item.publisher_name} />
-					<DetailsProperty name="Categories" 	value={state.item.categories.join(", ")} />
-					<DetailsProperty name="Keywords" 	value={state.item.keywords.join(", ")} />
+					<DetailsProperty name="ISBN" 		value={item.isbn} />
+					<DetailsProperty name="Title" 		value={item.title} />
+					<DetailsProperty name="Author" 		value={item.authors.join(", ")} />
+					<DetailsProperty name="Publisher" 	value={item.publisher_name} />
+					<DetailsProperty name="Categories" 	value={item.categories.join(", ")} />
+					<DetailsProperty name="Keywords" 	value={item.keywords.join(", ")} />
 				</div>
 				<button className="next-button" onClick={handleNext}>Next</button>
 			</>
@@ -61,70 +76,61 @@ function ItemIdForm({state, setState}) {
 	)
 }
 
-function UserIdForm({state, setState}) {
-	const handleUserIdChange = e => setState({...state, user_id: e.target.value});
-	const handleBack = e => setState({...state, step: 1});
+function UserIdForm({userid, setUserId, setError, handleBorrow, handleBack}) {
+	const [inputUserId, setInputUserId] = useState(userid || "");
+	const [user, setUser] = useState(null);
+	const [userLoading, setUserLoading] = useState(false);
+	const auth = useContext(AuthContext);
 
-	async function handleFind(e) {
-		const payload = {
-			user_id: parseInt(state.user_id)
+	useEffect(() => {
+		setError(null);
+		setUser(null);
+		if (!userid) return;
+		setUserLoading(true);
+		const fetchUser = async () => {
+			try {
+				const payload = {
+					user_id: parseInt(userid)
+				};
+				const response = await axios.post('http://127.0.0.1:5000/user/get-details/', payload, {headers: {
+					'Content-Type': 'application/json',
+					'Authorization': `Bearer ${auth.authTokens}`,
+				}});
+				setUserLoading(false);
+				if (!response.data.success) {
+					setError("Something went wrong. Please try again.");
+				}
+
+				if (response.data.user) {
+					setUser(response.data.user);
+				}
+				else {
+					setError("No user found.");
+				}
+			} catch (e) {
+				setUserLoading(false);
+			}
 		};
-		const response = await axios.post('http://127.0.0.1:5000/user/get-details/', payload, {headers: {
-			'Content-Type': 'application/json',
-		}});
 
-		if (response.status !== 200) {
-			console.log("API request failed with status code: ", response.status)
-			return;
-		}
-		if (response.data.user) {
-			setState({...state, user: {...response.data.user, user_id: state.user_id}});
-		}
-		return;
-	}
-
-	async function handleBorrow(e) {
-		if (!state.user || !state.item) return;
-		const payload = {
-			borrower_id: parseInt(state.user.user_id),
-			item_id: parseInt(state.item.item_id)
-		}
-		try {
-			const response = await axios.post('http://127.0.0.1:5000/item/borrow/', payload, {headers: {
-				'Content-Type': 'application/json',
-			}, validateStatus: (status) => status === 200})
-			if (response.data.success) {
-				setState({...state, showCompleted: true, step: 1, user: null, item: null, user_id: null, item_id: null});
-			}
-
-		} catch (e) {
-			if (e.status === 401) {
-				setState({...state, showError: true, last_error_message: "Access denied. Try signing in again."});
-				return;
-			}
-			setState({...state, showError: true, last_error_message: "Something went wrong. Please try again."});
-			return;
-		}
-		/*if (response.status !== 200) {
-			console.log("API request failed with status code: ", response.status)
-			return;
-		}*/
-	}
+		fetchUser();
+	}, [userid])
 
 	return (
 		<div className="form-container">
 			<div className="input-container">
-				<input type="text" value={state.user_id} onChange={handleUserIdChange} placeholder="Enter User ID"/>
-				<button className="find-button" onClick={handleFind}>Find</button>
+				<p className="details-name">User ID</p>
+				<input type="text" value={inputUserId} onChange={e => {setInputUserId(e.target.value)}} placeholder="Enter User ID"/>
+				<button className="find-button" onClick={e => {setUserId(inputUserId)}}>Find</button>
 				<button className="back-button" onClick={handleBack}>Back</button>
+				{userLoading && <img className="loading-animation" src="./loading.gif"/>}
 			</div>
-			{state.user &&
+			{user &&
 			<>
 				<div className="details-container">
-					<DetailsProperty name="Username"	value={state.user.username} />
-					<DetailsProperty name="First name"	value={state.user.first_name} />
-					<DetailsProperty name="Last name"	value={state.user.last_name} />
-					<DetailsProperty name="E-mail"		value={state.user.email} />
+					<DetailsProperty name="Username"	value={user.username} />
+					<DetailsProperty name="First name"	value={user.first_name} />
+					<DetailsProperty name="Last name"	value={user.last_name} />
+					<DetailsProperty name="E-mail"		value={user.email} />
 				</div>
 				<button className="borrow-button" onClick={handleBorrow}>Borrow</button>
 			</>
@@ -133,55 +139,80 @@ function UserIdForm({state, setState}) {
 	)
 }
 
-function CompletedToast({state, setState}) {
-	const handleClose = e => setState({...state, showCompleted: false});
-	if (!state.showCompleted) return null;
-	return (
-		<div className="toast-container toast-completed">
-			<p className="toast-message">Borrowing completed!</p>
-			<button className="toast-button" onClick={handleClose}>Close</button>
-		</div>
-	)
-}
-
-
-function ErrorToast({state, setState}) {
-	const handleClose = e => setState({...state, showError: false});
-	if (!state.showError) return null;
-	return (
-		<div className="toast-error toast-container toast-error">
-			<p className="toast-message">{state.last_error_message}</p>
-			<button className="toast-button" onClick={handleClose}>Close</button>
-		</div>
-	)
-}
-
-
-
-
-function BorrowStep({state, setState}) {
-	switch (state.step) {
-		case 1:
-			return (<ItemIdForm state={state} setState={setState} />);
+function Toast({type, message, handleClose}) {
+	var classname = "";
+	switch (type) {
+		case 'success':
+			classname = 'toast-success';
 			break;
-		case 2:
-			return (<UserIdForm state={state} setState={setState} />);
+		case 'error':
+			classname = 'toast-error';
 			break;
 	}
+	return (
+		<div className={"toast-container" + " " + classname}>
+			<p className="toast-message">{message}</p>
+			<button className="toast-button" onClick={handleClose}>Close</button>
+		</div>
+	)
 }
 
 function BorrowForm() {
-	const [state, setState] = useState({
-		item_id: "",
-		user_id: "",
-		step: 1
-	})
+	const [step, setStep] = useState(1);
+	const [itemid, setItemId] = useState(null);
+	const [userid, setUserId] = useState(null);
+	const [error, setError] = useState(null);
+	const [success, setSuccess] = useState(null);
+
+	const auth = useContext(AuthContext);
+
+	async function borrow() {
+		setError(null);
+
+		const payload = {
+			borrower_id: parseInt(userid),
+			item_id: parseInt(itemid)
+		}
+		try {
+			const response = await axios.post('http://127.0.0.1:5000/item/borrow/', payload, {headers: {
+				'Content-Type': 'application/json',
+				'Authorization': `Bearer ${auth.authTokens}`,
+			}})
+			if (response.status === 401) {
+				setError("Access denied. Try signing in again.");
+			}
+			else if (response.data.success) {
+				setSuccess("Lending completed!");
+			}
+			else {
+				setError("Something went wrong. Please try again.");
+			}
+		} catch (e) {
+			setError("Something went wrong. Please try again.");
+			return;
+		}
+	}
 
 	return (
 		<div className="page-container">
-			<CompletedToast state={state} setState={setState} />
-			<ErrorToast state={state} setState={setState} />
-			<BorrowStep state={state} setState={setState} />
+			{success &&
+			<Toast type="sucesss" message={success} handleClose={() => setSuccess(null)} />}
+			{error &&
+				<Toast type="error" message={error} handleClose={() => setError(null)} />}
+			{step == 1 &&
+				<ItemIdForm
+					itemid={itemid}
+					setItemId={setItemId}
+					setError={setError}
+					handleNext={() => {setStep(2)}}/>}
+			{step == 2 &&
+				<UserIdForm
+					userid={userid}
+					setUserId={setUserId}
+					setError={setError}
+					handleBack={() => {setStep(1)}}
+					handleBorrow={borrow}/>
+			}
 		</div>
 	)
 }

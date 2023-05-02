@@ -3,6 +3,8 @@ import jsonschema
 import psycopg2.sql
 import psycopg2.extras
 
+from .roles_decorators import check_roles
+
 bp = Blueprint("user", __name__)
 
 GET_USER_DETAILS_JSONSCHEMA = {
@@ -15,6 +17,7 @@ GET_USER_DETAILS_JSONSCHEMA = {
         }
 
 @bp.route("/get-details/", methods=["POST"])
+@check_roles(["lib_editor"])
 def get_user_details():
     data = request.get_json()
     try:

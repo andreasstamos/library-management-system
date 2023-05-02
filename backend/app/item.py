@@ -102,7 +102,7 @@ BORROW_ITEM_JSONSCHEMA = {
 
 
 @bp.route("/borrow/", methods=["POST"])
-@check_roles("lib_editor")
+@check_roles(["lib_editor"])
 def borrow_item():
     data = request.get_json()
     try:
