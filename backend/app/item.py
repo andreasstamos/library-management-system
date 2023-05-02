@@ -138,6 +138,7 @@ RETURN_ITEM_JSONSCHEMA = {
 
 
 @bp.route("/return/", methods=["POST"])
+@check_roles(["lib_editor"])
 def return_item():
     data = request.get_json()
     try:
@@ -150,7 +151,7 @@ def return_item():
             cur.execute("UPDATE borrow SET period = TSTZRANGE(LOWER(period), NOW(), '[]')\
                     WHERE item_id = %s AND UPPER_INF(period)", (data["item_id"],))
             g.db_conn.commit()
-            return {"success": True}, 200
+            return {"success": cur.rowcount > 0}, 200
     except psycopg2.IntegrityError as err:
         g.db_conn.rollback()
         return {"success": False, "error": err.pgerror}, 400
@@ -170,6 +171,7 @@ GET_ITEM_DETAILS_JSONSCHEMA = {
         }
 
 @bp.route("/get-details/", methods=["POST"])
+@check_roles(["lib_editor"])
 def get_item_details():
     data = request.get_json()
     try:
@@ -179,18 +181,22 @@ def get_item_details():
 
     try:
         with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
-            cur.execute("SELECT book.isbn, title, publisher_name,\
+            cur.execute("SELECT book.isbn, book.title, book.publisher_name,\
                     array_remove(array_agg(DISTINCT book_author.author_name), NULL) AS authors,\
                     array_remove(array_agg(DISTINCT book_keyword.keyword_name), NULL) AS keywords,\
-                    array_remove(array_agg(DISTINCT book_category.category_name), NULL) AS categories\
+                    array_remove(array_agg(DISTINCT book_category.category_name), NULL) AS categories,\
+                    \"user\".user_id, \"user\".first_name, \"user\".last_name, \"user\".email\
                     FROM item\
                     LEFT JOIN book USING (isbn)\
                     LEFT JOIN book_author USING (isbn)\
                     LEFT JOIN book_category USING (isbn)\
                     LEFT JOIN book_keyword USING (isbn)\
-                    WHERE item_id = %s\
-                    GROUP BY book.isbn", (data["item_id"],))
+                    LEFT JOIN borrow ON item.item_id = borrow.item_id AND upper_inf(borrow.period)\
+                    LEFT JOIN \"user\" ON user_id = borrower_id\
+                    WHERE item.item_id = %s\
+                    GROUP BY book.isbn, \"user\".user_id", (data["item_id"],))
             item = cur.fetchone()
+            item["isBorrowed"] = item["user_id"] is not None
             return {"success": True, "item": item}, 200
     except psycopg2.Error as err:
         print(err)

@@ -117,3 +117,8 @@
 	width: auto;
 	height: auto;
 }
+
+.two-column-container {
+	display: flex;
+	column-gap: 2rem;
+}

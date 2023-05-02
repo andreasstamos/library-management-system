@@ -11,7 +11,7 @@ function DetailsProperty({name, value}) {
 		</div>);
 }
 
-function ItemIdForm({itemid, setItemId, setError, handleNext}) {
+function ItemIdForm({itemid, setItemId, setError, handleNext, handleReturn}) {
 	const [inputItemId, setInputItemId] = useState(itemid || "");
 	const [item, setItem] = useState(null);
 	const [itemLoading, setItemLoading] = useState(false);
@@ -44,6 +44,7 @@ function ItemIdForm({itemid, setItemId, setError, handleNext}) {
 				}
 			} catch (e) {
 				setItemLoading(false);
+				setError("Something went wrong. Please try again.");
 			}
 		};
 
@@ -61,15 +62,26 @@ function ItemIdForm({itemid, setItemId, setError, handleNext}) {
 			</div>
 			{item &&
 			<>
-				<div className="details-container">
-					<DetailsProperty name="ISBN" 		value={item.isbn} />
-					<DetailsProperty name="Title" 		value={item.title} />
-					<DetailsProperty name="Author" 		value={item.authors.join(", ")} />
-					<DetailsProperty name="Publisher" 	value={item.publisher_name} />
-					<DetailsProperty name="Categories" 	value={item.categories.join(", ")} />
-					<DetailsProperty name="Keywords" 	value={item.keywords.join(", ")} />
+				<div className="two-column-container">
+					<div className="details-container">
+						<h2>Item</h2>
+						<DetailsProperty name="ISBN" 		value={item.isbn} />
+						<DetailsProperty name="Title" 		value={item.title} />
+						<DetailsProperty name="Author" 		value={item.authors.join(", ")} />
+						<DetailsProperty name="Publisher" 	value={item.publisher_name} />
+						<DetailsProperty name="Categories" 	value={item.categories.join(", ")} />
+						<DetailsProperty name="Keywords" 	value={item.keywords.join(", ")} />
+					</div>
+					{item.isBorrowed && <div className="details-container">
+						<h2>Borrower</h2>
+						<DetailsProperty name="First Name" 	value={item.first_name} />
+						<DetailsProperty name="Last Name" 	value={item.last_name} />
+						<DetailsProperty name="Email" 		value={item.email} />
+					</div>
+					}
 				</div>
-				<button className="next-button" onClick={handleNext}>Next</button>
+				{!item.isBorrowed && <button className="next-button" onClick={handleNext}>Next</button>}
+				{item.isBorrowed && <button className="borrow-button" onClick={handleReturn}>Return</button>}
 			</>
 			}
 		</div>
@@ -109,6 +121,7 @@ function UserIdForm({userid, setUserId, setError, handleBorrow, handleBack}) {
 				}
 			} catch (e) {
 				setUserLoading(false);
+				setError("Something went wrong. Please try again.");
 			}
 		};
 
@@ -166,7 +179,7 @@ function BorrowForm() {
 
 	const auth = useContext(AuthContext);
 
-	async function borrow() {
+	async function borrowItem() {
 		setError(null);
 
 		const payload = {
@@ -183,6 +196,9 @@ function BorrowForm() {
 			}
 			else if (response.data.success) {
 				setSuccess("Lending completed!");
+				setItemId(null);
+				setUserId(null);
+				setStep(1);
 			}
 			else {
 				setError("Something went wrong. Please try again.");
@@ -193,10 +209,41 @@ function BorrowForm() {
 		}
 	}
 
+	async function returnItem() {
+		setError(null);
+
+		const payload = {
+			item_id: parseInt(itemid)
+		}
+		try {
+			const response = await axios.post('http://127.0.0.1:5000/item/return/', payload, {headers: {
+				'Content-Type': 'application/json',
+				'Authorization': `Bearer ${auth.authTokens}`,
+			}})
+			if (response.status === 401) {
+				setError("Access denied. Try signing in again.");
+			}
+			else if (response.data.success) {
+				setSuccess("Return completed!");
+				setItemId(null);
+				setUserId(null);
+				setStep(1);
+			}
+			else {
+				setError("Something went wrong. Please try again.");
+			}
+		} catch (e) {
+			setError("Something went wrong. Please try again.");
+			return;
+		}
+	}
+
+
+
 	return (
 		<div className="page-container">
 			{success &&
-			<Toast type="sucesss" message={success} handleClose={() => setSuccess(null)} />}
+			<Toast type="success" message={success} handleClose={() => setSuccess(null)} />}
 			{error &&
 				<Toast type="error" message={error} handleClose={() => setError(null)} />}
 			{step == 1 &&
@@ -204,6 +251,7 @@ function BorrowForm() {
 					itemid={itemid}
 					setItemId={setItemId}
 					setError={setError}
+					handleReturn={returnItem}
 					handleNext={() => {setStep(2)}}/>}
 			{step == 2 &&
 				<UserIdForm
@@ -211,7 +259,7 @@ function BorrowForm() {
 					setUserId={setUserId}
 					setError={setError}
 					handleBack={() => {setStep(1)}}
-					handleBorrow={borrow}/>
+					handleBorrow={borrowItem}/>
 			}
 		</div>
 	)
