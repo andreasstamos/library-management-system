@@ -5,6 +5,8 @@ import jsonschema
 import psycopg2.sql
 import psycopg2.extras
 
+from .roles_decorators import check_roles
+
 bp = Blueprint("item", __name__)
 
 INSERT_ITEM_JSONSCHEMA = {
@@ -167,8 +169,10 @@ GET_ITEM_DETAILS_JSONSCHEMA = {
         }
 
 @bp.route("/get-details/", methods=["POST"])
+@check_roles(["teacher", "student"])
 def get_item_details():
     data = request.get_json()
+    print(get_jwt())
     try:
         jsonschema.validate(data, GET_ITEM_DETAILS_JSONSCHEMA)
     except jsonschema.ValidationError as err:

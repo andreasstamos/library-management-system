@@ -1,6 +1,7 @@
-import React, {useState} from 'react';
+import React, {useState, useContext} from 'react';
 import axios from 'axios';
 import './Borrow.css';
+import AuthContext from '../context/AuthContext';
 
 function DetailsProperty({name, value}) {
 	return (
@@ -13,13 +14,18 @@ function DetailsProperty({name, value}) {
 function ItemIdForm({state, setState}) {
 	const handleItemIdChange = e => setState({...state, item_id: e.target.value});
 	const handleNext = e => setState({...state, step: 2});
-
+	const auth = useContext(AuthContext);
+	
 	async function handleFind(e) {
 		const payload = {
 			item_id: parseInt(state.item_id)
 		};
+		console.log(auth.authTokens);
 		const response = await axios.post('http://127.0.0.1:5000/item/get-details/', payload, {headers: {
+			//'Access-Control-Expose-Headers' : '*',
+			//'Access-Control-Allow-Origin': '*', 
 			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${auth.authTokens}`,
 		}});
 
 		console.log(response);
@@ -88,7 +94,7 @@ function UserIdForm({state, setState}) {
 		const response = await axios.post('http://127.0.0.1:5000/item/borrow/', payload, {headers: {
 			'Content-Type': 'application/json',
 		}});
-		
+
 		if (response.status !== 200) {
 			console.log("API request failed with status code: ", response.status)
 			return;
