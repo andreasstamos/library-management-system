@@ -20,23 +20,22 @@ function ItemIdForm({state, setState}) {
 		const payload = {
 			item_id: parseInt(state.item_id)
 		};
-		console.log(auth.authTokens);
-		const response = await axios.post('http://127.0.0.1:5000/item/get-details/', payload, {headers: {
-			//'Access-Control-Expose-Headers' : '*',
-			//'Access-Control-Allow-Origin': '*', 
-			'Content-Type': 'application/json',
-			'Authorization': `Bearer ${auth.authTokens}`,
-		}});
-
-		console.log(response);
-		if (response.status !== 200) {
-			console.log("API request failed with status code: ", response.status)
+		setState((state) => ({...state, item: null, itemLoading: true, showError: false, last_error_message: null}));
+		try {
+			const response = await axios.post('http://127.0.0.1:5000/item/get-details/', payload, {headers: {
+				'Content-Type': 'application/json',
+				'Authorization': `Bearer ${auth.authTokens}`,
+			}});
+			if (!response.data.success) throw 0;
+			if (response.data.item) {
+				setState((state) => ({...state, item: {...response.data.item, itemLoading: false, item_id: state.item_id}}));
+			}
+			else setState((state) => ({...state, itemLoading: false, showError: true, last_error_message: "No item found"}));
+			return;
+		} catch (e) {
+			setState((state) => ({...state, itemLoading: false, showError: true, last_error_message: "Something went wrong. Please try again."}));
 			return;
 		}
-		if (response.data.item) {
-			setState({...state, item: {...response.data.item, item_id: state.item_id}});
-		}
-		return;
 	}
 
 	return (
@@ -64,7 +63,6 @@ function ItemIdForm({state, setState}) {
 
 function UserIdForm({state, setState}) {
 	const handleUserIdChange = e => setState({...state, user_id: e.target.value});
-	//const handleBorrow = e => setState({...state, showCompleted: true, step: 1, item: null, user: null});
 	const handleBack = e => setState({...state, step: 1});
 
 	async function handleFind(e) {
@@ -91,17 +89,26 @@ function UserIdForm({state, setState}) {
 			borrower_id: parseInt(state.user.user_id),
 			item_id: parseInt(state.item.item_id)
 		}
-		const response = await axios.post('http://127.0.0.1:5000/item/borrow/', payload, {headers: {
-			'Content-Type': 'application/json',
-		}});
+		try {
+			const response = await axios.post('http://127.0.0.1:5000/item/borrow/', payload, {headers: {
+				'Content-Type': 'application/json',
+			}, validateStatus: (status) => status === 200})
+			if (response.data.success) {
+				setState({...state, showCompleted: true, step: 1, user: null, item: null, user_id: null, item_id: null});
+			}
 
-		if (response.status !== 200) {
-			console.log("API request failed with status code: ", response.status)
+		} catch (e) {
+			if (e.status === 401) {
+				setState({...state, showError: true, last_error_message: "Access denied. Try signing in again."});
+				return;
+			}
+			setState({...state, showError: true, last_error_message: "Something went wrong. Please try again."});
 			return;
 		}
-		if (response.data.success) {
-			setState({...state, showCompleted: true, step: 1, user: null, item: null, user_id: null, item_id: null});
-		}
+		/*if (response.status !== 200) {
+			console.log("API request failed with status code: ", response.status)
+			return;
+		}*/
 	}
 
 	return (
@@ -130,12 +137,26 @@ function CompletedToast({state, setState}) {
 	const handleClose = e => setState({...state, showCompleted: false});
 	if (!state.showCompleted) return null;
 	return (
-		<div class="toast-container">
-			<p class="toast-message">Borrowing completed!</p>
-			<button class="toast-button" onClick={handleClose}>Close</button>
+		<div className="toast-container toast-completed">
+			<p className="toast-message">Borrowing completed!</p>
+			<button className="toast-button" onClick={handleClose}>Close</button>
 		</div>
 	)
 }
+
+
+function ErrorToast({state, setState}) {
+	const handleClose = e => setState({...state, showError: false});
+	if (!state.showError) return null;
+	return (
+		<div className="toast-error toast-container toast-error">
+			<p className="toast-message">{state.last_error_message}</p>
+			<button className="toast-button" onClick={handleClose}>Close</button>
+		</div>
+	)
+}
+
+
 
 
 function BorrowStep({state, setState}) {
@@ -151,12 +172,15 @@ function BorrowStep({state, setState}) {
 
 function BorrowForm() {
 	const [state, setState] = useState({
+		item_id: "",
+		user_id: "",
 		step: 1
 	})
 
 	return (
 		<div className="page-container">
 			<CompletedToast state={state} setState={setState} />
+			<ErrorToast state={state} setState={setState} />
 			<BorrowStep state={state} setState={setState} />
 		</div>
 	)

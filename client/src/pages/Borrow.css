@@ -80,10 +80,18 @@
 	padding: 1vw;
 	justify-content: center;
 	align-items: center;
-	background-color: green;
+	background-color: grey;
 	border: 1.5px solid grey;
 	border-radius: 10px;
 	column-gap: 2vw;
+}
+
+.toast-success {
+	background-color: green;
+}
+
+.toast-error {
+	background-color: red;
 }
 
 .toast-container .toast-message {

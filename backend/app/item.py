@@ -102,6 +102,7 @@ BORROW_ITEM_JSONSCHEMA = {
 
 
 @bp.route("/borrow/", methods=["POST"])
+@check_roles("lib_editor")
 def borrow_item():
     data = request.get_json()
     try:
@@ -169,10 +170,8 @@ GET_ITEM_DETAILS_JSONSCHEMA = {
         }
 
 @bp.route("/get-details/", methods=["POST"])
-@check_roles(["teacher", "student"])
 def get_item_details():
     data = request.get_json()
-    print(get_jwt())
     try:
         jsonschema.validate(data, GET_ITEM_DETAILS_JSONSCHEMA)
     except jsonschema.ValidationError as err:

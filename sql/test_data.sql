@@ -30,8 +30,12 @@ INSERT INTO book_keyword (isbn, keyword_name) VALUES
 ('9780525537561', 'memoir'),
 ('9780525537561', 'politics');
 
+INSERT INTO school (name, address, city, phone, email) VALUES
+('ABC School', '123 Main St', 'New York', '+1234567890', 'info@abcschool.com'),
+('XYZ School', '456 Elm St', 'Los Angeles', '+9876543210', 'info@xyzschool.com');
+
 INSERT INTO item (isbn, school_id) VALUES
-('9780142437230', 2),
-('9780061120084', 2),
+('9780142437230', 1),
+('9780061120084', 1),
 ('9780525537561', 2);
 
