@@ -8,6 +8,7 @@
     row-gap: 2rem;
 }
 .page-filters {
+    width: 100%;
     display: flex;
     flex-direction: row;
     justify-content: space-between;

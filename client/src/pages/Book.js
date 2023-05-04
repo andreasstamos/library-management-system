@@ -62,7 +62,7 @@ function Book() {
                     <p className='affirmative'>Άμεσα Διαθέσιμο</p>
                 </div>
 
-                <Button variant="contained">Κράτηση</Button>
+                <Button variant="contained">Κρατηση</Button>
                 
                 <div className='book-detail'>
                     <h4>{!userHasVotedBefore ? 'Rate this book' : 'Your rating'}</h4>
