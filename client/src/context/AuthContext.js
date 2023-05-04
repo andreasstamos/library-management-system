@@ -9,7 +9,6 @@ const AuthContext = createContext();
 export const AuthProvider = ({children}) => {    
     let [authTokens, setAuthTokens] = useState( () => localStorage.getItem('authTokens') ? localStorage.getItem('authTokens') : null);
     let [user, setUser] = useState( () => localStorage.getItem('authTokens') ? jwt_decode(localStorage.getItem('authTokens')) : null);
-    let [loading, setLoading] = useState(true);
 
     let saveTokens = (tokens) => {
         localStorage.setItem('authTokens', tokens);
@@ -22,8 +21,8 @@ export const AuthProvider = ({children}) => {
     }
     
     let contextData = {
-	authTokens: authTokens,
-        user:user,
+	    authTokens: authTokens,
+        user: user,
         setAuthTokens: setAuthTokens,
         logoutUser: logoutUser,
         saveTokens: saveTokens,

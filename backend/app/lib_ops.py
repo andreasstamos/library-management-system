@@ -13,6 +13,9 @@ bp = Blueprint("lib-api", __name__)
 @jwt_required(refresh=False,locations=['headers'], verify_type=False)
 def get_deactivated_users():
     data = request.get_json()
+
+
+    # if boolean = true: We will get the activated users. Otherwise we will get the deactivated users.
     boolean = True
     if data['action'] == 'activate':
         boolean = False

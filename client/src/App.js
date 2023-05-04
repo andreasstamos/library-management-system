@@ -10,6 +10,12 @@ import LibraryEditorPrivateRoute from './utils/LibraryEditorPrivateRoute';
 import Dashboard from './pages/lib_editor/Dashboard';
 import UsersControl from './pages/lib_editor/UsersControl';
 import BorrowForm from './pages/Borrow';
+import PrivateRoute from './utils/PrivateRoute';
+import Landing from './pages/Landing';
+import Books from './pages/Books';
+import Book from './pages/Book';
+
+
 
 
 function App() {
@@ -18,7 +24,15 @@ function App() {
       <Router>
         <AuthProvider>
         <Routes>
-		<Route path='/auth' element={<Auth></Auth>} >
+
+        <Route path='/' element={<PrivateRoute><Landing/></PrivateRoute>}>
+            <Route path='/books' element={<PrivateRoute><Books/></PrivateRoute>} />
+            <Route path='/book/:bookISBN' element={<PrivateRoute><Book/></PrivateRoute>} />
+
+        </Route>
+		
+    
+    <Route path='/auth' element={<Auth></Auth>} >
                 <Route path='login/' element={<Login />} />
                 <Route path='register/' element={<Register />} />
                 <Route path='forgot-password/' element={<ForgotPassword />} />
@@ -28,6 +42,7 @@ function App() {
               <Route path='activate-users' element={<UsersControl action={"activate"} />} />
               <Route path='deactivate-users' element={<UsersControl action={"deactivate"}/>} />
             </Route>
+
 	    <Route path='/borrow/' element={<BorrowForm />} />
         </Routes>
         </AuthProvider>

@@ -1,0 +1,11 @@
+.app-container {
+    width: 90%;
+    background-color: #fff;
+    border:2px solid #eee;
+    border-radius: 4px;
+    margin: 5rem auto;
+    padding: 2rem;
+}
+.page-container-title {
+    font-size: clamp(2.5rem, 2.5vw, 5rem);
+}

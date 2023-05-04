@@ -77,7 +77,7 @@ def get_book():
         jsonschema.validate(data, GET_BOOK_JSONSCHEMA)
     except jsonschema.ValidationError as err:
         return {"success": False, "error": err.message}, 400
-
+    
     query = psycopg2.sql.SQL("SELECT book.*,\
  array_remove(array_agg(DISTINCT book_author.author_name), NULL) AS authors,\
  array_remove(array_agg(DISTINCT book_keyword.keyword_name), NULL) AS keywords,\

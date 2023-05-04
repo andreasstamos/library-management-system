@@ -1,6 +1,7 @@
 from flask import Blueprint, request, g
 import psycopg2.sql
 import jsonschema
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 bp = Blueprint("student-ops", __name__)
 
@@ -35,3 +36,41 @@ def my_borrows():
 
 
     return {"success": True, "borrows": results}, 200
+
+
+REVIEW_JSONSCHEMA = {
+        "type": "object",
+        "properties": {
+            "isbn": {"type": "string", "maxLength": 15},
+            "rate": {"type": "integer", 'minimum': 1, 'maximum': 5},
+            },
+        "additionalProperties": False,
+        "required": ["isbn", "rate",]
+        }
+
+
+@bp.route('/review/', methods=['POST'])
+@jwt_required(refresh=False,locations=['headers'], verify_type=False)
+def insert_review():
+    data = request.get_json()
+    try:
+        jsonschema.validate(data, REVIEW_JSONSCHEMA)
+    except jsonschema.ValidationError as err:
+        return {"success": False, "error": err.message}, 400
+    
+    user = get_jwt_identity()
+
+    try:
+        with g.db_conn.cursor() as cur:
+            cur.execute("INSERT INTO review (isbn, user_id, rate) VALUES (%s, %s, %s)", [data['isbn'], user['user_id'], data['rate']])
+            g.db_conn.commit()
+    except psycopg2.IntegrityError as err:
+        g.db_conn.rollback()
+        return {"success": False, "error": err.pgerror}, 400
+    except psycopg2.Error as err:
+        g.db_conn.rollback()
+        print(err)
+        return {"success": False, "error": "unknown"}, 400
+
+    return {"success": True} ,200
+

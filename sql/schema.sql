@@ -12,6 +12,7 @@ DROP TABLE IF EXISTS teacher;
 DROP TABLE IF EXISTS "admin";
 DROP TABLE IF EXISTS "user";
 DROP TABLE IF EXISTS school;
+DROP TABLE IF EXISTS review;
 
 CREATE TABLE publisher (
 	publisher_name VARCHAR(50) PRIMARY KEY
@@ -91,6 +92,15 @@ CREATE TABLE item (
 	isbn varchar(13) REFERENCES book ON UPDATE CASCADE,
 	school_id SERIAL REFERENCES school
 );
+
+CREATE TABLE review (
+	review_id SERIAL PRIMARY KEY,
+	isbn VARCHAR(13) NOT NULL REFERENCES "book" ON DELETE CASCADE,
+	user_id INT NOT NULL REFERENCES "user" ON DELETE CASCADE,
+	rate SMALLINT NOT NULL CHECK (number_column >= 1 AND number_column <= 5),
+	UNIQUE(user_id, review_id) 
+	-- One user can do only one review on a specific book
+)
 
 CREATE EXTENSION IF NOT EXISTS btree_gist;
 
