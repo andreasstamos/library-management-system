@@ -41,8 +41,9 @@ def my_borrows():
 REVIEW_JSONSCHEMA = {
         "type": "object",
         "properties": {
-            "isbn": {"type": "string", "maxLength": 15},
+            "isbn": {"type": "string", "maxLength": 15, 'minLength': 3},
             "rate": {"type": "integer", 'minimum': 1, 'maximum': 5},
+            'body': {'type': 'string', 'maxLength': 500},
             },
         "additionalProperties": False,
         "required": ["isbn", "rate",]
@@ -62,7 +63,7 @@ def insert_review():
 
     try:
         with g.db_conn.cursor() as cur:
-            cur.execute("INSERT INTO review (isbn, user_id, rate) VALUES (%s, %s, %s)", [data['isbn'], user['user_id'], data['rate']])
+            cur.execute("INSERT INTO review (isbn, user_id, rate, body) VALUES (%s, %s, %s, %s)", [data['isbn'], user['user_id'], data['rate'], data['body'].strip()])
             g.db_conn.commit()
     except psycopg2.IntegrityError as err:
         g.db_conn.rollback()
@@ -73,4 +74,3 @@ def insert_review():
         return {"success": False, "error": "unknown"}, 400
 
     return {"success": True} ,200
-

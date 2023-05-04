@@ -97,10 +97,12 @@ CREATE TABLE review (
 	review_id SERIAL PRIMARY KEY,
 	isbn VARCHAR(13) NOT NULL REFERENCES "book" ON DELETE CASCADE,
 	user_id INT NOT NULL REFERENCES "user" ON DELETE CASCADE,
-	rate SMALLINT NOT NULL CHECK (number_column >= 1 AND number_column <= 5),
-	UNIQUE(user_id, review_id) 
+	rate SMALLINT NOT NULL CHECK (rate >= 1 AND rate <= 5),
+	body VARCHAR(500) NOT NULL,
+	active BOOLEAN DEFAULT FALSE,
+	UNIQUE(user_id, isbn)
 	-- One user can do only one review on a specific book
-)
+);
 
 CREATE EXTENSION IF NOT EXISTS btree_gist;
 

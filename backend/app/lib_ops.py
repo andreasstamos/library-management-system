@@ -3,6 +3,7 @@ import jsonschema
 import psycopg2.sql
 import psycopg2.extras
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from .roles_decorators import check_roles
 
 
 
@@ -91,3 +92,71 @@ def activate_user():
         g.db_conn.rollback()
         print(err)
         return {"success": False, "error": "unknown"}, 400
+
+
+@bp.route('/get-reviews/', methods=['POST'])
+@check_roles(["lib_editor"])
+def get_reviews():
+
+    user = get_jwt_identity()
+    try:
+        with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
+            # Get all non active reviews from users that are in the same school as the lib editor.
+            cur.execute("""
+                SELECT review.review_id, review.body, book.isbn, book.title, "user".username,
+                array_remove(array_agg(DISTINCT book_author.author_name), NULL) AS authors
+                FROM review
+                INNER JOIN book ON book.isbn = review.isbn
+                INNER JOIN book_author ON book_author.isbn = review.isbn
+                INNER JOIN "user" ON "user".user_id = review.user_id
+                WHERE review.active = false AND "user".school_id = (%s)
+                GROUP BY review.review_id, book.isbn, review.body, "user".username
+            """, [user['school_id']])
+            results = cur.fetchall()
+            return {"success": True, "reviews": results}, 200
+    except psycopg2.Error as err:
+        print(err.pgerror)
+        return {"success": False, "error": "unknown"}
+
+
+@bp.route('/activate-review/', methods=['POST'])
+@check_roles(["lib_editor"])
+def activate_reviews():
+
+    ACTIVATE_REVIEW_JSON = {
+        "type": "object",
+        "properties": {
+            "review_id": {"type": "integer"},
+            },
+        "additionalProperties": False,
+        "required": ["review_id"]
+    }
+
+    data = request.get_json()
+    try:
+        jsonschema.validate(data, ACTIVATE_REVIEW_JSON)
+    except jsonschema.ValidationError as err:
+        return {"success": False, "error": err.message}, 400
+    user = get_jwt_identity()
+
+    try:
+        with g.db_conn.cursor() as cur:
+            # Library user must be in the same school with the user that has written the review....
+            cur.execute("""
+                UPDATE review 
+                SET active=true 
+                WHERE review.review_id = (%s) AND active=false
+                AND EXISTS(SELECT 1 
+                FROM "user"
+                INNER JOIN school on "user".school_id=(%s)
+                WHERE "user".user_id = review.user_id)
+            """, [data['review_id'], user['school_id']])
+            g.db_conn.commit()
+    except psycopg2.IntegrityError as err:
+        g.db_conn.rollback()
+        return {"success": False, "error": err.pgerror}, 400
+    except psycopg2.Error as err:
+        print(err.pgerror)
+        return {"success": False, "error": "unknown"}
+
+    return {"success": True}, 200

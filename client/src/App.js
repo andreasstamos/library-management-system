@@ -14,6 +14,7 @@ import PrivateRoute from './utils/PrivateRoute';
 import Landing from './pages/Landing';
 import Books from './pages/Books';
 import Book from './pages/Book';
+import ReviewActivate from './pages/lib_editor/ReviewActivate';
 
 
 
@@ -41,6 +42,8 @@ function App() {
             <Route path='/lib-editor' element={<LibraryEditorPrivateRoute><Dashboard /></LibraryEditorPrivateRoute>}>
               <Route path='activate-users' element={<UsersControl action={"activate"} />} />
               <Route path='deactivate-users' element={<UsersControl action={"deactivate"}/>} />
+              <Route path='activate-reviews' element={<ReviewActivate />} />
+
             </Route>
 
 	    <Route path='/borrow/' element={<BorrowForm />} />

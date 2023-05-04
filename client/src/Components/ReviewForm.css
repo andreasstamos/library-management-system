@@ -1,0 +1,16 @@
+.review-form {
+    width: 50%;
+    margin: 0 auto;
+}
+.review-form-body {
+    width: 100%;
+}
+.form-inline {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+.review-form .form-error {
+    color:#d94159
+}

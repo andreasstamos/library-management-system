@@ -2,6 +2,8 @@ from flask import Blueprint, request, g
 import jsonschema
 import psycopg2.sql
 import psycopg2.extras
+from flask_jwt_extended import jwt_required, get_jwt_identity
+
 
 bp = Blueprint("book", __name__)
 

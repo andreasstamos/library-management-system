@@ -7,9 +7,15 @@ import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import { Link } from 'react-router-dom';
+import AuthContext from '../context/AuthContext';
+import { useContext } from 'react';
+
 
 
 export default function ButtonAppBar() {
+
+  let {user} = useContext(AuthContext);
+
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
@@ -26,8 +32,9 @@ export default function ButtonAppBar() {
           <Typography variant="h5" component="div" sx={{ flexGrow: 1 }}>
             MySchoolLib
           </Typography>
+          
           <Button color="inherit" component={Link} to="/books/" className='navLink'>Books</Button>
-          {/* <Button color="inherit" component={Link} to="/books" className='navLink'>Books</Button> */}
+          {user?.sub?.role === 'lib_editor' && <Button color="inherit" component={Link} to="/lib-editor/" className='navLink'>Dashboard</Button>}
 
         </Toolbar>
       </AppBar>

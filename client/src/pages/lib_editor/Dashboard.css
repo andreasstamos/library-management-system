@@ -3,23 +3,24 @@
     width: 100%;
 }
 .dashboard .dashboard-title {
-    color: rgb(57, 57, 219);
+    color: var(--material-ui-theme);
     text-align: center;
     font-size: clamp(2.5rem, 4vw, 7rem);
+    margin: 0 auto;
 }
 .dashboard-component {
     margin: 0 auto;
     width: 90%;
     border: 2px solid #eee;
     text-align: center;
-    padding: 0 3rem;
+    padding: 2rem 3rem;
 }
 .dashboard-component .component-title {
     font-size: clamp(2rem, 2.7vw, 5rem);
     width: fit-content;
     text-align: center;
     position: relative;
-    margin: 2rem auto 0 auto;
+    margin: 2rem auto;
 }
 .dashboard-component .component-title:before {
     content:'';
@@ -39,7 +40,7 @@
     justify-content: space-evenly;
 }
 .dashboard-routes a {
-    color: rgb(57, 57, 219);
+    color: var(--material-ui-theme);
     text-decoration: none;
     font-size: 1rem;
     font-weight: bolder;

@@ -4,33 +4,11 @@ import Button from '@mui/material/Button';
 import { useParams } from 'react-router-dom';
 import './Book.css'
 import axios from 'axios';
+import ReviewForm from '../Components/ReviewForm';
 
 function Book() {
 
     let {bookISBN} = useParams();
-    // this is the rate that the user submits (if he does so...)
-    const [rate, setRate] = useState(null);
-    const [userHasVotedBefore, SetUserHasVotedBefore] = useState(false);
-
-
-    async function handleReview() {
-        const payload = {
-            'rate': rate,
-            'isbn': bookISBN,
-        }
-        const response = await axios.post('http://localhost:5000/student-api/review/', payload, {headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('authTokens')}`,
-        }})
-        if (response.status === 200) SetUserHasVotedBefore(true);
-    }
-
-    useEffect( () => {
-        // if this is the first time loading and user has not submitted anything...
-        if (!rate) return;
-
-        handleReview();
-    }, [rate])
 
   return (
     <div className='book-page-container'>
@@ -64,26 +42,12 @@ function Book() {
 
                 <Button variant="contained">Κρατηση</Button>
                 
-                <div className='book-detail'>
-                    <h4>{!userHasVotedBefore ? 'Rate this book' : 'Your rating'}</h4>
-                    <Rating
-                        name="simple-controlled"
-                        value={rate}
-                        onChange={(event, newValue) => {
-                            setRate(newValue);
-                        }}
-                        // if user has voted before don't let him rate again.
-                        // later on we should check if the user has voted in the backend
-                        // if we reload user can vote again.
-
-                        readOnly={userHasVotedBefore}
-                    />
-                </div>
 
             </div>
             
             
         </div>
+        <ReviewForm bookISBN={bookISBN} />
 
     </div>
   )

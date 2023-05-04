@@ -62,7 +62,7 @@ function Register() {
     e.target.reset();
 
     if (response.status === 201) {
-      setSucc("All Done! Your account will have to be activated by a library editor.")
+      setSucc("All Done! Your account will have to be activated.")
       return;
     }
 

@@ -25,3 +25,6 @@
     color: hotpink;
     transition: 150ms ease-in;
 }
+.user-card {
+    text-align: left;
+}

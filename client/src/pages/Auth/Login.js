@@ -1,18 +1,19 @@
 import axios from 'axios';
 import React, { useContext, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import AuthContext from '../../context/AuthContext';
-
+import { useNavigate } from 'react-router-dom';
+import jwt_decode from "jwt-decode"
 function Login() {
 
 
-  const {logoutUser, saveTokens, setAuthTokens} = useContext(AuthContext);
+  const {setUser, logoutUser, saveTokens, setAuthTokens} = useContext(AuthContext);
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [err, setErr] = useState('');
   const [succ, setSucc] = useState('');
-  
+  const navigate = useNavigate();
 
 
 
@@ -38,11 +39,12 @@ function Login() {
       console.log(succ)
       logoutUser();
       saveTokens(response?.data?.access_token);
+      setUser(jwt_decode(response?.data?.access_token))
       setAuthTokens(response?.data?.access_token);
 
       if (response.status === 200) {
         setSucc("Logged In!");
-        return;
+        navigate("/books",{replace:true});
       } 
   } catch(err) {
     // console.log(err);

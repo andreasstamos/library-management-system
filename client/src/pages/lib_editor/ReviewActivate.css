@@ -1,0 +1,6 @@
+.review-control {
+    display: flex;
+    flex-direction: row;
+    column-gap: 2rem;
+    row-gap: 2rem;
+}

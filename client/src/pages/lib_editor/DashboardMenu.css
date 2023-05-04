@@ -1,0 +1,11 @@
+#dashboard-menu {
+    margin-bottom: 2rem;
+    margin-left: 3rem;
+}
+#dashboard-menu a {
+    text-decoration: none!important;
+    color: var(--material-ui-theme);
+}
+#dashboard-menu a.active {
+    color: hotpink!important;
+}
