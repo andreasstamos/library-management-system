@@ -1,6 +1,7 @@
 from flask import Blueprint, request, g
 import psycopg2.sql
 import jsonschema
+from .roles_decorators import check_roles
 
 bp = Blueprint("school", __name__)
 
@@ -17,7 +18,8 @@ INSERT_SCHOOL_JSONSCHEMA = {
         "required": ["name", "address", "city", "phone", "email"]
         }
 
-@bp.route('/', methods=["POST"])
+@bp.route('/insert-school/', methods=["POST"])
+@check_roles(['admin'])
 def insert_school():
     data = request.get_json()
     try:

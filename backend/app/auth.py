@@ -61,7 +61,12 @@ def login():
         is_lib_editor = cur.fetchone()[0]
         if is_lib_editor:
             role = 'lib_editor'
-        
+
+        cur.execute('SELECT EXISTS(SELECT 1 FROM "user" AS t1 INNER JOIN admin AS t2 ON t1.user_id = t2.user_id WHERE t1.username = (%s))', (username, ))
+        is_lib_editor = cur.fetchone()[0]
+        if is_lib_editor:
+            role = 'admin'
+
         if not role:
             return {"success": False, "error": 'Invalid user role'}, 400
 

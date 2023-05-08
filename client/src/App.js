@@ -15,7 +15,9 @@ import Landing from './pages/Landing';
 import Books from './pages/Books';
 import Book from './pages/Book';
 import ReviewActivate from './pages/lib_editor/ReviewActivate';
-
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AddSchool from './pages/admin/AddSchool';
+import LibUsersControl from './pages/admin/LibUsersControl';
 
 
 
@@ -38,13 +40,20 @@ function App() {
                 <Route path='register/' element={<Register />} />
                 <Route path='forgot-password/' element={<ForgotPassword />} />
                 <Route path='reset-password/:token/' element={<ResetPassword />} />
-            </Route>
-            <Route path='/lib-editor' element={<LibraryEditorPrivateRoute><Dashboard /></LibraryEditorPrivateRoute>}>
+    </Route>
+            
+    <Route path='/lib-editor' element={<LibraryEditorPrivateRoute><Dashboard /></LibraryEditorPrivateRoute>}>
               <Route path='activate-users' element={<UsersControl action={"activate"} />} />
               <Route path='deactivate-users' element={<UsersControl action={"deactivate"}/>} />
               <Route path='activate-reviews' element={<ReviewActivate />} />
 
-            </Route>
+    </Route>
+
+    <Route path='/admin' element={<AdminDashboard />}>
+        <Route path='add-school' element={<AddSchool/>} />
+        <Route path='activate-library-editors' element={<LibUsersControl />} />
+
+    </Route>
 
 	    <Route path='/borrow/' element={<BorrowForm />} />
         </Routes>

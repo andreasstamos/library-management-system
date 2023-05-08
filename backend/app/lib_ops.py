@@ -50,8 +50,6 @@ def get_deactivated_users():
         return {"success": False, "error": "unknown"}
 
 
-    return {'success': True}, 200
-
 
 @bp.route("/change-active-user/", methods=['POST'])
 @jwt_required(refresh=False,locations=['headers'], verify_type=False)
