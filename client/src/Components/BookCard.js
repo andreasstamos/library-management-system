@@ -9,7 +9,7 @@ import { Rating } from '@mui/material';
 import './BookCard.css'
 import { Link } from 'react-router-dom';
 
-export default function BookCard({title, imageURI, summary, isbn}) {
+export default function BookCard({title, imageURI, summary, isbn, rating}) {
 
 
   return (
@@ -26,7 +26,7 @@ export default function BookCard({title, imageURI, summary, isbn}) {
         <Typography variant="body2" color="text.secondary" className='book-card-summary'>
           {summary}
         </Typography>
-        <Rating name="read-only" value={3} readOnly  className='book-card-rating'/>
+        <Rating name="read-only" value={rating} readOnly  className='book-card-rating'/>
 
       </CardContent>
       <CardActions>

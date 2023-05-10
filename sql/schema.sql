@@ -1,4 +1,5 @@
 DROP TABLE IF EXISTS borrow;
+DROP TABLE IF EXISTS review;
 DROP TABLE IF EXISTS item;
 DROP TABLE IF EXISTS book_author;
 DROP TABLE IF EXISTS book_category;
@@ -12,7 +13,6 @@ DROP TABLE IF EXISTS teacher;
 DROP TABLE IF EXISTS "admin";
 DROP TABLE IF EXISTS "user";
 DROP TABLE IF EXISTS school;
-DROP TABLE IF EXISTS review;
 
 CREATE TABLE publisher (
 	publisher_name VARCHAR(50) PRIMARY KEY
@@ -24,7 +24,8 @@ CREATE TABLE book (
 	page_number SMALLINT CHECK (page_number > 0),
 	summary VARCHAR(10000),
 	language VARCHAR(30),
-	publisher_name VARCHAR(50) REFERENCES publisher ON UPDATE CASCADE
+	publisher_name VARCHAR(50) REFERENCES publisher ON UPDATE CASCADE,
+	image_uri VARCHAR(1000)
 );
 
 CREATE TABLE book_author (

@@ -237,3 +237,36 @@ def insert_publisher():
         return {"success": False, "error": "unknown"}, 400
 
     return {"success": True}, 201
+
+
+GET_BOOK_LIST_JSONSCHEMA = {
+        "type": "object",
+        "properties": {
+            },
+        "additionalProperties": False,
+        }
+
+
+@bp.route("/get-list/", methods=["POST"])
+def get_book_list():
+    data = request.get_json()
+    try:
+        jsonschema.validate(data, GET_BOOK_LIST_JSONSCHEMA)
+    except jsonschema.ValidationError as err:
+        return {"success": False, "error": err.message}, 400
+    
+    try:
+        with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
+            cur.execute("SELECT isbn, title, summary, image_uri,\
+ array_remove(array_agg(DISTINCT book_author.author_name), NULL) AS authors,\
+ avg(review.rate) as rating\
+ FROM book\
+ LEFT OUTER JOIN book_author USING (isbn)\
+ LEFT OUTER JOIN review USING (isbn)\
+ GROUP BY isbn")
+            results = cur.fetchall()
+            return {"success": True, "books": results}, 200
+    except psycopg2.Error as err:
+        print(err)
+        return {"success": False, "error": "unknown"}
+
