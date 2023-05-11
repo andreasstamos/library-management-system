@@ -30,7 +30,8 @@ CREATE TABLE book (
 
 CREATE TABLE book_author (
 	isbn varchar(13) REFERENCES book ON DELETE CASCADE ON UPDATE CASCADE,
-	author_name VARCHAR(100) NOT NULL
+	author_name VARCHAR(100) NOT NULL,
+	UNIQUE(isbn, author_name)
 );
 
 CREATE TABLE category (
@@ -39,12 +40,14 @@ CREATE TABLE category (
 
 CREATE TABLE book_category (
 	isbn varchar(13) REFERENCES book ON DELETE CASCADE,
-	category_name VARCHAR(20) REFERENCES category ON UPDATE CASCADE
+	category_name VARCHAR(20) REFERENCES category ON UPDATE CASCADE,
+	UNIQUE(isbn, category_name)
 );
 
 CREATE TABLE book_keyword (
 	isbn varchar(13) REFERENCES book ON DELETE CASCADE,
-	keyword_name VARCHAR(20) NOT NULL
+	keyword_name VARCHAR(20) NOT NULL,
+	UNIQUE(isbn, keyword_name)
 );
 
 CREATE TABLE school (
