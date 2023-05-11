@@ -31,6 +31,7 @@ function App() {
             <Route path='/' element={<PrivateRoute><Landing/></PrivateRoute>}>
               <Route path='/books' element={<PrivateRoute><Books/></PrivateRoute>} />
               <Route path='/book/:bookISBN' element={<PrivateRoute><Book/></PrivateRoute>} />
+              <Route path='/lend-return/' element={<PrivateRoute><BorrowForm/></PrivateRoute>} />
               <Route path='/404' element={<NotFound404 />} />
             </Route>
 

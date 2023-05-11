@@ -5,7 +5,7 @@ export default function SearchBar() {
     <>
         <TextField
           id="standard-search"
-          label="Search field"
+          label="Αναζήτηση"
           type="search"
           variant="standard"
           sx={{ width: 250 }}

@@ -1,5 +1,7 @@
 .book-page-container {
-    
+    display: flex;
+    flex-direction: column;
+    row-gap: 1rem;
 }
 
 .book-container {
@@ -16,17 +18,9 @@
     border: 1px solid #eee;
     border-radius: 4px;
 }
-.book-container .book-details .book-author {
-    color:var(--material-ui-theme);
-    margin-bottom: 3rem;
-}
-.book-container .book-details .book-detail {
-    margin-top:1.5rem
-}
-.book-container .book-details .book-detail p {
-    margin-top:5px;
-}
-.book-container .book-details .book-detail h4 {
-    margin:0;
-    padding:0;
+
+.book-details {
+    display: flex;
+    flex-direction: column;
+    row-gap: 1rem;
 }

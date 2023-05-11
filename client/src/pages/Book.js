@@ -2,11 +2,13 @@ import React, { useEffect, useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Rating } from '@mui/material'
 import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
 import { useParams } from 'react-router-dom';
 import './Book.css'
 import axios from 'axios';
 import ReviewForm from '../Components/ReviewForm';
 import AuthContext from '../context/AuthContext';
+
 
 function Book() {
     const navigate = useNavigate();
@@ -55,58 +57,57 @@ function Book() {
             <div className='book-container'>
                 <img className='book-image' src={book?.image_uri} />
                 <div className='book-details'>
-                    <h1 className='book-title title-with-hr'>{book?.title}</h1>
-                    <h3 className='book-author'>{book?.authors.join(', ')}</h3>
+                    <Typography variant="h2">{book?.title}</Typography>
+                    <Typography variant="h3">{book?.authors.join(', ')}</Typography>
 
                     <div className='book-detail'>
-                        <h4>ISBN</h4>
-                        <p>{book?.isbn}</p>
+                        <Typography variant="h6">ISBN</Typography>
+                        <Typography variant="body1">{book?.isbn}</Typography>
                     </div>
 
                     <div className='book-detail'>
-                        <h4>Βαθμολογία Likert</h4>
+                        <Typography variant="h6">Βαθμολογία Likert</Typography>
                         <Rating name="read-only" value={book?.rate} readOnly />
                     </div>
 
                     <div className='book-detail'>
-                        <h4>Περίληψη</h4>
-                        <p>{book?.summary}</p>
+                        <Typography variant="h6">Περίληψη</Typography>
+                        <Typography variant="body1">{book?.summary}</Typography>
                     </div>
 
                     <div className='book-detail'>
-                        <h4>{book?.categories?.length <= 1 ? 'Κατηγορία' : 'Κατηγορίες'}</h4>
-                        <p>{book?.categories.join(', ')}</p>
+                        <Typography variant="h6">{book?.categories?.length <= 1 ? 'Κατηγορία' : 'Κατηγορίες'}</Typography>
+                        <Typography variant="body1">{book?.categories.join(', ')}</Typography>
                     </div>
 
                     <div className='book-detail'>
-                        <h4>Λέξεις κλειδιά</h4>
-                        <p>{book?.keywords?.join(', ')}</p>
+                        <Typography variant="h6">Λέξεις κλειδιά</Typography>
+                        <Typography variant="body1">{book?.keywords?.join(', ')}</Typography>
                     </div>
 
                     <div className='book-detail'>
-                        <h4>Γλώσσα</h4>
-                        <p>{book?.language}</p>
+                        <Typography variant="h6">Γλώσσα</Typography>
+                        <Typography variant="body1">{book?.language}</Typography>
                     </div>
 
                     <div className='book-detail'>
-                        <h4>Αριθμός σελίδων</h4>
-                        <p>{book?.page_number}</p>
+                        <Typography variant="h6">Αριθμός σελίδων</Typography>
+                        <Typography variant="body1">{book?.page_number}</Typography>
                     </div>
 
                     <div className='book-detail'>
-                        <h4>Εκδοτικός Οίκος</h4>
-                        <p>{book?.publisher_name}</p>
+                        <Typography variant="h6">Εκδοτικός Οίκος</Typography>
+                        <Typography variant="body1">{book?.publisher_name}</Typography>
                     </div>
 
                     <div className='book-detail'>
-                        <h4>Διαθεσιμότητα</h4>
-                        <p className='affirmative'>Άμεσα Διαθέσιμο</p>
+                        <Typography variant="h6">Διαθεσιμότητα</Typography>
+                        <Typography variant="body1" sx={{color: 'success.main'}}>Άμεσα Διαθέσιμο</Typography>
                     </div>
 
-                    <Button variant="contained">Κράτηση</Button>
+                    <Button variant="contained" sx={{mr: 'auto'}}>ΚΡΑΤΗΣΗ</Button>
 
                 </div>
-
 
             </div>
             <ReviewForm bookISBN={bookISBN} />

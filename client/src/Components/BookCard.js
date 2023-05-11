@@ -13,11 +13,12 @@ export default function BookCard({title, imageURI, summary, isbn, rating}) {
 
 
   return (
-    <Card sx={{ maxWidth: 345 }}>
+    <Card sx={{display: 'flex', flexDirection: 'column', maxWidth: 345 }}>
       <CardMedia
         sx={{ height: 500 }}
         image={imageURI}
         title={title}
+        alt={title}
       />
       <CardContent>
         <Typography gutterBottom variant="h5" component="div">
@@ -26,11 +27,11 @@ export default function BookCard({title, imageURI, summary, isbn, rating}) {
         <Typography variant="body2" color="text.secondary" className='book-card-summary'>
           {summary}
         </Typography>
-        <Rating name="read-only" value={rating} readOnly  className='book-card-rating'/>
+        <Rating name="read-only" value={rating} readOnly className='book-card-rating'/>
 
       </CardContent>
-      <CardActions>
-        <Button size="small" to={`/book/${isbn}`} component={Link}>View More</Button>
+      <CardActions sx={{mt: 'auto'}}>
+        <Button size="small" to={`/book/${isbn}`} component={Link}>ΔΕΣ ΠΕΡΙΣΣΟΤΕΡΑ</Button>
       </CardActions>
     </Card>
   );

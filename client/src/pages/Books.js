@@ -5,6 +5,7 @@ import BookCard from '../Components/BookCard';
 import './Books.css'
 import SearchBar from '../Components/SearchBar';
 import AuthContext from '../context/AuthContext';
+import Typography from '@mui/material/Typography';
 
 function Books() {
 
@@ -45,7 +46,7 @@ function Books() {
 
     return (
         <div className='books-page-container'>
-            <h1 className='page-container-title title-with-hr'>Books</h1>
+            <Typography variant="h3" component="h1">Βιβλία</Typography>
             <div className='page-filters'>
                 <PaginationControlled totalPages={10} page={page} setPage={setPage} />
                 <SearchBar />
