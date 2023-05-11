@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Auth from './pages/Auth/Auth';
 import Login from './pages/Auth/Login';
 import Register from './pages/Auth/Register';
@@ -18,7 +18,7 @@ import ReviewActivate from './pages/lib_editor/ReviewActivate';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AddSchool from './pages/admin/AddSchool';
 import LibUsersControl from './pages/admin/LibUsersControl';
-
+import NotFound404 from './pages/NotFound404';
 
 
 function App() {
@@ -26,37 +26,35 @@ function App() {
     <div className="App">
       <Router>
         <AuthProvider>
-        <Routes>
+          <Routes>
 
-        <Route path='/' element={<PrivateRoute><Landing/></PrivateRoute>}>
-            <Route path='/books' element={<PrivateRoute><Books/></PrivateRoute>} />
-            <Route path='/book/:bookISBN' element={<PrivateRoute><Book/></PrivateRoute>} />
+            <Route path='/' element={<PrivateRoute><Landing/></PrivateRoute>}>
+              <Route path='/books' element={<PrivateRoute><Books/></PrivateRoute>} />
+              <Route path='/book/:bookISBN' element={<PrivateRoute><Book/></PrivateRoute>} />
+              <Route path='/404' element={<NotFound404 />} />
+            </Route>
 
-        </Route>
-		
-    
-    <Route path='/auth' element={<Auth></Auth>} >
-                <Route path='login/' element={<Login />} />
-                <Route path='register/' element={<Register />} />
-                <Route path='forgot-password/' element={<ForgotPassword />} />
-                <Route path='reset-password/:token/' element={<ResetPassword />} />
-    </Route>
-            
-    <Route path='/lib-editor' element={<LibraryEditorPrivateRoute><Dashboard /></LibraryEditorPrivateRoute>}>
+            <Route path='/auth' element={<Auth></Auth>} >
+              <Route path='login/' element={<Login />} />
+              <Route path='register/' element={<Register />} />
+              <Route path='forgot-password/' element={<ForgotPassword />} />
+              <Route path='reset-password/:token/' element={<ResetPassword />} />
+            </Route>
+
+            <Route path='/lib-editor' element={<LibraryEditorPrivateRoute><Dashboard /></LibraryEditorPrivateRoute>}>
               <Route path='activate-users' element={<UsersControl action={"activate"} />} />
               <Route path='deactivate-users' element={<UsersControl action={"deactivate"}/>} />
               <Route path='activate-reviews' element={<ReviewActivate />} />
+            </Route>
 
-    </Route>
+            <Route path='/admin' element={<AdminDashboard />}>
+              <Route path='add-school' element={<AddSchool/>} />
+              <Route path='activate-library-editors' element={<LibUsersControl />} />
+            </Route>
 
-    <Route path='/admin' element={<AdminDashboard />}>
-        <Route path='add-school' element={<AddSchool/>} />
-        <Route path='activate-library-editors' element={<LibUsersControl />} />
+            <Route path='*' element={<Navigate to='/404' />}/>
 
-    </Route>
-
-	    <Route path='/borrow/' element={<BorrowForm />} />
-        </Routes>
+          </Routes>
         </AuthProvider>
       </Router>
     </div>

@@ -19,9 +19,10 @@ function Books() {
         const fetchBooks = async () => {
             try {
                 const payload = {
+                    fetch_fields: ["isbn", "title", "summary", "image_uri", "rate"]
                 };
 
-                const response = await axios.post('http://127.0.0.1:5000/book/get-list/', payload, {headers: {
+                const response = await axios.post('http://127.0.0.1:5000/book/get/', payload, {headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${auth.authTokens}`,
                 }});
@@ -30,7 +31,6 @@ function Books() {
                     setError("Something went wrong. Please try again.");
                 }
                 if (response.data.books) {
-                    console.log(response.data.books);
                     setBooks(response.data.books);
                 }
             } catch (e) {
@@ -41,7 +41,7 @@ function Books() {
 
         fetchBooks();
 
-    }, [])
+    }, []);
 
     return (
         <div className='books-page-container'>
@@ -56,7 +56,7 @@ function Books() {
                 <BookCard
                     key={book.isbn}
                     isbn={book.isbn}
-                    rating={book.rating}
+                    rating={book.rate}
                     imageURI={book.image_uri}
                     title={book.title}
                     summary={book.summary}/>

@@ -95,7 +95,7 @@ def get_book():
     if 'item_number' in data['fetch_fields']:
         select_clause.append('COUNT(DISTINCT item_id) AS iten_number')
     if 'rate' in data['fetch_fields']:
-        select_clause.append('(SELECT AVG(rate) FROM review WHERE isbn=book.isbn) AS rate')
+        select_clause.append('(SELECT ROUND(AVG(rate)) FROM review WHERE isbn=book.isbn) AS rate')
     select_clause = ','.join(select_clause)
 
     where_clause = [f"{field} {'IN' if type(data[field]) is tuple else '='} %({field})s"
