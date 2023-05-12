@@ -95,7 +95,9 @@ def get_book():
     if 'item_number' in data['fetch_fields']:
         select_clause.append('COUNT(DISTINCT item_id) AS iten_number')
     if 'rate' in data['fetch_fields']:
-        select_clause.append('(SELECT ROUND(AVG(rate)) FROM review WHERE isbn=book.isbn) AS rate')
+        # Kostas added active=true in the WHERE clause... (in case it stops working)
+        select_clause.append('(SELECT ROUND(AVG(rate)) FROM review WHERE isbn=book.isbn AND active=true) AS rate')
+
     select_clause = ','.join(select_clause)
 
     where_clause = [f"{field} {'IN' if type(data[field]) is tuple else '='} %({field})s"
@@ -252,4 +254,38 @@ GET_BOOK_LIST_JSONSCHEMA = {
             },
         "additionalProperties": False,
         }
+
+
+
+@bp.route('/get-book-raitings/', methods=['POST'])
+@jwt_required(refresh=False,locations=['headers'], verify_type=False)
+def get_book_raitings():
+    GET_RAITINGS = {
+        "type": "object",
+        "properties": {
+            "isbn": {'type':'string', 'maxLength': 50},
+            },
+        "required": ["isbn"],
+        "additionalProperties": False,
+    }
+    data = request.get_json()
+    try:
+        jsonschema.validate(data, GET_RAITINGS)
+    except jsonschema.ValidationError as err:
+        return {"success": False, "error": err.message}, 400
+    
+    query = psycopg2.sql.SQL("""
+    SELECT review.rate, review.body, "user".username 
+    FROM review
+    INNER JOIN "user"
+    ON "user".user_id = review.user_id
+    WHERE review.active = true AND review.isbn = (%s)""")
+    try:
+        with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
+            cur.execute(query, [data['isbn']])
+            results = cur.fetchall()
+            return {"success": True, "reviews": results}, 200
+    except psycopg2.Error as err:
+        print(err)
+        return {"success": False, "error": "unknown"}
 

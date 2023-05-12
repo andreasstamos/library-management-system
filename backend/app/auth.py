@@ -77,7 +77,7 @@ def login():
             'school_id':row[3],
             'user_id':row[0],
         }
-        token = create_access_token(identity=identity,expires_delta=datetime.timedelta(hours=1))
+        token = create_access_token(identity=identity,expires_delta=datetime.timedelta(hours=5))
         
         return {"success": True, "access_token": token}, 200
 
