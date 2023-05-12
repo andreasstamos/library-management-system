@@ -181,7 +181,7 @@ def get_item_details():
 
     try:
         with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
-            cur.execute("SELECT book.isbn, book.title, book.publisher_name,\
+            cur.execute("SELECT book.isbn, book.title, book.image_uri, book.publisher_name,\
                     array_remove(array_agg(DISTINCT book_author.author_name), NULL) AS authors,\
                     array_remove(array_agg(DISTINCT book_keyword.keyword_name), NULL) AS keywords,\
                     array_remove(array_agg(DISTINCT book_category.category_name), NULL) AS categories,\

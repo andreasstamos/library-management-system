@@ -1,124 +1,18 @@
-.page-container {
-	display: flex;
-	flex-direction: column; 
-	justify-content: center;
-	align-items: center;
-	row-gap: 1vw;
+.book-image {
+    max-width: 340px;
+    height: auto;
+    object-fit: contain;
+    border: 1px solid #eee;
+    border-radius: 4px;
 }
 
-
-.form-container {
-	display: flex;
-	flex-direction: column;
-	justify-content: space-evenly;
-	border: 1px solid #ccc;
-	border-radius: 15px;
-	padding: 2vw;
-	}
-
-.input-container {
-	display: flex;
-	gap: 0.5vw;
-	justify-content: space-evenly;
-	align-items: center;
+.book-details {
+    display: flex;
+    flex-direction: column;
+    row-gap: 1rem;
 }
 
-.input-container input {
-	font-size: 16px;
-	border: 1px solid #ccc;
-	border-radius: 10px;
-}
-
-.page-container button {
-	color: white;
-	padding: 1vw;
-	border-radius: 10px;
-	border: 0;
-	font-size: 16px;
-	font-weight: 1000;
-	cursor: pointer;
-}
-
-
-.details-container {
-	display: flex;
-	flex-direction: column;
-}
-
-.details-property {
-	display: flex;
-	column-gap: 1em;
-	align-items: baseline;
-}
-
-.details-name {
-	font-size: 20px;
-	font-weight: 500;
-}
-
-.details-value {
-	font-size: 20px;
-}
-
-.form-container .find-button {
-	background-color: blue;
-}
-
-.form-container .next-button {
-	background-color: green;
-}
-
-.form-container .borrow-button {
-	background-color: green;
-}
-
-.form-container .back-button {
-	background-color: grey;
-}
-
-.toast-container {
-	display: flex;
-	padding: 1vw;
-	justify-content: center;
-	align-items: center;
-	background-color: grey;
-	border: 1.5px solid grey;
-	border-radius: 10px;
-	column-gap: 2vw;
-}
-
-.toast-success {
-	background-color: green;
-}
-
-.toast-error {
-	background-color: red;
-}
-
-.toast-container .toast-message {
-	font-size: 20px;
-	color: white;
-	margin: 0;
-}
-
-.toast-container .toast-button {
-	background-color: orange;
-	color:white;
-	border: 0;
-	font-size: 15px;
-	border-radius: 5px;
-	padding: 0.25vw;
-	font-weight: 300;
-}
-
-.loading-animation {
-	max-width: 1.5rem;
-	max-height: 1.5rem;
-	width: auto;
-	height: auto;
-}
-
-.two-column-container {
-	display: flex;
-	column-gap: 2rem;
+.book-detail {
+    display: flex;
+    flex-direction: column;
 }

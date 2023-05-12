@@ -41,9 +41,9 @@ INSERT INTO item (isbn, school_id) VALUES
 
 INSERT INTO "user" (school_id, first_name, last_name, email, username, password_hash, dob, active) VALUES
 --password123
-(1, 'John', 'Doe', 'johndoe@example.com', 'johndoe', '$2b$12$M3JfFI4eG/AInpxxJ5yZ6Orc/iu2dPGf96yMmtmsb/xpW1jAuXYMq', '1990-01-01', true),
+(1, 'John', 'Doe', 'johndoe@example.com', 'johndoe', '$2b$12$dlE/DWLZoIYcB6UI6rK0I.tL6owgllKG52pM6h6UiGWhHipwyfQ.6', '1990-01-01', true),
 --letmein123
-(1, 'Jane', 'Doe', 'janedoe@example.com', 'janedoe', '$2b$12$kwVH7O4tG0PU3R/w6XnEZOt63vG2UjY5oJj.CErFhIWpK2xpZB3JG', '1995-05-05', true);
+(1, 'Jane', 'Doe', 'janedoe@example.com', 'janedoe', '$2b$12$vZXec/tilJiOhvexjbKxguJXVKwzwk4FZklfMkeQWwdHT7ZDIkfOu', '1995-05-05', true);
 
 INSERT INTO lib_user (user_id) VALUES (1);
 
