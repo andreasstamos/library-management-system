@@ -16,9 +16,12 @@ import Books from './pages/Books';
 import Book from './pages/Book';
 import ReviewActivate from './pages/lib_editor/ReviewActivate';
 import AdminDashboard from './pages/admin/AdminDashboard';
-import AddSchool from './pages/admin/AddSchool';
+import AddSchool from './pages/admin/school/AddSchool';
 import LibUsersControl from './pages/admin/LibUsersControl';
 import NotFound404 from './pages/NotFound404';
+import SchoolDashboard from './pages/admin/school/SchoolDashboard';
+import AllSchools from './pages/admin/school/AllSchools';
+import Profile from './pages/Profile';
 
 
 function App() {
@@ -32,7 +35,9 @@ function App() {
               <Route path='/books' element={<PrivateRoute><Books/></PrivateRoute>} />
               <Route path='/book/:bookISBN' element={<PrivateRoute><Book/></PrivateRoute>} />
               <Route path='/lend-return/' element={<PrivateRoute><BorrowForm/></PrivateRoute>} />
+              <Route path='/profile/' element={<PrivateRoute><Profile /></PrivateRoute>} />
               <Route path='/404' element={<NotFound404 />} />
+
             </Route>
 
             <Route path='/auth' element={<Auth></Auth>} >
@@ -49,7 +54,11 @@ function App() {
             </Route>
 
             <Route path='/admin' element={<AdminDashboard />}>
-              <Route path='add-school' element={<AddSchool/>} />
+              <Route path='schools/' element={<SchoolDashboard/>}>
+                  <Route path='add-school/' element={<AddSchool/>} />
+                  <Route path='all-schools/' element={<AllSchools/>} />
+
+              </Route>
               <Route path='activate-library-editors' element={<LibUsersControl />} />
             </Route>
 

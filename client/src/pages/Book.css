@@ -13,9 +13,9 @@
 }
 .book-container .book-image {
     max-width: 340px;
-    height: auto;
+    /* height: auto; */
     object-fit: contain;
-    border: 1px solid #eee;
+    /* border: 1px solid #eee; */
     border-radius: 4px;
 }
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import './AddSchool.css'
-import { Button } from '@mui/material'
+import { Button, Alert } from '@mui/material'
 import axios from 'axios';
 
 
@@ -12,9 +12,13 @@ function AddSchool() {
     const [schoolEmail, setSchoolEmail] = useState('');
     const [schoolCity, setSchoolCity] = useState('');
     const [schoolPhone, setSchoolPhone] = useState('');
+    const [succ, setSucc] = useState(null);
+    const [err, setErr] = useState(null);
 
 
     async function insertSchool(e) {
+        setSucc(null);
+        setErr(null);
         e.preventDefault();
         console.log(schoolName);
         const payload = {
@@ -24,15 +28,21 @@ function AddSchool() {
             city: schoolCity,
             phone: schoolPhone,
         }
-        const response = await axios.post('http://localhost:5000/school/insert-school/', payload, {
-            headers: {
-                'Access-Control-Expose-Headers' : '*',
-                'Access-Control-Allow-Origin': '*', 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('authTokens')}`,
-             }
-        })
-        console.log(response?.data);
+        try{
+            const response = await axios.post('http://localhost:5000/school/insert-school/', payload, {
+                headers: {
+                    'Access-Control-Expose-Headers' : '*',
+                    'Access-Control-Allow-Origin': '*', 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('authTokens')}`,
+                }
+            })
+            console.log(response?.data);
+            setSucc("Success");
+            e.target.reset();
+        } catch(err) {
+            setErr("Something Went wrong :(")
+        }
     }
 
   return (
@@ -64,6 +74,8 @@ function AddSchool() {
                 <label for='school-phone'>Phone:</label>
                 <input value={schoolPhone} onChange={(e) => {setSchoolPhone(e.target.value)}} required type='text' name='school-phone' />
             </div>
+            {err && <Alert severity="error">{err}</Alert>}
+            {succ && <Alert severity="success">{succ}</Alert>}
 
             <Button variant="contained" type='submit'>Insert School</Button>
 

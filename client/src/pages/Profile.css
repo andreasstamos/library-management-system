@@ -1,0 +1,15 @@
+.user-profile-container h1 {
+    margin: 0 auto;
+}
+.user-profile-card {
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    row-gap: 2rem;
+    width: max(50%, 340px);
+    margin-top:3rem;
+}
+.user-profile-card button {
+    width: max(35%, 250px);
+    margin: 0 auto;
+}

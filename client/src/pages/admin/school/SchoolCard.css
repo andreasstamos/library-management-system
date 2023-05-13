@@ -1,0 +1,3 @@
+#change-school-form input:read-only::placeholder{
+    color: #000!important;
+}

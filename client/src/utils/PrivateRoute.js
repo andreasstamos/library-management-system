@@ -10,6 +10,7 @@ const PrivateRoute = ({children}) => {
     let {user} = useContext(AuthContext);
     console.log(user);
     if (!user) return <Navigate to='/auth/login/' />
+    if (user?.sub?.role === 'admin') return <Navigate to='/admin/' />
     return children;
 }
 

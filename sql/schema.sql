@@ -118,3 +118,10 @@ CREATE TABLE borrow (
 	EXCLUDE USING GIST (item_id WITH =, period WITH &&)
 );
 
+-- CREATE TABLE booking (
+-- 	booking_id SERIAL PRIMARY KEY,
+-- 	isbn VARCHAR(13) NOT NULL REFERENCES "book" ON DELETE CASCADE,
+-- 	user_id INT NOT NULL REFERENCES "user" ON DELETE CASCADE,
+-- 	period TSTZRANGE DEFAULT (TSTZRANGE(NOW(), NOW() + INTERVAL '1 week')),
+
+-- )

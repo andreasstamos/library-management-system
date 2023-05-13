@@ -71,7 +71,12 @@ function Register() {
 
 
   async function fetchSchools() {
-    const response = await axios.get('http://127.0.0.1:5000/school/get-schools/');
+    const payload = {
+      fetch_fields:['name', 'school_id']
+    }
+    const response = await axios.post('http://127.0.0.1:5000/school/get-schools/', payload, {headers: {
+      'Content-Type': 'application/json'
+    }});
     console.log(response);
     setLoadingSchools(false);
     setSchools(response?.data?.schools);

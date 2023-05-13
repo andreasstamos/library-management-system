@@ -26,7 +26,7 @@ export default function AdminNavbar() {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             Admin Dashboard
           </Typography>
-          <Button color="inherit" component={Link} to="add-school/" className='navLink'>Add School</Button>
+          <Button color="inherit" component={Link} to="schools/" className='navLink'>School</Button>
           <Button color="inherit" component={Link} to="activate-library-editors/" className='navLink'>Library Editors</Button>
         </Toolbar>
       </AppBar>

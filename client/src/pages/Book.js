@@ -8,6 +8,7 @@ import './Book.css'
 import axios from 'axios';
 import ReviewForm from '../Components/ReviewForm';
 import AuthContext from '../context/AuthContext';
+import Reviews from '../Components/Reviews';
 
 
 function Book() {
@@ -67,7 +68,7 @@ function Book() {
 
                     <div className='book-detail'>
                         <Typography variant="h6">Βαθμολογία Likert</Typography>
-                        <Rating name="read-only" value={book?.rate} readOnly />
+                        <Rating name="read-only" value={parseInt(book?.rate)} readOnly />
                     </div>
 
                     <div className='book-detail'>
@@ -111,6 +112,7 @@ function Book() {
 
             </div>
             <ReviewForm bookISBN={bookISBN} />
+            <Reviews bookISBN={bookISBN} />
 
         </div>
     )

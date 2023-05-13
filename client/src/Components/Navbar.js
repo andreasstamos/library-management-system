@@ -34,6 +34,7 @@ export default function ButtonAppBar() {
           </Typography>
           
           <Button color="inherit" component={Link} to="/books/" className='navLink'>Books</Button>
+          <Button color="inherit" component={Link} to="/profile/" className='navLink'>Προφιλ</Button>
           {user?.sub?.role === 'lib_editor' && <Button color="inherit" component={Link} to="/lib-editor/" className='navLink'>Dashboard</Button>}
 
         </Toolbar>
