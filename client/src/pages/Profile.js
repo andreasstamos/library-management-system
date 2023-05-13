@@ -25,6 +25,8 @@ function Profile() {
     let {user} = useContext(AuthContext);
     
     async function fetchProfile() {
+      setProfile(null);
+      setLoading(true);
         const response = await axios.post('http://localhost:5000/user/get-profile/', {},{
             headers: {
                 'Access-Control-Expose-Headers' : '*',
@@ -37,7 +39,6 @@ function Profile() {
         console.log(response);
         setLoading(false);
         setProfile(response?.data?.profile);
-
 
         // setting this values here because when you are editing the values through the form if you don't update anything
         // empty values get passed at the request
@@ -56,7 +57,7 @@ function Profile() {
             first_name:newFirstName,
             last_name:newLastName,
             email:newEmail,
-            dob:newDob
+            dob:dayjs(newDob)
         }
         console.log(newDob);
         try {
@@ -71,6 +72,7 @@ function Profile() {
             })
             console.log(response);
             setEdit(false);
+            fetchProfile();
         } catch(err) {
             setEdit(false);
         }

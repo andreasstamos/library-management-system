@@ -84,7 +84,7 @@ def update_profile():
     user = get_jwt_identity()
     if user['role'] == 'student':
         return {'success': False, 'error': 'Unauthorized access.'}, 401
-    
+    print(data['dob'])
     normalized_datetime = datetime.strptime(data['dob'], "%Y-%m-%dT%H:%M:%S.%fZ")
     normalized_date = normalized_datetime.date()
     print(normalized_date)
