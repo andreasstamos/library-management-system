@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { CircularProgress, TextField } from '@mui/material'
+import { Alert, CircularProgress, TextField, Typography } from '@mui/material'
 import './Profile.css'
 import axios from 'axios'
 import AuthContext from '../context/AuthContext'
@@ -7,7 +7,6 @@ import {Button} from '@mui/material'
 import { DateField } from '@mui/x-date-pickers/DateField';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-
 import dayjs from 'dayjs'
 function Profile() {
 
@@ -21,6 +20,9 @@ function Profile() {
     const [newLastName, setNewLastName] = useState('');
     const [newFirstName, setNewFirstName] = useState('');
     const [newDob, setNewDob] = useState('');
+
+    const [err, setErr] = useState('');
+    const [succ, setSucc] = useState('');
 
     let {user} = useContext(AuthContext);
     
@@ -51,6 +53,8 @@ function Profile() {
 
 
     async function updateProfile(e) {
+      setSucc('');
+      setErr('');
         e.preventDefault();
         const payload = {
             username: newUsername,
@@ -72,9 +76,12 @@ function Profile() {
             })
             console.log(response);
             setEdit(false);
+            setSucc('Profile updated :)')
             fetchProfile();
         } catch(err) {
             setEdit(false);
+            setErr("Something went wrong. Please try again later.")
+
         }
 
     }
@@ -85,12 +92,29 @@ function Profile() {
     }, [])
 
 
+  const GREEK_ROLES = {
+      lib_editor: 'Χειριστής',
+      student: 'Μαθητής',
+      teacher: 'Καθηγητής',
+  } 
+
   return (
     <div className='user-profile-container'>
         <h1 className='title-with-hr'>Το προφίλ μου</h1>
         {loading && <CircularProgress />}
         {profile && <form className='user-profile-card' onSubmit={(e) => {updateProfile(e)}}>
-        <h2>{user?.sub?.role.charAt(0).toUpperCase() + user?.sub?.role.slice(1)}</h2>
+        {/* <h2>{user?.sub?.role.charAt(0).toUpperCase() + user?.sub?.role.slice(1)}</h2> */}
+        <Typography variant='h4' component='h3'>{GREEK_ROLES[user?.sub?.role]}</Typography>
+        <TextField
+                  id="filled-read-only-input"
+                  label="School"
+                  defaultValue={profile?.school_name}
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                  disabled
+                  variant={'filled'}
+                />
 
                 <TextField
                   id="filled-read-only-input"
@@ -146,6 +170,10 @@ function Profile() {
                     />
                 </LocalizationProvider>
             
+                  {err && <Alert severity='error'>{err}</Alert>}
+                  {succ && <Alert severity='success'>{succ}</Alert>}
+
+
             {user?.sub?.role !== 'student' && <Button variant="contained" onClick={() => setEdit(!edit)}>Edit</Button>}
             {user?.sub?.role !== 'student' && <Button variant="contained" color="secondary" type='submit' disabled={!edit}>Ενημερωση Προφιλ</Button>}
 

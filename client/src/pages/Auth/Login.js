@@ -44,7 +44,7 @@ function Login() {
 
       if (response.status === 200) {
         setSucc("Logged In!");
-        navigate("/books",{replace:true});
+        navigate("/",{replace:true});
       } 
   } catch(err) {
     // console.log(err);

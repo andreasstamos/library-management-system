@@ -8,21 +8,21 @@
     font-size: clamp(2.5rem, 4vw, 7rem);
     margin: 0 auto;
 }
-.dashboard-component {
-    margin: 0 auto;
+.dashboard-componentt {
+    margin: 2rem auto;
     width: 90%;
     border: 2px solid #eee;
     text-align: center;
     padding: 2rem 3rem;
 }
-.dashboard-component .component-title {
-    font-size: clamp(2rem, 2.7vw, 5rem);
+.dashboard-componentt .component-title {
+    font-size: clamp(2rem, 2.2vw, 5rem);
     width: fit-content;
-    text-align: center;
+    /* text-align: center; */
     position: relative;
-    margin: 2rem auto;
+    /* margin: 2rem auto; */
 }
-.dashboard-component .component-title:before {
+.dashboard-componentt .component-title:before {
     content:'';
     position: absolute;
     bottom: -5px;

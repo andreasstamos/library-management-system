@@ -10,6 +10,7 @@ from .roles_decorators import check_roles
 bp = Blueprint("lib-api", __name__)
 
 
+
 @bp.route("/get-users-active-status/", methods=["POST"])
 @jwt_required(refresh=False,locations=['headers'], verify_type=False)
 def get_deactivated_users():
@@ -95,21 +96,35 @@ def activate_user():
 @bp.route('/get-reviews/', methods=['POST'])
 @check_roles(["lib_editor"])
 def get_reviews():
-
+    GET_REVIEWS_JSON = {
+        "type": "object",
+        "properties": {
+            # do we want activated reviews or not...?
+            "active": {"type": "boolean"},
+            },
+        "additionalProperties": False,
+        "required": ["active"]
+    }
+    data = request.get_json()
+    try:
+        jsonschema.validate(data, GET_REVIEWS_JSON)
+    except jsonschema.ValidationError as err:
+        return {"success": False, "error": err.message}, 400
+    
     user = get_jwt_identity()
     try:
         with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
             # Get all non active reviews from users that are in the same school as the lib editor.
             cur.execute("""
-                SELECT review.review_id, review.body, book.isbn, book.title, "user".username,
+                SELECT review.review_id, review.body, review.active, book.isbn, book.title, "user".username,
                 array_remove(array_agg(DISTINCT book_author.author_name), NULL) AS authors
                 FROM review
                 INNER JOIN book ON book.isbn = review.isbn
                 INNER JOIN book_author ON book_author.isbn = review.isbn
                 INNER JOIN "user" ON "user".user_id = review.user_id
-                WHERE review.active = false AND "user".school_id = (%s)
+                WHERE review.active = (%s) AND "user".school_id = (%s)
                 GROUP BY review.review_id, book.isbn, review.body, "user".username
-            """, [user['school_id']])
+            """, [data['active'], user['school_id']])
             results = cur.fetchall()
             return {"success": True, "reviews": results}, 200
     except psycopg2.Error as err:
@@ -117,7 +132,7 @@ def get_reviews():
         return {"success": False, "error": "unknown"}
 
 
-@bp.route('/activate-review/', methods=['POST'])
+@bp.route('/change-review-status/', methods=['POST'])
 @check_roles(["lib_editor"])
 def activate_reviews():
 
@@ -125,6 +140,7 @@ def activate_reviews():
         "type": "object",
         "properties": {
             "review_id": {"type": "integer"},
+            'active': {'type': 'boolean'}
             },
         "additionalProperties": False,
         "required": ["review_id"]
@@ -142,13 +158,13 @@ def activate_reviews():
             # Library user must be in the same school with the user that has written the review....
             cur.execute("""
                 UPDATE review 
-                SET active=true 
-                WHERE review.review_id = (%s) AND active=false
+                SET active=(%s)
+                WHERE review.review_id = (%s) AND active=(%s)
                 AND EXISTS(SELECT 1 
                 FROM "user"
                 INNER JOIN school on "user".school_id=(%s)
                 WHERE "user".user_id = review.user_id)
-            """, [data['review_id'], user['school_id']])
+            """, [data['active'],data['review_id'], not data['active'],user['school_id']])
             g.db_conn.commit()
     except psycopg2.IntegrityError as err:
         g.db_conn.rollback()

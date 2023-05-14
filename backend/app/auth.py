@@ -115,8 +115,6 @@ def register():
         return {"success": False, "error": err.message}, 400
 
 
-    print(data['user_type'])
-
     # Might be vulnerable to SQL Injections... will check later.
     # Try block is outside covers 2 queries. Hope there aren't any weird bugs with that in case 1 of them fails...
     try:
@@ -146,7 +144,6 @@ def register():
                         (first_name, last_name, username, email, hashed_password, data['school_id'], data['dob']))
 
             user_id = cur.fetchone()[0]
-            print(user_id)
 
             if data['user_type'].lower() == 'teacher':
                 cur.execute('INSERT INTO teacher (user_id) VALUES (%s)', (user_id,))
@@ -167,10 +164,6 @@ def register():
         g.db_conn.rollback()
         print(err)
         return {"success": False, "error": "unknown"}, 400
-    
-
-    
-    
 
 
 

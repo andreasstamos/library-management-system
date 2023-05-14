@@ -33,8 +33,10 @@ export default function ButtonAppBar() {
             MySchoolLib
           </Typography>
           
-          <Button color="inherit" component={Link} to="/books/" className='navLink'>Books</Button>
-          <Button color="inherit" component={Link} to="/profile/" className='navLink'>Προφιλ</Button>
+          <Button color="inherit" component={Link} to="/" className='navLink'>Books</Button>
+          <Button color="inherit" component={Link} to="/profile/" className='navLink'>ΠΡΟΦΙΛ</Button>
+          <Button color="inherit" component={Link} to="/my-borrows/" className='navLink'>Οι δανεισμοι μου</Button>
+
           {user?.sub?.role === 'lib_editor' && <Button color="inherit" component={Link} to="/lib-editor/" className='navLink'>Dashboard</Button>}
 
         </Toolbar>

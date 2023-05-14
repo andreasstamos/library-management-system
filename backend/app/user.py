@@ -47,8 +47,10 @@ def get_profile():
     try:
         with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
             cur.execute("""
-            SELECT username, first_name, last_name, email, dob
+            SELECT username, first_name, last_name, "user".email, dob, school.name AS school_name
             FROM "user"
+            INNER JOIN school
+            ON school.school_id = "user".school_id
             WHERE user_id = (%s)
             """, [user["user_id"]])
             profile = cur.fetchone()
@@ -69,17 +71,16 @@ def update_profile():
             "email": {"type": "string", "minLength":5},
             'first_name': {"type": "string", "minLength": 3},
             "last_name": {"type": "string", "minLength":3},
-            'dob': {'type':'string'}
+            'dob': {'type':'string'},
             },
         "additionalProperties": False,
-        "required": ["username", 'email', 'first_name', 'last_name']
+        "required": ["username", 'email', 'first_name', 'last_name', 'dob']
     }
     data = request.get_json()
     try:
         jsonschema.validate(data, UPDATE_USER_JSON)
     except jsonschema.ValidationError as err:
         return {"success": False, "error": err.message}, 400
-
 
     user = get_jwt_identity()
     if user['role'] == 'student':

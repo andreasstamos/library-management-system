@@ -15,25 +15,23 @@ bp = Blueprint("student-ops", __name__)
 
 
 @bp.route("/my-borrows/", methods=['POST'])
+@jwt_required(refresh=False,locations=['headers'], verify_type=False)
 def my_borrows():
 
-    # Must get from access token.
-    student_id = 2
+    user = get_jwt_identity()
 
 
     try:
         with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
-        
-            cur.execute("SELECT book.title, item.isbn ,item.item_id, borrow.period, borrow.exprected_return, \
+            cur.execute("SELECT book.title, book.publisher_name, item.isbn ,item.item_id, lower(borrow.period) AS borrowed_on,upper(borrow.period) as returned, borrow.expected_return \
             FROM book\
             INNER JOIN item ON book.isbn = item.isbn \
             INNER JOIN borrow ON item.item_id = borrow.item_id \
-            INNER JOIN student ON student.student_id = (%s)", (student_id,))
+            AND borrow.borrower_id = (%s)", (user['user_id'],))
             results = cur.fetchall()
     except psycopg2.Error as err:
         print(err.pgerror)
         return {"success": False, "error": "unknown"}
-
 
     return {"success": True, "borrows": results}, 200
 
@@ -74,3 +72,4 @@ def insert_review():
         return {"success": False, "error": "unknown"}, 400
 
     return {"success": True} ,200
+

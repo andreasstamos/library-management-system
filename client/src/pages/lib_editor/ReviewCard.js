@@ -9,7 +9,7 @@ import './ReviewCard.css'
 import axios from 'axios';
 
 
-export default function ReviewCard({reviewID, title, authors, username, isbn, body, fetchReviews}) {
+export default function ReviewCard({reviewID, title, authors, username, isbn, body, fetchReviews, active}) {
 
     function formatISBN(isbn) {
         let formattedISBN = '';
@@ -30,9 +30,10 @@ export default function ReviewCard({reviewID, title, authors, username, isbn, bo
 
       async function activateReview() {
             const payload = {
-                'review_id': reviewID,
+                review_id: reviewID,
+                active: !active,
             }
-            const response = await axios.post('http://localhost:5000/lib-api/activate-review/', payload, {headers: {
+            const response = await axios.post('http://localhost:5000/lib-api/change-review-status/', payload, {headers: {
                 'Access-Control-Expose-Headers' : '*',
                 'Access-Control-Allow-Origin': '*', 
                 'Content-Type': 'application/json',
@@ -67,7 +68,8 @@ export default function ReviewCard({reviewID, title, authors, username, isbn, bo
         
       </CardContent>
       <CardActions>
-        <Button size="small" onClick={activateReview}>Activate Review</Button>
+        {active && <Button size="small" onClick={activateReview}>Deactivate Review</Button>}
+        {!active && <Button size="small" onClick={activateReview}>Activate Review</Button>}
       </CardActions>
     </Card>
   );

@@ -9,12 +9,12 @@ function AdminDashboard() {
     <>
     <AdminNavbar />
     
+
     <div className='admin-dashboard'>
         <h1 className='title-with-hr admin-dashboard-title'>Admin Dashboard</h1>
         <div className='admin-dashboard-container'>
           <Outlet />
         </div>
-
     </div>
     </>
   )

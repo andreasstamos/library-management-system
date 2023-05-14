@@ -14,14 +14,18 @@ import PrivateRoute from './utils/PrivateRoute';
 import Landing from './pages/Landing';
 import Books from './pages/Books';
 import Book from './pages/Book';
-import ReviewActivate from './pages/lib_editor/ReviewActivate';
+import ReviewControl from './pages/lib_editor/ReviewControl';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AddSchool from './pages/admin/school/AddSchool';
-import LibUsersControl from './pages/admin/LibUsersControl';
+import LibUsersControl from './pages/admin/library_editors/LibUsersControl';
 import NotFound404 from './pages/NotFound404';
 import SchoolDashboard from './pages/admin/school/SchoolDashboard';
 import AllSchools from './pages/admin/school/AllSchools';
 import Profile from './pages/Profile';
+import LibraryUsersControlDashboard from './pages/admin/library_editors/LibraryUsersControlDashboard';
+import AddLibraryEditor from './pages/admin/library_editors/AddLibraryEditor';
+import AdminMenu from './pages/admin/AdminMenu';
+import MyBorrows from './pages/MyBorrows';
 
 
 function App() {
@@ -32,12 +36,13 @@ function App() {
           <Routes>
 
             <Route path='/' element={<PrivateRoute><Landing/></PrivateRoute>}>
-              <Route path='/books' element={<PrivateRoute><Books/></PrivateRoute>} />
+              <Route index path='' element={<PrivateRoute><Books/></PrivateRoute>} />
               <Route path='/book/:bookISBN' element={<PrivateRoute><Book/></PrivateRoute>} />
               <Route path='/lend-return/' element={<PrivateRoute><BorrowForm/></PrivateRoute>} />
               <Route path='/profile/' element={<PrivateRoute><Profile /></PrivateRoute>} />
-              <Route path='/404' element={<NotFound404 />} />
+              <Route path='/my-borrows/' element={<PrivateRoute><MyBorrows /></PrivateRoute>} />
 
+              <Route path='/404' element={<NotFound404 />} />
             </Route>
 
             <Route path='/auth' element={<Auth></Auth>} >
@@ -50,16 +55,24 @@ function App() {
             <Route path='/lib-editor' element={<LibraryEditorPrivateRoute><Dashboard /></LibraryEditorPrivateRoute>}>
               <Route path='activate-users' element={<UsersControl action={"activate"} />} />
               <Route path='deactivate-users' element={<UsersControl action={"deactivate"}/>} />
-              <Route path='activate-reviews' element={<ReviewActivate />} />
+              <Route path='activate-reviews' element={<ReviewControl />} />
             </Route>
 
             <Route path='/admin' element={<AdminDashboard />}>
+              <Route index path='' element={<AdminMenu />} />
+              
               <Route path='schools/' element={<SchoolDashboard/>}>
                   <Route path='add-school/' element={<AddSchool/>} />
                   <Route path='all-schools/' element={<AllSchools/>} />
 
               </Route>
-              <Route path='activate-library-editors' element={<LibUsersControl />} />
+             
+              <Route path='lib-editors/' element={<LibraryUsersControlDashboard />}>
+                  <Route path='all-lib-editors/' element={<LibUsersControl />} />
+                  <Route path='add-lib-editor/' element={<AddLibraryEditor />} />
+              </Route>
+              {/* <Route path='activate-library-editors' element={<LibUsersControl />} /> */}
+            
             </Route>
 
             <Route path='*' element={<Navigate to='/404' />}/>

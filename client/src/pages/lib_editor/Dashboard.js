@@ -14,8 +14,10 @@ function Dashboard() {
             <NavLink to='/lib-editor/activate-users/'>Non-Active Users</NavLink>
             <NavLink to='/lib-editor/deactivate-users/'>Active Users</NavLink>
         </div> */}
-        <DashboardMenu />
-        <Outlet />
+        <div className='dashboard-componentt'>
+            <DashboardMenu />
+            <Outlet />
+        </div>
     </div>
     </>
     )

@@ -26,3 +26,8 @@ html, body {
   .affirmative {
     color: green;
   }
+  .dashboard-inline {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  }
