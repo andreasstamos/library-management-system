@@ -3,7 +3,7 @@ import axios from 'axios'
 import PaginationControlled from '../Components/PaginationControlled';
 import BookCard from '../Components/BookCard';
 import './Books.css'
-import SearchBar from '../Components/SearchBar';
+import SearchBarBooks from '../Components/SearchBarBooks';
 import AuthContext from '../context/AuthContext';
 import Typography from '@mui/material/Typography';
 
@@ -49,7 +49,7 @@ function Books() {
             <Typography variant="h3" component="h1">Βιβλία</Typography>
             <div className='page-filters'>
                 <PaginationControlled totalPages={10} page={page} setPage={setPage} />
-                <SearchBar />
+                <SearchBarBooks />
             </div>
             <div className='books-container'>
 
