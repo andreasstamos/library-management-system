@@ -1,12 +1,11 @@
-import { useState, useEffect, useMemo, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Autocomplete, TextField } from "@mui/material";
 import AuthContext from "../context/AuthContext";
 import axios from "axios";
 import debounce from "lodash/debounce";
 
-export default function SearchBarBooks() {
+export default function SearchBarBooks({value, handleChangeValue}) {
   const [options, setOptions] = useState([]);
-  const [value, setValue] = useState(null);
   const [inputValue, setInputValue] = useState('');
   
   const [loading, setLoading] = useState(false);
@@ -19,7 +18,7 @@ export default function SearchBarBooks() {
       try {
         const payload = {
           title: inputValue,
-          fetch_fields: ["title"]
+          fetch_fields: ["isbn", "title"]
         };
 
         const response = await axios.post('http://127.0.0.1:5000/book/get/', payload, {headers: {
@@ -48,22 +47,14 @@ export default function SearchBarBooks() {
     return () => {debounced_fetchBooks.cancel();}
   }, [inputValue]);
 
-  function handleInputChange(event, value) {
-    setInputValue(value);
-  }
-
-  function handleChange(event, value) {
-    setValue(value);
-  }
-
   return (
     <Autocomplete
       freeSolo
       sx={{ width: 250 }}
       value={value}
       inputValue={inputValue}
-      onInputChange={handleInputChange}
-      onChange={handleChange}
+      onInputChange={(event, value) => {setInputValue(value);}}
+      onChange={(event, value) => {handleChangeValue(value);}}
       getOptionLabel={(option) => option?.title ?? option}
       isOptionEqualToValue={(book, value) => book?.title === value?.title}
       loading={loading}

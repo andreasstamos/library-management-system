@@ -18,6 +18,8 @@ CREATE TABLE publisher (
 	publisher_name VARCHAR(50) PRIMARY KEY
 );
 
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
 CREATE TABLE book (
 	isbn VARCHAR(13) PRIMARY KEY CHECK (isbn ~ '^[0-9]{13}'),
 	title VARCHAR(200),

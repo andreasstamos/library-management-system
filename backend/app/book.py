@@ -68,6 +68,8 @@ GET_BOOK_JSONSCHEMA = {
             "keywords": {"type": "array", "items": {"type": "string"}, "minItems": 1},
             "categories": {"type": "array", "items": {"type": "string"}, "minItems": 1},
             "school_id": {"type": "integer"},
+            "limit": {"type": "integer", "minimum": 1},
+            "offset": {"type": "integer", "minimum": 0},
             "fetch_fields": {"type": "array", "minItems": 1, "items": {"type": "string", "enum":\
                     ["isbn", "title", "publisher_name", "page_number", "language", "summary", "image_uri",
                         "authors", "keywords", "categories", "rate", "item_number"]}}
@@ -93,7 +95,7 @@ def get_book():
     if 'categories' in data['fetch_fields']:
         select_clause.append('array_remove(array_agg(DISTINCT category_name), NULL) AS categories')
     if 'item_number' in data['fetch_fields']:
-        select_clause.append('COUNT(DISTINCT item_id) AS iten_number')
+        select_clause.append('COUNT(DISTINCT item_id) AS item_number')
     if 'rate' in data['fetch_fields']:
         # Kostas added active=true in the WHERE clause... (in case it stops working)
         select_clause.append('(SELECT ROUND(AVG(rate)) FROM review WHERE isbn=book.isbn AND active=true) AS rate')
@@ -101,7 +103,7 @@ def get_book():
     select_clause = ','.join(select_clause)
 
     where_clause = [f"{field} {'IN' if type(data[field]) is tuple else '='} %({field})s"
-            for field in {'isbn', 'title', 'publisher_name', 'page_number', 'language', 'school_id'} & set(data.keys())]
+            for field in {'isbn', 'publisher_name', 'page_number', 'language', 'school_id'} & set(data.keys())]
     where_clause = ' AND '.join(where_clause)
     if where_clause:
         where_clause = f"WHERE {where_clause}"
@@ -125,7 +127,10 @@ def get_book():
             {'LEFT JOIN item USING (isbn)' if 'school_id' in data.keys() or 'item_number' in data['fetch_fields'] else ''}\
             {where_clause}\
             GROUP BY isbn\
-            {having_clause}""")
+            {having_clause}\
+            {'ORDER BY (title <-> %(title)s)' if 'title' in data.keys() else ''}\
+            {'OFFSET %(offset)s' if 'offset' in data.keys() else ''}\
+            {'LIMIT %(limit)s' if 'limit' in data.keys() else ''}""")
     
     try:
         with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
