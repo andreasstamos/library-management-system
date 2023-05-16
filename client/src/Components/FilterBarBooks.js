@@ -8,18 +8,22 @@ import AuthContext from "../context/AuthContext";
 import axios from "axios";
 import debounce from "lodash/debounce";
 
-function FilterBar({label, inputValue, value, options, loading, handleChangeValue, handleChangeInputValue}) {
+function FilterBar({label, inputValue, value, options, loading, handleChangeValue, handleChangeInputValue, edit, singlevalue, readOnly}) {
+  if (readOnly && singlevalue) handleChangeInputValue(value);
   return (
     <Autocomplete
+      readOnly={readOnly}
+      freeSolo={edit}
       value={value}
-      inputValue={inputValue}
+      defaultValue={value}
+      inputValue={readOnly ? (singlevalue ? value : '') : inputValue}
       onChange={(event, value) => {handleChangeValue(value);}}
       onInputChange={(event, value) => {handleChangeInputValue(value);}}
       options={options}
-      multiple
-      disableCloseOnSelect
-      limitTags    
-      renderOption={(props, option, { selected }) => (
+      multiple={!singlevalue}
+      disableCloseOnSelect={!singlevalue}
+      limitTags={3}
+      renderOption={singlevalue ? undefined : ((props, option, { selected }) => (
         <li {...props}>
           <Checkbox
             icon = {<CheckBoxOutlineBlankIcon fontSize="small" />}
@@ -29,7 +33,7 @@ function FilterBar({label, inputValue, value, options, loading, handleChangeValu
           />
           {option}
         </li>
-      )}
+      ))}
 
       loading={loading}
       loadingText="Φόρτωση..."
@@ -42,7 +46,7 @@ function FilterBar({label, inputValue, value, options, loading, handleChangeValu
   );
 }
 
-function FilterBarCategory({value, handleChangeValue}) {
+function FilterBarCategory({value, handleChangeValue, edit, singlevalue, readOnly}) {
   const [options, setOptions] = useState([]);
   const [inputValue, setInputValue] = useState('');
 
@@ -85,6 +89,9 @@ function FilterBarCategory({value, handleChangeValue}) {
 
   return (
     <FilterBar
+      readOnly={readOnly}
+      singlevalue={singlevalue}
+      edit={edit}
       label="Κατηγορίες"
       inputValue={inputValue}
       value={value}
@@ -96,7 +103,7 @@ function FilterBarCategory({value, handleChangeValue}) {
   );
 }
 
-function FilterBarPublisher({value, handleChangeValue}) {
+function FilterBarPublisher({value, handleChangeValue, edit, singlevalue, readOnly}) {
   const [options, setOptions] = useState([]);
   const [inputValue, setInputValue] = useState('');
 
@@ -139,6 +146,9 @@ function FilterBarPublisher({value, handleChangeValue}) {
 
   return (
     <FilterBar
+      readOnly={readOnly}
+      singlevalue={singlevalue}
+      edit={edit} 
       label="Εκδοτικοί Οίκοι"
       inputValue={inputValue}
       value={value}
@@ -150,7 +160,7 @@ function FilterBarPublisher({value, handleChangeValue}) {
   );
 }
 
-function FilterBarKeyword({value, handleChangeValue}) {
+function FilterBarKeyword({value, handleChangeValue, edit, singlevalue, readOnly}) {
   const [options, setOptions] = useState([]);
   const [inputValue, setInputValue] = useState('');
 
@@ -176,7 +186,6 @@ function FilterBarKeyword({value, handleChangeValue}) {
           setError("Something went wrong. Please try again.");
         }
         if (response.data.keywords) {
-          console.log(response.data.keywords);
           setOptions(response.data.keywords.map((keyword) => keyword.keyword_name));
         }
       } catch (e) {
@@ -196,6 +205,9 @@ function FilterBarKeyword({value, handleChangeValue}) {
 
   return (
     <FilterBar
+      readOnly={readOnly}
+      singlevalue={singlevalue}
+      edit={edit}
       label="Λέξεις κλειδιά"
       inputValue={inputValue}
       value={value}
@@ -207,7 +219,7 @@ function FilterBarKeyword({value, handleChangeValue}) {
   );
 }
 
-function FilterBarAuthor({value, handleChangeValue}) {
+function FilterBarAuthor({value, handleChangeValue, edit, singlevalue, readOnly}) {
   const [options, setOptions] = useState([]);
   const [inputValue, setInputValue] = useState('');
 
@@ -252,6 +264,9 @@ function FilterBarAuthor({value, handleChangeValue}) {
 
   return (
     <FilterBar
+      readOnly={readOnly}
+      singlevalue={singlevalue}
+      edit={edit}
       label="Συγγραφείς"
       inputValue={inputValue}
       value={value}
@@ -263,4 +278,63 @@ function FilterBarAuthor({value, handleChangeValue}) {
   );
 }
 
-export { FilterBarCategory, FilterBarPublisher, FilterBarKeyword, FilterBarAuthor };
+function FilterBarLanguage({value, handleChangeValue, edit, singlevalue, readOnly}) {
+  const [options, setOptions] = useState([]);
+  const [inputValue, setInputValue] = useState('');
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const auth = useContext(AuthContext);
+
+  useEffect(() => {
+    const fetchLanguages = async () => {
+      try {
+        const payload = {
+          "limit": 10,
+          "language": inputValue,
+        };
+
+        const response = await axios.post('http://127.0.0.1:5000/book/language/get/', payload, {headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${auth.authTokens}`,
+        }});
+        setLoading(false);
+        if (!response.data.success) {
+          setError("Something went wrong. Please try again.");
+        }
+        if (response.data.languages) {
+          setOptions(response.data.languages.map((language) => language.language));
+        }
+      } catch (e) {
+        setLoading(false);
+        setError("Something went wrong. Please try again.");
+      }
+    };
+
+    const debounced_fetchLanguages = debounce(() => {
+      setLoading(true);
+      fetchLanguages();
+    }, 200); //200ms between search calls to api.
+    debounced_fetchLanguages();
+
+    return () => {debounced_fetchLanguages.cancel();}
+  }, [inputValue]);
+
+  return (
+    <FilterBar
+      readOnly={readOnly}
+      singlevalue={singlevalue}
+      edit={edit}
+      label="Γλώσσες"
+      inputValue={inputValue}
+      value={value}
+      options={options}
+      loading={loading}
+      handleChangeValue={handleChangeValue}
+      handleChangeInputValue={(value) => {setInputValue(value);}}
+    />
+  );
+}
+
+export { FilterBarCategory, FilterBarPublisher, FilterBarKeyword, FilterBarAuthor, FilterBarLanguage };

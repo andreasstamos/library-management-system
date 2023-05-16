@@ -14,6 +14,7 @@ import PrivateRoute from './utils/PrivateRoute';
 import Landing from './pages/Landing';
 import Books from './pages/Books';
 import Book from './pages/Book';
+import BookAdd from './pages/BookAdd';
 import ReviewControl from './pages/lib_editor/ReviewControl';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AddSchool from './pages/admin/school/AddSchool';
@@ -39,6 +40,7 @@ function App() {
               <Route index path='' element={<PrivateRoute><Books/></PrivateRoute>} />
               <Route path='/book/:bookISBN' element={<PrivateRoute><Book/></PrivateRoute>} />
               <Route path='/lend-return/' element={<PrivateRoute><BorrowForm/></PrivateRoute>} />
+              <Route path='/add-book/' element={<PrivateRoute><BookAdd/></PrivateRoute>} />
               <Route path='/profile/' element={<PrivateRoute><Profile /></PrivateRoute>} />
               <Route path='/my-borrows/' element={<PrivateRoute><MyBorrows /></PrivateRoute>} />
 

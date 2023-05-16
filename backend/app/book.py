@@ -2,8 +2,10 @@ from flask import Blueprint, request, g
 import jsonschema
 import psycopg2.sql
 import psycopg2.extras
+
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
+from .roles_decorators import check_roles
 
 bp = Blueprint("book", __name__)
 
@@ -19,6 +21,8 @@ INSERT_BOOK_JSONSCHEMA = {
             "authors": {"type": "array", "items": {"type": "string"}, "minItems": 1},
             "keywords": {"type": "array", "items": {"type": "string"}},
             "categories": {"type": "array", "items": {"type": "string"}},
+#            "image_uri": {"type" "string"}
+            "insert_item": {"type": "boolean"}, #If given will also insert one item (the 1st item) at the given school
             },
         "additionalProperties": False,
         "required": ["isbn", "title", "publisher_name", "page_number", "summary", "language", "authors", "keywords", "categories"]
@@ -26,6 +30,7 @@ INSERT_BOOK_JSONSCHEMA = {
 
 
 @bp.route("/insert/", methods=["POST"])
+@check_roles("lib_editor")
 def insert_book():
     data = request.get_json()
     try:
@@ -33,8 +38,18 @@ def insert_book():
     except jsonschema.ValidationError as err:
         return {"success": False, "error": err.message}, 400
 
+    insert_item = False
+    if "insert_item" in data.keys() and data["insert_item"]:
+        identity = get_jwt_identity()
+        school_id = identity["school_id"]
+        insert_item = True
+    
     try:
         with g.db_conn.cursor() as cur:
+            cur.execute("INSERT INTO publisher (publisher_name) VALUES (%s) ON CONFLICT DO NOTHING", (data["publisher_name"],))
+            psycopg2.extras.execute_batch(cur, "INSERT INTO category (category_name) VALUES (%s) ON CONFLICT DO NOTHING",\
+                        [(category,) for category in data["categories"]])
+
             cur.execute("INSERT INTO book (isbn, title, page_number, summary, language, publisher_name)\
                     VALUES (%s, %s, %s, %s, %s, %s)",\
                     (data["isbn"], data["title"], data["page_number"], data["summary"], data["language"], data["publisher_name"]))
@@ -44,17 +59,26 @@ def insert_book():
             psycopg2.extras.execute_batch(cur, "INSERT INTO book_category (isbn, category_name) VALUES (%s, %s)",\
                         [(data["isbn"], category) for category in data["categories"]])
             psycopg2.extras.execute_batch(cur, "INSERT INTO book_keyword (isbn, keyword_name) VALUES (%s, %s)",\
-                        [(data["isbn"], keyword) for keyword in data["keywords"]])            
+                        [(data["isbn"], keyword) for keyword in data["keywords"]])
+            
+            if insert_item:
+                cur.execute("INSERT INTO item (isbn, school_id) VALUES (%s, %s) RETURNING item_id", (data["isbn"], school_id))
+            
             g.db_conn.commit()
+            
+            if insert_item:
+                item_id = cur.fetchone()
+                return {"success": True, "item_id": item_id[0]}, 201
+
+            return {"success": True}
+ 
     except psycopg2.IntegrityError as err:
         g.db_conn.rollback()
-        return {"success": False, "error": err.pgerror}, 400
+        return {"success": False, "error": "unknown"}, 400
     except psycopg2.Error as err:
         g.db_conn.rollback()
         print(err)
         return {"success": False, "error": "unknown"}, 400
-
-    return {"success": True}, 201
 
 GET_BOOK_JSONSCHEMA = {
         "type": "object",
@@ -162,6 +186,7 @@ UPDATE_BOOK_JSONSCHEMA = {
         }
 
 @bp.route("/update/", methods=["POST"])
+@check_roles("lib_editor")
 def update_book():
     data = request.get_json()
     try:
@@ -169,32 +194,45 @@ def update_book():
     except jsonschema.ValidationError as err:
         return {"success": False, "error": err.message}, 400
 
+    insert_item = False
+    if "insert_item" in data.keys() and data["insert_item"]:
+        identity = get_jwt_identity()
+        school_id = identity["school_id"]
+        insert_item = True
+    
     try:
         with g.db_conn.cursor() as cur:
+            if "publisher_name" in data.keys():
+                    cur.execute("INSERT INTO publisher (publisher_name) VALUES (%s) ON CONFLICT DO NOTHING", (data["publisher_name"],))
+            
+           
             if "authors" in data.keys():
                 cur.execute("DELETE FROM book_author WHERE isbn = %s", (data["old_isbn"],))
                 psycopg2.extras.execute_batch(cur, "INSERT INTO book_author (isbn, author_name) VALUES (%s, %s)",\
                         [(data["old_isbn"], author) for author in data["authors"]])
-                if "keywords" in data.keys():
-                    cur.execute("DELETE FROM book_keyword WHERE isbn = %s", (data["old_isbn"],))
+            if "keywords" in data.keys():
+                cur.execute("DELETE FROM book_keyword WHERE isbn = %s", (data["old_isbn"],))
                 psycopg2.extras.execute_batch(cur, "INSERT INTO book_keyword (isbn, keyword_name) VALUES (%s, %s)",\
                         [(data["old_isbn"], keyword) for keyword in data["keywords"]])            
-                if "categories" in data.keys():
-                    cur.execute("DELETE FROM book_category WHERE isbn = %s", (data["old_isbn"],))
+            if "categories" in data.keys():
+                psycopg2.extras.execute_batch(cur, "INSERT INTO category (category_name) VALUES (%s) ON CONFLICT DO NOTHING",\
+                        [(category,) for category in data["categories"]])
+                cur.execute("DELETE FROM book_category WHERE isbn = %s", (data["old_isbn"],))
                 psycopg2.extras.execute_batch(cur, "INSERT INTO book_category (isbn, category_name) VALUES (%s, %s)",\
                         [(data["old_isbn"], category) for category in data["categories"]])
 
 
-                book_fields = {fieldName: value for fieldName, value in data.items()
-                        if fieldName in {"isbn", "title", "publisher_name", "page_number", "summary", "language"}}
-                if len(book_fields) > 0:
-                    query = psycopg2.sql.SQL("UPDATE book SET {} WHERE isbn={}").format(
-                            psycopg2.sql.SQL(", ").join(
-                                psycopg2.sql.SQL("{} = {}").format(
-                                    psycopg2.sql.Identifier(fieldName), psycopg2.sql.Literal(value))
-                                for fieldName, value in book_fields.items()),
-                            psycopg2.sql.Literal(data["old_isbn"]))
-                    cur.execute(query)
+            book_fields = {fieldName: value for fieldName, value in data.items()
+                    if fieldName in {"isbn", "title", "publisher_name", "page_number", "summary", "language"}}
+            if len(book_fields) > 0:
+                query = psycopg2.sql.SQL("UPDATE book SET {} WHERE isbn={}").format(
+                        psycopg2.sql.SQL(", ").join(
+                            psycopg2.sql.SQL("{} = {}").format(
+                                psycopg2.sql.Identifier(fieldName), psycopg2.sql.Literal(value))
+                            for fieldName, value in book_fields.items()),
+                        psycopg2.sql.Literal(data["old_isbn"]))
+                cur.execute(query)
+
             g.db_conn.commit()
             return {"success": True}, 200
     except psycopg2.IntegrityError as err:
@@ -386,6 +424,41 @@ def get_author():
             cur.execute(query, data)
             authors = cur.fetchall()
             return {"success": True, "authors": authors}, 200
+    except psycopg2.Error as err:
+        print(err)
+        return {"success": False, "error": "unknown"}, 400
+
+GET_LANGUAGE_JSONSCHEMA = {
+        "type": "object",
+        "properties": {
+            "language": {"type": "string"},
+            "limit": {"type": "integer", "minimum": 1}
+            },
+        "additionalProperties": False,
+        }
+
+@bp.route("/language/get/", methods=["POST"])
+def get_language():
+    data = request.get_json()
+    try:
+        jsonschema.validate(data, GET_LANGUAGE_JSONSCHEMA)
+    except jsonschema.ValidationError as err:
+        return {"success": False, "error": err.message}, 400
+
+    query = f"""WITH languages AS (\
+                    SELECT DISTINCT language\
+                    FROM book\
+                )\
+                SELECT language\
+                FROM languages\
+                {'ORDER BY (language <-> %(language)s)' if 'language' in data.keys() else ''}\
+                {'LIMIT %(limit)s' if 'limit' in data.keys() else ''}"""
+ 
+    try:
+        with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
+            cur.execute(query, data)
+            languages = cur.fetchall()
+            return {"success": True, "languages": languages}, 200
     except psycopg2.Error as err:
         print(err)
         return {"success": False, "error": "unknown"}, 400

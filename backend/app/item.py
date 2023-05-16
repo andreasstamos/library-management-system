@@ -5,6 +5,8 @@ import jsonschema
 import psycopg2.sql
 import psycopg2.extras
 
+from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
+
 from .roles_decorators import check_roles
 
 bp = Blueprint("item", __name__)
@@ -13,14 +15,14 @@ INSERT_ITEM_JSONSCHEMA = {
         "type": "object",
         "properties": {
             "isbn": {"type": "string", "pattern": "^[0-9]{13}$"},
-            "school_id": {"type": "integer"},
             },
         "additionalProperties": False,
-        "required": ["isbn", "school_id"]
+        "required": ["isbn"]
         }
 
 
-@bp.route("/", methods=["POST"])
+@bp.route("/insert/", methods=["POST"])
+@check_roles("lib_editor")
 def insert_item():
     data = request.get_json()
     try:
@@ -28,16 +30,19 @@ def insert_item():
     except jsonschema.ValidationError as err:
         return {"success": False, "error": err.message}, 400
 
+    identity = get_jwt_identity()
+    school_id = identity["school_id"]
+
     try:
         with g.db_conn.cursor() as cur:
             cur.execute("INSERT INTO item (isbn, school_id) VALUES (%s, %s) RETURNING item_id",\
-                    (data["isbn"], data["school_id"]))
+                    (data["isbn"], school_id))
             g.db_conn.commit()
             item_id = cur.fetchone()
             return {"success": True, "item_id": item_id[0]}, 201
     except psycopg2.IntegrityError as err:
         g.db_conn.rollback()
-        return {"success": False, "error": err.pgerror}, 400
+        return {"success": False}, 400
     except psycopg2.Error as err:
         g.db_conn.rollback()
         print(err)
@@ -57,7 +62,7 @@ UPDATE_ITEM_JSONSCHEMA = {
         "additionalProperties": False,
         }
 
-@bp.route("/", methods=["PATCH"])
+@bp.route("/update/", methods=["POST"])
 def update_item():
     data = request.get_json()
     try:
