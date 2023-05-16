@@ -25,7 +25,7 @@ INSERT_BOOK_JSONSCHEMA = {
         }
 
 
-@bp.route("/", methods=["POST"])
+@bp.route("/insert/", methods=["POST"])
 def insert_book():
     data = request.get_json()
     try:
@@ -159,7 +159,7 @@ UPDATE_BOOK_JSONSCHEMA = {
         "additionalProperties": False
         }
 
-@bp.route("/", methods=["PATCH"])
+@bp.route("/update/", methods=["POST"])
 def update_book():
     data = request.get_json()
     try:
@@ -253,15 +253,6 @@ def insert_publisher():
     return {"success": True}, 201
 
 
-GET_BOOK_LIST_JSONSCHEMA = {
-        "type": "object",
-        "properties": {
-            },
-        "additionalProperties": False,
-        }
-
-
-
 @bp.route('/get-book-raitings/', methods=['POST'])
 @jwt_required(refresh=False,locations=['headers'], verify_type=False)
 def get_book_raitings():
@@ -293,4 +284,27 @@ def get_book_raitings():
     except psycopg2.Error as err:
         print(err)
         return {"success": False, "error": "unknown"}
+
+GET_CATEGORY_JSONSCHEMA = {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": False,
+        }
+
+@bp.route("/category/get/", methods=["POST"])
+def get_category():
+    data = request.get_json()
+    try:
+        jsonschema.validate(data, GET_CATEGORY_JSONSCHEMA)
+    except jsonschema.ValidationError as err:
+        return {"success": False, "error": err.message}, 400
+
+    try:
+        with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
+            cur.execute("SELECT category_name FROM category")
+            categories = cur.fetchall()
+            return {"success": True, "categories": categories}, 200
+    except psycopg2.Error as err:
+        print(err)
+        return {"success": False, "error": "unknown"}, 400
 

@@ -5,6 +5,7 @@ import PaginationControlled from '../Components/PaginationControlled';
 import BookCard from '../Components/BookCard';
 import './Books.css';
 import SearchBarBooks from '../Components/SearchBarBooks';
+import { FilterBarCategory } from '../Components/FilterBarBooks';
 import AuthContext from '../context/AuthContext';
 import Typography from '@mui/material/Typography';
 
@@ -15,9 +16,11 @@ function Books() {
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
     const [availablePages, setAvailablePages] = useState(10);
-    const BooksPerPage = 1;
+
+    const BooksPerPage = 9;
 
     const [searchValue, setSearchValue] = useState(null);
+    const [categoriesValue, setCategoriesValue] = useState([]);
 
     const navigate = useNavigate();
 
@@ -28,6 +31,7 @@ function Books() {
             try {
                 const payload = {
                     ...(searchValue) && {title: searchValue},
+                    ...(categoriesValue?.length) && {categories: categoriesValue.map((category) => category.category_name)},
                     fetch_fields: ["isbn", "title", "summary", "image_uri", "rate"],
                     limit: BooksPerPage,
                     offset: page>0 ? (page-1)*BooksPerPage : 0,
@@ -54,18 +58,18 @@ function Books() {
         };
 
         fetchBooks();
-    }, [searchValue, page]);
+    }, [searchValue, categoriesValue, page]);
 
     useEffect(() => {
         if (searchValue?.isbn) navigate(`/book/${searchValue?.isbn}`);
     }, [searchValue]);
 
-    console.log(page);
     return (
         <div className='books-page-container'>
             <Typography variant="h3" component="h1">Βιβλία</Typography>
             <div className='page-filters'>
                 <PaginationControlled totalPages={availablePages} page={page} setPage={setPage} />
+                <FilterBarCategory value={categoriesValue} handleChangeValue={(value) => {setCategoriesValue(value);}} />
                 <SearchBarBooks value={searchValue} handleChangeValue={(value) => {setSearchValue(value)}} />
             </div>
             <div className='books-container'>
