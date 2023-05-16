@@ -180,7 +180,37 @@ def insert_library_editor():
 
 
 
+@bp.route('/delete-library-user/', methods=['POST'])
+def delete_library_user():
+    DELETE_LIB_USER_JSON = {
+        "type": "object",
+        "properties": {
+            "user_id": {"type": "integer"},
+            },
+        "required": ["user_id"],
+        "additionalProperties": False,
+    }
+    data = request.get_json()
+    try:
+        jsonschema.validate(data, DELETE_LIB_USER_JSON)
+    except jsonschema.ValidationError as err:
+        return {"success": False, "error": err.message}, 400
 
+    try:
+        with g.db_conn.cursor() as cur:
+            #We must make sure the user being delete is actually a library editor!
+            query = psycopg2.sql.SQL("""
+            DELETE FROM "user" 
+            WHERE "user".user_id = (%s)
+            AND EXISTS(SELECT 1
+            FROM "lib_user" 
+            WHERE "lib_user".user_id = (%s))""")
+            cur.execute(query, [data['user_id'], data['user_id']])
+            g.db_conn.commit()
+            return {'success': True,}, 200
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+        return {'success': False, 'error': 'unknown'}, 400
 
 
 # @bp.route('/activate-library-users/', methods=['POST'])
