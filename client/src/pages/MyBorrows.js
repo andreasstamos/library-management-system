@@ -31,7 +31,7 @@ function MyBorrows() {
         <h1 className='title-with-hr'>Οι δανεισμοί μου</h1>
         <div className='my-borrows-container'>
             {loading && <CircularProgress />}
-            {myBorrows && myBorrows.length > 0 ? <MyBorrowsTable data={myBorrows}/> : <h3>Δεν έχετε δανειστεί βιβλίο.</h3>}
+            {!loading && (myBorrows.length > 0 ? <MyBorrowsTable data={myBorrows}/> : <h3>Δεν έχετε δανειστεί βιβλίο.</h3>)}
             
         </div>
     </div>

@@ -26,7 +26,7 @@ def insert_school():
         jsonschema.validate(data, INSERT_SCHOOL_JSONSCHEMA)
     except jsonschema.ValidationError as err:
         return {"success": False, "error": err.message}, 400
- 
+
     try:
         with g.db_conn.cursor() as cur:
             cur.execute("INSERT INTO school (name, address, city, phone, email)\

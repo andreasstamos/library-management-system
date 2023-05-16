@@ -143,7 +143,7 @@ def activate_reviews():
             'active': {'type': 'boolean'}
             },
         "additionalProperties": False,
-        "required": ["review_id"]
+        "required": ["review_id", 'active']
     }
 
     data = request.get_json()
@@ -174,3 +174,44 @@ def activate_reviews():
         return {"success": False, "error": "unknown"}
 
     return {"success": True}, 200
+
+
+
+@bp.route('/delete-review/', methods=['POST'])
+@check_roles(["lib_editor"])
+def delete_review():
+    DELETE_REVIEW_JSON = {
+        'type': 'object',
+        "properties": {
+            "review_id": {"type": "integer"},
+            },
+        "additionalProperties": False,
+        "required": ["review_id"]
+    }
+    data = request.get_json()
+    try:
+        jsonschema.validate(data, DELETE_REVIEW_JSON)
+    except jsonschema.ValidationError as err:
+        return {"success": False, "error": err.message}, 400
+    user = get_jwt_identity()
+
+    try:
+        with g.db_conn.cursor() as cur:
+
+            # Library editor needs to be at the same school as the user that has his review deleted!
+            query = psycopg2.sql.SQL("""
+            DELETE FROM review
+            WHERE review_id IN (
+                SELECT review.review_id
+                FROM review
+                INNER JOIN "user" 
+                ON "user".user_id = review.user_id AND "user".school_id = (%s)
+                WHERE review_id = (%s)
+            )""")
+            
+            cur.execute(query, [user['school_id'], data['review_id']])
+            g.db_conn.commit()
+            return {'success': True,}, 200
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+        return {'success': False, 'error': 'unknown'}, 400

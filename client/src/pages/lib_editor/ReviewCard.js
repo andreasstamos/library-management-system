@@ -28,6 +28,22 @@ export default function ReviewCard({reviewID, title, authors, username, isbn, bo
       }
 
 
+      async function deleteReview() {
+        const payload = {
+          review_id: reviewID,
+        }
+        const response = await axios.post('http://localhost:5000/lib-api/delete-review/', payload, {
+          headers: {
+            'Access-Control-Expose-Headers' : '*',
+            'Access-Control-Allow-Origin': '*', 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('authTokens')}`,
+         }
+        })
+        console.log(response);
+        fetchReviews();
+      }
+
       async function activateReview() {
             const payload = {
                 review_id: reviewID,
@@ -70,6 +86,7 @@ export default function ReviewCard({reviewID, title, authors, username, isbn, bo
       <CardActions>
         {active && <Button size="small" onClick={activateReview}>Deactivate Review</Button>}
         {!active && <Button size="small" onClick={activateReview}>Activate Review</Button>}
+        <Button color="error" onClick={deleteReview}>Delete Review</Button>
       </CardActions>
     </Card>
   );
