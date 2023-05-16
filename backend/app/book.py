@@ -61,9 +61,9 @@ GET_BOOK_JSONSCHEMA = {
         "properties": {
             "isbn": {"type": "string", "pattern": "^[0-9]{13}$"},
             "title": {"type": "string"},
-            "publisher_name": {"type": "string"},
             "page_number": {"type": "integer", "minimum": 0},
             "language": {"type": "string"},
+            "publisher_name": {"type": "array", "items": {"type": "string"}, "minItems": 1},
             "authors": {"type": "array", "items": {"type": "string"}, "minItems": 1},
             "keywords": {"type": "array", "items": {"type": "string"}, "minItems": 1},
             "categories": {"type": "array", "items": {"type": "string"}, "minItems": 1},
@@ -86,6 +86,9 @@ def get_book():
     except jsonschema.ValidationError as err:
         return {"success": False, "error": err.message}, 400
 
+    if 'publisher_name' in data.keys():
+        data['publisher_name'] = tuple(data['publisher_name'])
+
     select_clause = []
     select_clause += {'isbn', 'title', 'publisher_name', 'page_number', 'language', 'summary', 'image_uri'} & set(data['fetch_fields'])
     if 'authors' in data['fetch_fields']:
@@ -101,7 +104,6 @@ def get_book():
         select_clause.append('(SELECT ROUND(AVG(rate)) FROM review WHERE isbn=book.isbn AND active=true) AS rate')
 
     select_clause = ','.join(select_clause)
-
     where_clause = [f"{field} {'IN' if type(data[field]) is tuple else '='} %({field})s"
             for field in {'isbn', 'publisher_name', 'page_number', 'language', 'school_id'} & set(data.keys())]
     where_clause = ' AND '.join(where_clause)
@@ -110,11 +112,11 @@ def get_book():
 
     having_clause = []
     if 'authors' in data.keys():
-        having_clause.append("array_agg(author_name) @> %(authors)s::varchar[]")
+        having_clause.append("array_agg(author_name) && %(authors)s::varchar[]")
     if 'keywords' in data.keys():
-        having_clause.append("array_agg(keyword_name) @> %(keywords)s::varchar[]")
+        having_clause.append("array_agg(keyword_name) && %(keywords)s::varchar[]")
     if 'categories' in data.keys():
-        having_clause.append("array_agg(category_name) @> %(categories)s::varchar[]")
+        having_clause.append("array_agg(category_name) && %(categories)s::varchar[]")
     having_clause = ' AND '.join(having_clause)
     if having_clause:
         having_clause = f"HAVING {having_clause}"
@@ -203,21 +205,30 @@ def update_book():
         return {"success": False, "error": "unknown"}
 
 
+GET_PUBLISHER_JSONSCHEMA = {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": False,
+        }
+
 # This should be called when a db user tries to add a new book
 # and has to select a publisher
-@bp.route("/publisher/", methods=['GET'])
-def get_publishers():
-    query = psycopg2.sql.SQL("SELECT publisher_name FROM publisher")
+@bp.route("/publisher/get/", methods=["POST"])
+def get_publisher():
+    data = request.get_json()
     try:
-        with g.db_conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            cur.execute(query)
-            results = cur.fetchall()
-            return {"success": True, "publishers": results}, 200
+        jsonschema.validate(data, GET_CATEGORY_JSONSCHEMA)
+    except jsonschema.ValidationError as err:
+        return {"success": False, "error": err.message}, 400
 
+    try:
+        with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
+            cur.execute("SELECT publisher_name FROM publisher")
+            publishers = cur.fetchall()
+            return {"success": True, "publishers": publishers}, 200
     except psycopg2.Error as err:
-        print(err.pgerror)
-        return {"success": False, "error": "unknown"}
-
+        print(err)
+        return {"success": False, "error": "unknown"}, 400
 
 INSERT_PUBLISHER_JSONSCHEMA = {
         "type": "object",
@@ -231,7 +242,7 @@ INSERT_PUBLISHER_JSONSCHEMA = {
 
 # PUBLISHER STUFF GOING ON FROM NOW ON
 # Add a publisher
-@bp.route("/publisher/", methods=["POST"])
+@bp.route("/publisher/insert/", methods=["POST"])
 def insert_publisher():
     data = request.get_json()
     try:
@@ -304,6 +315,77 @@ def get_category():
             cur.execute("SELECT category_name FROM category")
             categories = cur.fetchall()
             return {"success": True, "categories": categories}, 200
+    except psycopg2.Error as err:
+        print(err)
+        return {"success": False, "error": "unknown"}, 400
+
+GET_KEYWORD_JSONSCHEMA = {
+        "type": "object",
+        "properties": {
+            "keyword": {"type": "string"},
+            "limit": {"type": "integer", "minimum": 1}
+            },
+        "additionalProperties": False,
+        }
+
+@bp.route("/keyword/get/", methods=["POST"])
+def get_keyword():
+    data = request.get_json()
+    try:
+        jsonschema.validate(data, GET_KEYWORD_JSONSCHEMA)
+    except jsonschema.ValidationError as err:
+        return {"success": False, "error": err.message}, 400
+
+    query = f"""WITH keywords AS (\
+                    SELECT DISTINCT keyword_name\
+                    FROM book_keyword\
+                )\
+                SELECT keyword_name\
+                FROM keywords\
+                {'ORDER BY (keyword_name <-> %(keyword)s)' if 'keyword' in data.keys() else ''}\
+                {'LIMIT %(limit)s' if 'limit' in data.keys() else ''}"""
+ 
+    try:
+        with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
+            cur.execute(query, data)
+            keywords = cur.fetchall()
+            return {"success": True, "keywords": keywords}, 200
+    except psycopg2.Error as err:
+        print(err)
+        return {"success": False, "error": "unknown"}, 400
+
+
+GET_AUTHOR_JSONSCHEMA = {
+        "type": "object",
+        "properties": {
+            "author": {"type": "string"},
+            "limit": {"type": "integer", "minimum": 1}
+            },
+        "additionalProperties": False,
+        }
+
+@bp.route("/author/get/", methods=["POST"])
+def get_author():
+    data = request.get_json()
+    try:
+        jsonschema.validate(data, GET_AUTHOR_JSONSCHEMA)
+    except jsonschema.ValidationError as err:
+        return {"success": False, "error": err.message}, 400
+
+    query = f"""WITH authors AS (\
+                    SELECT DISTINCT author_name\
+                    FROM book_author\
+                )\
+                SELECT author_name\
+                FROM authors\
+                {'ORDER BY (author_name <-> %(author)s)' if 'author' in data.keys() else ''}\
+                {'LIMIT %(limit)s' if 'limit' in data.keys() else ''}"""
+ 
+    try:
+        with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
+            cur.execute(query, data)
+            authors = cur.fetchall()
+            return {"success": True, "authors": authors}, 200
     except psycopg2.Error as err:
         print(err)
         return {"success": False, "error": "unknown"}, 400

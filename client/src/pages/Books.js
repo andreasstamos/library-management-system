@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios'
-import PaginationControlled from '../Components/PaginationControlled';
 import BookCard from '../Components/BookCard';
 import './Books.css';
 import SearchBarBooks from '../Components/SearchBarBooks';
-import { FilterBarCategory } from '../Components/FilterBarBooks';
+import { FilterBarCategory, FilterBarPublisher, FilterBarKeyword, FilterBarAuthor } from '../Components/FilterBarBooks';
 import AuthContext from '../context/AuthContext';
-import Typography from '@mui/material/Typography';
+import { Typography, Box, Pagination } from '@mui/material';
 
 function Books() {
 
@@ -21,17 +20,24 @@ function Books() {
 
     const [searchValue, setSearchValue] = useState(null);
     const [categoriesValue, setCategoriesValue] = useState([]);
+    const [publishersValue, setPublishersValue] = useState([]);
+    const [keywordsValue, setKeywordsValue] = useState([]);
+    const [authorsValue, setAuthorsValue] = useState([]);
 
     const navigate = useNavigate();
 
     const auth = useContext(AuthContext);
+
 
     useEffect(() => {
         const fetchBooks = async () => {
             try {
                 const payload = {
                     ...(searchValue) && {title: searchValue},
-                    ...(categoriesValue?.length) && {categories: categoriesValue.map((category) => category.category_name)},
+                    ...(categoriesValue?.length) && {categories: categoriesValue},
+                    ...(keywordsValue?.length) && {keywords: keywordsValue},
+                    ...(publishersValue?.length) && {publisher_name: publishersValue},
+                    ...(authorsValue?.length) && {authors: authorsValue},
                     fetch_fields: ["isbn", "title", "summary", "image_uri", "rate"],
                     limit: BooksPerPage,
                     offset: page>0 ? (page-1)*BooksPerPage : 0,
@@ -58,20 +64,29 @@ function Books() {
         };
 
         fetchBooks();
-    }, [searchValue, categoriesValue, page]);
+    }, [searchValue, categoriesValue, publishersValue, keywordsValue, authorsValue, page]);
 
     useEffect(() => {
         if (searchValue?.isbn) navigate(`/book/${searchValue?.isbn}`);
     }, [searchValue]);
 
     return (
-        <div className='books-page-container'>
+        <Box sx={{display: 'flex', flexDirection: 'column', rowGap: '1.5rem'}}>
             <Typography variant="h3" component="h1">Βιβλία</Typography>
-            <div className='page-filters'>
-                <PaginationControlled totalPages={availablePages} page={page} setPage={setPage} />
+            <Box sx={{display: 'flex', columnGap: '1rem'}}>
+                <FilterBarAuthor value={authorsValue} handleChangeValue={(value) => {setAuthorsValue(value);}} />
+                <FilterBarPublisher value={publishersValue} handleChangeValue={(value) => {setPublishersValue(value);}} />
                 <FilterBarCategory value={categoriesValue} handleChangeValue={(value) => {setCategoriesValue(value);}} />
-                <SearchBarBooks value={searchValue} handleChangeValue={(value) => {setSearchValue(value)}} />
-            </div>
+                <FilterBarKeyword value={keywordsValue} handleChangeValue={(value) => {setKeywordsValue(value);}} />
+                <Box sx={{ml: 'auto'}}>
+                    <SearchBarBooks value={searchValue} handleChangeValue={(value) => {setSearchValue(value)}} />
+                </Box>
+            </Box>
+            <Box sx={{display: 'flex', justifyContent: 'center'}}>
+                <Pagination count={availablePages} variant="outlined" color="primary" page={page}
+                    onChange={(event,value) => {setPage(value);}} />
+            </Box>
+            
             <div className='books-container'>
 
                 {books.map((book) =>
@@ -84,9 +99,8 @@ function Books() {
                     summary={book.summary}/>
                 )}
 
-
             </div>
-        </div>
+        </Box>
     )
 }
 
