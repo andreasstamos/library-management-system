@@ -6,6 +6,8 @@ DROP TABLE IF EXISTS book_category;
 DROP TABLE IF EXISTS book_keyword;
 DROP TABLE IF EXISTS book;
 DROP TABLE IF EXISTS category;
+DROP TABLE IF EXISTS keyword;
+DROP TABLE IF EXISTS author;
 DROP TABLE IF EXISTS publisher;
 DROP TABLE IF EXISTS lib_user;
 DROP TABLE IF EXISTS student;
@@ -15,7 +17,8 @@ DROP TABLE IF EXISTS "user";
 DROP TABLE IF EXISTS school;
 
 CREATE TABLE publisher (
-	publisher_name VARCHAR(50) PRIMARY KEY
+	publisher_id SERIAL PRIMARY KEY,
+	publisher_name VARCHAR(50) NOT NULL UNIQUE
 );
 
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
@@ -26,30 +29,41 @@ CREATE TABLE book (
 	page_number SMALLINT CHECK (page_number > 0),
 	summary VARCHAR(10000),
 	language VARCHAR(30),
-	publisher_name VARCHAR(50) REFERENCES publisher ON UPDATE CASCADE,
+	publisher_id SERIAL REFERENCES publisher,
 	image_uri VARCHAR(1000)
 );
 
+CREATE TABLE author (
+	author_id SERIAL PRIMARY KEY,
+	author_name VARCHAR(100) NOT NULL UNIQUE
+);
+
 CREATE TABLE book_author (
-	isbn varchar(13) REFERENCES book ON DELETE CASCADE ON UPDATE CASCADE,
-	author_name VARCHAR(100) NOT NULL,
-	UNIQUE(isbn, author_name)
+	isbn varchar(13) REFERENCES book ON UPDATE CASCADE,
+	author_id SERIAL REFERENCES author,
+	UNIQUE(isbn, author_id)
 );
 
 CREATE TABLE category (
-	category_name VARCHAR(20) PRIMARY KEY
+	category_id SERIAL PRIMARY KEY,
+	category_name VARCHAR(20) NOT NULL UNIQUE
 );
 
 CREATE TABLE book_category (
-	isbn varchar(13) REFERENCES book ON DELETE CASCADE,
-	category_name VARCHAR(20) REFERENCES category ON UPDATE CASCADE,
-	UNIQUE(isbn, category_name)
+	isbn varchar(13) REFERENCES book,
+	category_id SERIAL REFERENCES category,
+	UNIQUE(isbn, category_id)
+);
+
+CREATE TABLE keyword (
+	keyword_id SERIAL PRIMARY KEY,
+	keyword_name VARCHAR(20) NOT NULL UNIQUE
 );
 
 CREATE TABLE book_keyword (
-	isbn varchar(13) REFERENCES book ON DELETE CASCADE,
-	keyword_name VARCHAR(20) NOT NULL,
-	UNIQUE(isbn, keyword_name)
+	isbn varchar(13) REFERENCES book,
+	keyword_id SERIAL REFERENCES keyword,
+	UNIQUE(isbn, keyword_id)
 );
 
 CREATE TABLE school (

@@ -9,32 +9,42 @@ from .roles_decorators import check_roles
 
 bp = Blueprint("book", __name__)
 
-INSERT_BOOK_JSONSCHEMA = {
+
+def insert_multiple_entity_relationship_book(cur, entity, entity_type, values, isbn):
+    cur.execute(f"CREATE TEMPORARY TABLE temp ({entity}_name {entity_type})")
+    psycopg2.extras.execute_values(cur, f"INSERT INTO temp ({entity}_name) VALUES %s", ((value,) for value in values))
+    cur.execute(f"INSERT INTO {entity} ({entity}_name) SELECT {entity}_name FROM temp ON CONFLICT DO NOTHING")
+    cur.execute(f"DELETE FROM book_{entity} WHERE isbn = %s", (isbn,))
+    cur.execute(f"INSERT INTO book_{entity} (isbn, {entity}_id)\
+            SELECT %s, {entity}_id FROM temp JOIN {entity} USING ({entity}_name)", (isbn,))
+    cur.execute("DROP TABLE temp");
+
+INSERT_UPDATE_BOOK_JSONSCHEMA = {
         "type": "object",
         "properties": {
             "isbn": {"type": "string", "pattern": "^[0-9]{13}$"},
+            "new_isbn": {"type": "string", "pattern": "^[0-9]{13}$"},
             "title": {"type": "string"},
-            "publisher_name": {"type": "string"},
+            "publisher": {"type": "string"},
             "page_number": {"type": "integer", "minimum": 0},
             "summary": {"type": "string"},
             "language": {"type": "string"},
             "authors": {"type": "array", "items": {"type": "string"}, "minItems": 1},
             "keywords": {"type": "array", "items": {"type": "string"}},
             "categories": {"type": "array", "items": {"type": "string"}},
-#            "image_uri": {"type" "string"}
-            "insert_item": {"type": "boolean"}, #If given will also insert one item (the 1st item) at the given school
+            #"image_uri": {"type" "string"},
+            "insert_item": {"type": "boolean"}, #If given will also insert one item (the 1st item) at the school_id in the jwt identity
             },
         "additionalProperties": False,
-        "required": ["isbn", "title", "publisher_name", "page_number", "summary", "language", "authors", "keywords", "categories"]
+        "required": ["isbn", "title", "publisher", "page_number", "summary", "language", "authors", "keywords", "categories"],
         }
 
-
-@bp.route("/insert/", methods=["POST"])
-@check_roles("lib_editor")
-def insert_book():
+@bp.route("/insert-update/", methods=["POST"])
+#@check_roles("lib_editor")
+def insert_update_book():
     data = request.get_json()
     try:
-        jsonschema.validate(data, INSERT_BOOK_JSONSCHEMA)
+        jsonschema.validate(data, INSERT_UPDATE_BOOK_JSONSCHEMA)
     except jsonschema.ValidationError as err:
         return {"success": False, "error": err.message}, 400
 
@@ -45,36 +55,40 @@ def insert_book():
         insert_item = True
     
     try:
-        with g.db_conn.cursor() as cur:
-            cur.execute("INSERT INTO publisher (publisher_name) VALUES (%s) ON CONFLICT DO NOTHING", (data["publisher_name"],))
-            psycopg2.extras.execute_batch(cur, "INSERT INTO category (category_name) VALUES (%s) ON CONFLICT DO NOTHING",\
-                        [(category,) for category in data["categories"]])
+        with g.db_conn.cursor() as cur:           
+            cur.execute("INSERT INTO publisher (publisher_name) VALUES (%s) ON CONFLICT DO NOTHING",\
+                    (data["publisher"],))
+             
+            cur.execute("INSERT INTO book (isbn, title, page_number, summary, language, publisher_id)\
+                    SELECT %s, %s, %s, %s, %s, publisher_id\
+                    FROM publisher\
+                    WHERE publisher_name = %s\
+                    ON CONFLICT (isbn) DO UPDATE SET\
+                        title = EXCLUDED.title,\
+                        page_number = EXCLUDED.page_number,\
+                        summary = EXCLUDED.summary,\
+                        language = EXCLUDED.language,\
+                        publisher_id = EXCLUDED.publisher_id",
+                    (data["isbn"], data["title"], data["page_number"], data["summary"], data["language"], data["publisher"]))
 
-            cur.execute("INSERT INTO book (isbn, title, page_number, summary, language, publisher_name)\
-                    VALUES (%s, %s, %s, %s, %s, %s)",\
-                    (data["isbn"], data["title"], data["page_number"], data["summary"], data["language"], data["publisher_name"]))
+            if "new_isbn" in data.keys():
+                cur.execute("UPDATE book SET isbn = %s WHERE isbn = %s", (data["new_isbn"], data["isbn"]))
 
-            psycopg2.extras.execute_batch(cur, "INSERT INTO book_author (isbn, author_name) VALUES (%s, %s)",\
-                        [(data["isbn"], author) for author in data["authors"]])
-            psycopg2.extras.execute_batch(cur, "INSERT INTO book_category (isbn, category_name) VALUES (%s, %s)",\
-                        [(data["isbn"], category) for category in data["categories"]])
-            psycopg2.extras.execute_batch(cur, "INSERT INTO book_keyword (isbn, keyword_name) VALUES (%s, %s)",\
-                        [(data["isbn"], keyword) for keyword in data["keywords"]])
-            
+            insert_multiple_entity_relationship_book(cur, "author", "VARCHAR(100)", data["authors"], data["isbn"])
+            insert_multiple_entity_relationship_book(cur, "category", "VARCHAR(100)", data["categories"], data["isbn"])
+            insert_multiple_entity_relationship_book(cur, "keyword", "VARCHAR(100)", data["keywords"], data["isbn"])
+
             if insert_item:
                 cur.execute("INSERT INTO item (isbn, school_id) VALUES (%s, %s) RETURNING item_id", (data["isbn"], school_id))
+                item_id = cur.fetchone()[0]
             
             g.db_conn.commit()
             
             if insert_item:
-                item_id = cur.fetchone()
                 return {"success": True, "item_id": item_id[0]}, 201
 
-            return {"success": True}
+            return {"success": True}, 201
  
-    except psycopg2.IntegrityError as err:
-        g.db_conn.rollback()
-        return {"success": False, "error": "unknown"}, 400
     except psycopg2.Error as err:
         g.db_conn.rollback()
         print(err)
@@ -85,17 +99,19 @@ GET_BOOK_JSONSCHEMA = {
         "properties": {
             "isbn": {"type": "string", "pattern": "^[0-9]{13}$"},
             "title": {"type": "string"},
-            "page_number": {"type": "integer", "minimum": 0},
-            "language": {"type": "string"},
-            "publisher_name": {"type": "array", "items": {"type": "string"}, "minItems": 1},
-            "authors": {"type": "array", "items": {"type": "string"}, "minItems": 1},
-            "keywords": {"type": "array", "items": {"type": "string"}, "minItems": 1},
-            "categories": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+            
+            "publishers": {"type": "array", "items": {"type": "integer"}, "minItems": 1},
+            "authors": {"type": "array", "items": {"type": "integer"}, "minItems": 1},
+            "keywords": {"type": "array", "items": {"type": "integer"}, "minItems": 1},
+            "categories": {"type": "array", "items": {"type": "integer"}, "minItems": 1},
+
             "school_id": {"type": "integer"},
+            
             "limit": {"type": "integer", "minimum": 1},
             "offset": {"type": "integer", "minimum": 0},
+            
             "fetch_fields": {"type": "array", "minItems": 1, "items": {"type": "string", "enum":\
-                    ["isbn", "title", "publisher_name", "page_number", "language", "summary", "image_uri",
+                    ["isbn", "title", "publisher", "page_number", "language", "summary", "image_uri",
                         "authors", "keywords", "categories", "rate", "item_number"]}}
             },
         "additionalProperties": False,
@@ -110,134 +126,64 @@ def get_book():
     except jsonschema.ValidationError as err:
         return {"success": False, "error": err.message}, 400
 
-    if 'publisher_name' in data.keys():
-        data['publisher_name'] = tuple(data['publisher_name'])
-
-    select_clause = []
-    select_clause += {'isbn', 'title', 'publisher_name', 'page_number', 'language', 'summary', 'image_uri'} & set(data['fetch_fields'])
-    if 'authors' in data['fetch_fields']:
-        select_clause.append('array_remove(array_agg(DISTINCT author_name), NULL) AS authors')
-    if 'keywords' in data['fetch_fields']:
-        select_clause.append('array_remove(array_agg(DISTINCT keyword_name), NULL) AS keywords')
-    if 'categories' in data['fetch_fields']:
-        select_clause.append('array_remove(array_agg(DISTINCT category_name), NULL) AS categories')
-    if 'item_number' in data['fetch_fields']:
-        select_clause.append('COUNT(DISTINCT item_id) AS item_number')
+    select_clause = set(data["fetch_fields"]) - {"rate", "item_number"}
     if 'rate' in data['fetch_fields']:
         # Kostas added active=true in the WHERE clause... (in case it stops working)
         select_clause.append('(SELECT ROUND(AVG(rate)) FROM review WHERE isbn=book.isbn AND active=true) AS rate')
-
     select_clause = ','.join(select_clause)
-    where_clause = [f"{field} {'IN' if type(data[field]) is tuple else '='} %({field})s"
-            for field in {'isbn', 'publisher_name', 'page_number', 'language', 'school_id'} & set(data.keys())]
+
+    join_clause = []
+    if 'authors' in data.keys() or 'authors' in data["fetch_fields"]:
+        join_clause.append("""LEFT JOIN (\
+                SELECT isbn, ARRAY_AGG(author_name) AS authors\
+                FROM book_author\
+                JOIN author USING (author_id)\
+                GROUP BY isbn) AS authors\
+                USING (isbn)""")
+
+    if 'keywords' in data.keys() or 'keywords' in data["fetch_fields"]:
+        join_clause.append("""LEFT JOIN (\
+                SELECT isbn, ARRAY_AGG(keyword_name) AS keywords\
+                FROM book_keyword\
+                JOIN keyword USING (keyword_id)\
+                GROUP BY isbn) AS keywords\
+                USING (isbn)""")
+
+    if 'categories' in data.keys() or 'categories' in data["fetch_fields"]:
+        join_clause.append("""LEFT JOIN (\
+                SELECT isbn, ARRAY_AGG(category_name) AS categories\
+                FROM book_category\
+                JOIN category USING (category_id)\
+                GROUP BY isbn) AS categories\
+                USING (isbn)""")
+    if 'publishers' in data.keys() or 'publisher' in data["fetch_fields"]:
+        join_clause.append('LEFT JOIN publisher USING (isbn)') 
+
+    join_clause = ' '.join(join_clause)
+
+    where_clause = []
+    where_clause += [f"{field} && %({field})s"
+            for field in {'authors', 'keywords', 'categories'} & set(data.keys())]
     where_clause = ' AND '.join(where_clause)
+    
+    if 'isbn' in data.keys():
+        where_clause = "isbn = %(isbn)s"
     if where_clause:
         where_clause = f"WHERE {where_clause}"
 
-    having_clause = []
-    if 'authors' in data.keys():
-        having_clause.append("array_agg(author_name) && %(authors)s::varchar[]")
-    if 'keywords' in data.keys():
-        having_clause.append("array_agg(keyword_name) && %(keywords)s::varchar[]")
-    if 'categories' in data.keys():
-        having_clause.append("array_agg(category_name) && %(categories)s::varchar[]")
-    having_clause = ' AND '.join(having_clause)
-    if having_clause:
-        having_clause = f"HAVING {having_clause}"
-
-    query = psycopg2.sql.SQL(f"""SELECT {select_clause}\
+    query = f"""SELECT {select_clause}\
             FROM book\
-            {'LEFT JOIN book_author USING (isbn)' if 'authors' in data.keys() or 'authors' in data['fetch_fields'] else ''}\
-            {'LEFT JOIN book_keyword USING (isbn)' if 'keywords' in data.keys() or 'keywords' in data['fetch_fields'] else ''}\
-            {'LEFT JOIN book_category USING (isbn)' if 'categories' in data.keys() or 'categories' in data['fetch_fields'] else ''}\
-            {'LEFT JOIN item USING (isbn)' if 'school_id' in data.keys() or 'item_number' in data['fetch_fields'] else ''}\
+            {join_clause}
             {where_clause}\
-            GROUP BY isbn\
-            {having_clause}\
             {'ORDER BY (title <-> %(title)s)' if 'title' in data.keys() else ''}\
             {'OFFSET %(offset)s' if 'offset' in data.keys() else ''}\
-            {'LIMIT %(limit)s' if 'limit' in data.keys() else ''}""")
+            {'LIMIT %(limit)s' if 'limit' in data.keys() else ''}"""
     
     try:
         with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
             cur.execute(query, data)
             results = cur.fetchall()
             return {"success": True, "books": results}, 200
-    except psycopg2.Error as err:
-        print(err.pgerror)
-        return {"success": False, "error": "unknown"}
-
-UPDATE_BOOK_JSONSCHEMA = {
-        "type": "object",
-        "properties": {
-            "old_isbn": {"type": "string", "pattern": "^[0-9]{13}$"},
-            "isbn": {"type": "string", "pattern": "^[0-9]{13}$"},
-            "title": {"type": "string"},
-            "publisher_name": {"type": "string"},
-            "page_number": {"type": "integer", "minimum": 0},
-            "summary": {"type": "string"},
-            "language": {"type": "string"},
-            "authors": {"type": "array", "items": {"type": "string"}, "minItems": 1},
-            "keywords": {"type": "array", "items": {"type": "string"}},
-            "categories": {"type": "array", "items": {"type": "string"}},
-            },
-        "required": ["old_isbn"],
-        "additionalProperties": False
-        }
-
-@bp.route("/update/", methods=["POST"])
-@check_roles("lib_editor")
-def update_book():
-    data = request.get_json()
-    try:
-        jsonschema.validate(data, UPDATE_BOOK_JSONSCHEMA)
-    except jsonschema.ValidationError as err:
-        return {"success": False, "error": err.message}, 400
-
-    insert_item = False
-    if "insert_item" in data.keys() and data["insert_item"]:
-        identity = get_jwt_identity()
-        school_id = identity["school_id"]
-        insert_item = True
-    
-    try:
-        with g.db_conn.cursor() as cur:
-            if "publisher_name" in data.keys():
-                    cur.execute("INSERT INTO publisher (publisher_name) VALUES (%s) ON CONFLICT DO NOTHING", (data["publisher_name"],))
-            
-           
-            if "authors" in data.keys():
-                cur.execute("DELETE FROM book_author WHERE isbn = %s", (data["old_isbn"],))
-                psycopg2.extras.execute_batch(cur, "INSERT INTO book_author (isbn, author_name) VALUES (%s, %s)",\
-                        [(data["old_isbn"], author) for author in data["authors"]])
-            if "keywords" in data.keys():
-                cur.execute("DELETE FROM book_keyword WHERE isbn = %s", (data["old_isbn"],))
-                psycopg2.extras.execute_batch(cur, "INSERT INTO book_keyword (isbn, keyword_name) VALUES (%s, %s)",\
-                        [(data["old_isbn"], keyword) for keyword in data["keywords"]])            
-            if "categories" in data.keys():
-                psycopg2.extras.execute_batch(cur, "INSERT INTO category (category_name) VALUES (%s) ON CONFLICT DO NOTHING",\
-                        [(category,) for category in data["categories"]])
-                cur.execute("DELETE FROM book_category WHERE isbn = %s", (data["old_isbn"],))
-                psycopg2.extras.execute_batch(cur, "INSERT INTO book_category (isbn, category_name) VALUES (%s, %s)",\
-                        [(data["old_isbn"], category) for category in data["categories"]])
-
-
-            book_fields = {fieldName: value for fieldName, value in data.items()
-                    if fieldName in {"isbn", "title", "publisher_name", "page_number", "summary", "language"}}
-            if len(book_fields) > 0:
-                query = psycopg2.sql.SQL("UPDATE book SET {} WHERE isbn={}").format(
-                        psycopg2.sql.SQL(", ").join(
-                            psycopg2.sql.SQL("{} = {}").format(
-                                psycopg2.sql.Identifier(fieldName), psycopg2.sql.Literal(value))
-                            for fieldName, value in book_fields.items()),
-                        psycopg2.sql.Literal(data["old_isbn"]))
-                cur.execute(query)
-
-            g.db_conn.commit()
-            return {"success": True}, 200
-    except psycopg2.IntegrityError as err:
-        g.db_conn.rollback()
-        return {"success": False, "error": err.pgerror}, 400
     except psycopg2.Error as err:
         print(err.pgerror)
         return {"success": False, "error": "unknown"}
@@ -374,14 +320,10 @@ def get_keyword():
     except jsonschema.ValidationError as err:
         return {"success": False, "error": err.message}, 400
 
-    query = f"""WITH keywords AS (\
-                    SELECT DISTINCT keyword_name\
-                    FROM book_keyword\
-                )\
-                SELECT keyword_name\
-                FROM keywords\
-                {'ORDER BY (keyword_name <-> %(keyword)s)' if 'keyword' in data.keys() else ''}\
-                {'LIMIT %(limit)s' if 'limit' in data.keys() else ''}"""
+    query = f"""SELECT keyword_name\
+            FROM keywords\
+            {'ORDER BY (keyword_name <-> %(keyword)s)' if 'keyword' in data.keys() else ''}\
+            {'LIMIT %(limit)s' if 'limit' in data.keys() else ''}"""
  
     try:
         with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
@@ -410,14 +352,10 @@ def get_author():
     except jsonschema.ValidationError as err:
         return {"success": False, "error": err.message}, 400
 
-    query = f"""WITH authors AS (\
-                    SELECT DISTINCT author_name\
-                    FROM book_author\
-                )\
-                SELECT author_name\
-                FROM authors\
-                {'ORDER BY (author_name <-> %(author)s)' if 'author' in data.keys() else ''}\
-                {'LIMIT %(limit)s' if 'limit' in data.keys() else ''}"""
+    query = f"""SELECT author_name\
+            FROM authors\
+            {'ORDER BY (author_name <-> %(author)s)' if 'author' in data.keys() else ''}\
+            {'LIMIT %(limit)s' if 'limit' in data.keys() else ''}"""
  
     try:
         with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
