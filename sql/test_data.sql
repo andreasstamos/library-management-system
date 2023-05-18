@@ -1,43 +1,64 @@
 --CHATGPT GENERATED
 
-INSERT INTO publisher (publisher_name) VALUES ('Penguin Books');
-INSERT INTO publisher (publisher_name) VALUES ('HarperCollins');
-INSERT INTO publisher (publisher_name) VALUES ('Random House');
+-- Insert dummy data into the publisher table
+INSERT INTO publisher (publisher_name) VALUES
+('ABC Publishers'),
+('XYZ Books'),
+('The Book Company');
 
-INSERT INTO book (isbn, title, page_number, summary, language, publisher_name, image_uri) VALUES
-('9780142437230', 'To Kill a Mockingbird', 336, 'A classic novel about racial injustice in the American South.', 'English', 'HarperCollins', 'https://upload.wikimedia.org/wikipedia/commons/4/4f/To_Kill_a_Mockingbird_%28first_edition_cover%29.jpg'),
-('9780061120084', '1984', 328, 'A dystopian novel about a totalitarian government and its impact on society.', 'English', 'Penguin Books', 'https://upload.wikimedia.org/wikipedia/commons/c/c3/1984first.jpg'),
-('9780525537561', 'Becoming', 448, 'A memoir by former First Lady Michelle Obama.', 'English', 'Random House', null);
+-- Insert dummy data into the book table
+INSERT INTO book (isbn, title, page_number, summary, language, publisher_id, image_uri) VALUES
+('9780000000001', 'The Adventure Begins', 350, 'Join the thrilling journey of a young hero as he embarks on a quest to save the world.', 'English', 1, 'https://media.gettyimages.com/id/157482029/photo/stack-of-books.jpg?s=612x612&w=gi&k=20&c=_Yaofm8sZLZkKs1eMkv-zhk8K4k5u0g0fJuQrReWfdQ='),
+('9780000000002', 'Secrets of the Past', 250, 'Uncover the hidden secrets of a mysterious ancient civilization.', 'English', 2, 'https://static.vecteezy.com/system/resources/previews/009/399/398/original/old-vintage-book-clipart-design-illustration-free-png.png'),
+('9780000000003', 'El Misterio del Pasado', 200, 'Descubre los secretos ocultos de una misteriosa civilización antigua.', 'Spanish', 1, 'http://example.com/book3.jpg');
 
-INSERT INTO book_author (isbn, author_name) VALUES
-('9780142437230', 'Harper Lee'),
-('9780061120084', 'George Orwell'),
-('9780525537561', 'Michelle Obama');
+-- Insert dummy data into the author table
+INSERT INTO author (author_name) VALUES
+('John Smith'),
+('Emily Johnson'),
+('Michael Anderson');
 
-INSERT INTO category (category_name) VALUES ('Fiction');
-INSERT INTO category (category_name) VALUES ('Non-fiction');
+-- Insert dummy data into the book_author table
+INSERT INTO book_author (isbn, author_id) VALUES
+('9780000000001', 1),
+('9780000000001', 2),
+('9780000000002', 2),
+('9780000000003', 3);
 
-INSERT INTO book_category (isbn, category_name) VALUES
-('9780142437230', 'Fiction'),
-('9780061120084', 'Fiction'),
-('9780525537561', 'Non-fiction');
+-- Insert dummy data into the category table
+INSERT INTO category (category_name) VALUES
+('Adventure'),
+('Mystery'),
+('Historical Fiction');
 
-INSERT INTO book_keyword (isbn, keyword_name) VALUES
-('9780142437230', 'race'),
-('9780142437230', 'justice'),
-('9780061120084', 'dystopia'),
-('9780061120084', 'government'),
-('9780525537561', 'memoir'),
-('9780525537561', 'politics');
+-- Insert dummy data into the book_category table
+INSERT INTO book_category (isbn, category_id) VALUES
+('9780000000001', 1),
+('9780000000001', 2),
+('9780000000002', 2),
+('9780000000003', 3);
+
+-- Insert dummy data into the keyword table
+INSERT INTO keyword (keyword_name) VALUES
+('Fantasy'),
+('Thriller'),
+('Ancient Civilization');
+
+-- Insert dummy data into the book_keyword table
+INSERT INTO book_keyword (isbn, keyword_id) VALUES
+('9780000000001', 1),
+('9780000000001', 2),
+('9780000000002', 2),
+('9780000000003', 3);
 
 INSERT INTO school (name, address, city, phone, email) VALUES
 ('ABC School', '123 Main St', 'New York', '+1234567890', 'info@abcschool.com'),
 ('XYZ School', '456 Elm St', 'Los Angeles', '+9876543210', 'info@xyzschool.com');
 
 INSERT INTO item (isbn, school_id) VALUES
-('9780142437230', 1),
-('9780061120084', 1),
-('9780525537561', 2);
+('9780000000001', 1),
+('9780000000002', 1),
+('9780000000003', 2);
 
 INSERT INTO "user" (school_id, first_name, last_name, email, username, password_hash, dob, active) VALUES
 --password123
@@ -48,9 +69,10 @@ INSERT INTO "user" (school_id, first_name, last_name, email, username, password_
 INSERT INTO lib_user (user_id) VALUES (1);
 
 INSERT INTO review (isbn, user_id, rate, body, active) VALUES
-('9780142437230', 1, 5, 'This is a must-read classic that everyone should experience.', true),
-('9780525537561', 1, 5, 'Becoming is an inspiring memoir that shows the power of hard work and determination.', true),
-('9780061120084', 1, 2, 'This book was too depressing for me. I wouldn''t recommend it unless you want to feel hopeless about the world.', true),
-('9780142437230', 2, 4, 'To Kill a Mockingbird is a timeless classic that is still relevant today.', true),
-('9780525537561', 2, 3, 'I enjoyed reading this book, but it didn''t quite live up to the hype for me.', true),
-('9780061120084', 2, 4, '1984 is a dark and thought-provoking book that really makes you question the world we live in.', true);
+    ('9780000000001', 1, 5, 'This book exceeded my expectations. The writing was superb, and the plot twists were unexpected.', true),
+    ('9780000000002', 1, 4, 'I found this book to be quite intriguing. The mystery kept me guessing until the end.', true),
+    ('9780000000003', 1, 4, 'An excellent read! The author did a great job of building suspense throughout the story.', true),
+    ('9780000000001', 2, 2, 'Unfortunately, this book did not resonate with me. I struggled to connect with the characters.', true),
+    ('9780000000002', 2, 3, 'The book had its moments, but I felt that it lacked depth in certain areas.', true),
+    ('9780000000003', 2, 5, 'I couldn''t put this book down! The author created a vivid and immersive world.', true);
+

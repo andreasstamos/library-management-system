@@ -26,7 +26,7 @@ INSERT_UPDATE_BOOK_JSONSCHEMA = {
             "new_isbn": {"type": "string", "pattern": "^[0-9]{13}$"},
             "title": {"type": "string"},
             "publisher": {"type": "string"},
-            "page_number": {"type": "integer", "minimum": 0},
+            "page_number": {"type": "integer", "minimum": 0, "maximum": 32767},
             "summary": {"type": "string"},
             "language": {"type": "string"},
             "authors": {"type": "array", "items": {"type": "string"}, "minItems": 1},
@@ -40,7 +40,7 @@ INSERT_UPDATE_BOOK_JSONSCHEMA = {
         }
 
 @bp.route("/insert-update/", methods=["POST"])
-#@check_roles("lib_editor")
+@check_roles("lib_editor")
 def insert_update_book():
     data = request.get_json()
     try:
@@ -85,7 +85,7 @@ def insert_update_book():
             g.db_conn.commit()
             
             if insert_item:
-                return {"success": True, "item_id": item_id[0]}, 201
+                return {"success": True, "item_id": item_id}, 201
 
             return {"success": True}, 201
  
@@ -100,10 +100,10 @@ GET_BOOK_JSONSCHEMA = {
             "isbn": {"type": "string", "pattern": "^[0-9]{13}$"},
             "title": {"type": "string"},
             
-            "publishers": {"type": "array", "items": {"type": "integer"}, "minItems": 1},
-            "authors": {"type": "array", "items": {"type": "integer"}, "minItems": 1},
-            "keywords": {"type": "array", "items": {"type": "integer"}, "minItems": 1},
-            "categories": {"type": "array", "items": {"type": "integer"}, "minItems": 1},
+            "publishers": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+            "authors": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+            "keywords": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+            "categories": {"type": "array", "items": {"type": "string"}, "minItems": 1},
 
             "school_id": {"type": "integer"},
             
@@ -111,7 +111,7 @@ GET_BOOK_JSONSCHEMA = {
             "offset": {"type": "integer", "minimum": 0},
             
             "fetch_fields": {"type": "array", "minItems": 1, "items": {"type": "string", "enum":\
-                    ["isbn", "title", "publisher", "page_number", "language", "summary", "image_uri",
+                    ["isbn", "title", "publisher_name", "page_number", "language", "summary", "image_uri",
                         "authors", "keywords", "categories", "rate", "item_number"]}}
             },
         "additionalProperties": False,
@@ -126,10 +126,7 @@ def get_book():
     except jsonschema.ValidationError as err:
         return {"success": False, "error": err.message}, 400
 
-    select_clause = set(data["fetch_fields"]) - {"rate", "item_number"}
-    if 'rate' in data['fetch_fields']:
-        # Kostas added active=true in the WHERE clause... (in case it stops working)
-        select_clause.append('(SELECT ROUND(AVG(rate)) FROM review WHERE isbn=book.isbn AND active=true) AS rate')
+    select_clause = set(data["fetch_fields"]) - {"item_number"}
     select_clause = ','.join(select_clause)
 
     join_clause = []
@@ -156,14 +153,26 @@ def get_book():
                 JOIN category USING (category_id)\
                 GROUP BY isbn) AS categories\
                 USING (isbn)""")
-    if 'publishers' in data.keys() or 'publisher' in data["fetch_fields"]:
-        join_clause.append('LEFT JOIN publisher USING (isbn)') 
+
+    if 'rate' in data["fetch_fields"]:
+        join_clause.append("""LEFT JOIN (\
+                SELECT isbn, ROUND(AVG(rate)) AS rate\
+                FROM review\
+                WHERE active=true\
+                GROUP BY isbn) AS rate\
+                USING (isbn)""")
+
+    if 'publishers' in data.keys() or 'publisher_name' in data["fetch_fields"]:
+        join_clause.append('LEFT JOIN publisher USING (publisher_id)') 
 
     join_clause = ' '.join(join_clause)
 
     where_clause = []
-    where_clause += [f"{field} && %({field})s"
+    where_clause += [f"{field} && %({field})s::varchar[]"
             for field in {'authors', 'keywords', 'categories'} & set(data.keys())]
+    if 'publishers' in data.keys():
+        data["publishers"] = tuple(data["publishers"])
+        where_clause.append("publisher_name IN %(publishers)s")
     where_clause = ' AND '.join(where_clause)
     
     if 'isbn' in data.keys():
@@ -186,7 +195,7 @@ def get_book():
             return {"success": True, "books": results}, 200
     except psycopg2.Error as err:
         print(err.pgerror)
-        return {"success": False, "error": "unknown"}
+        return {"success": False, "error": "unknown"}, 200
 
 
 GET_PUBLISHER_JSONSCHEMA = {
@@ -249,7 +258,7 @@ def insert_publisher():
 
 
 @bp.route('/get-book-raitings/', methods=['POST'])
-@jwt_required(refresh=False,locations=['headers'], verify_type=False)
+@check_roles()
 def get_book_raitings():
     GET_RAITINGS = {
         "type": "object",
@@ -321,7 +330,7 @@ def get_keyword():
         return {"success": False, "error": err.message}, 400
 
     query = f"""SELECT keyword_name\
-            FROM keywords\
+            FROM keyword\
             {'ORDER BY (keyword_name <-> %(keyword)s)' if 'keyword' in data.keys() else ''}\
             {'LIMIT %(limit)s' if 'limit' in data.keys() else ''}"""
  
@@ -353,7 +362,7 @@ def get_author():
         return {"success": False, "error": err.message}, 400
 
     query = f"""SELECT author_name\
-            FROM authors\
+            FROM author\
             {'ORDER BY (author_name <-> %(author)s)' if 'author' in data.keys() else ''}\
             {'LIMIT %(limit)s' if 'limit' in data.keys() else ''}"""
  

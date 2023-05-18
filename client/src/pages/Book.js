@@ -77,6 +77,12 @@ function Book() {
                     </div>
 
                     <div className='book-detail'>
+                        <Typography variant="h6">Εκδοτικός Οίκος</Typography>
+                        <Typography variant="body1">{book?.publisher_name}</Typography>
+                    </div>
+
+
+                    <div className='book-detail'>
                         <Typography variant="h6">{book?.categories?.length <= 1 ? 'Κατηγορία' : 'Κατηγορίες'}</Typography>
                         <Typography variant="body1">{book?.categories.join(', ')}</Typography>
                     </div>
@@ -94,11 +100,6 @@ function Book() {
                     <div className='book-detail'>
                         <Typography variant="h6">Αριθμός σελίδων</Typography>
                         <Typography variant="body1">{book?.page_number}</Typography>
-                    </div>
-
-                    <div className='book-detail'>
-                        <Typography variant="h6">Εκδοτικός Οίκος</Typography>
-                        <Typography variant="body1">{book?.publisher_name}</Typography>
                     </div>
 
                     <div className='book-detail'>

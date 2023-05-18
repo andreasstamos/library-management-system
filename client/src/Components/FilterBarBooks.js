@@ -15,7 +15,6 @@ function FilterBar({label, inputValue, value, options, loading, handleChangeValu
       readOnly={readOnly}
       freeSolo={edit}
       value={value}
-      defaultValue={value}
       inputValue={readOnly ? (singlevalue ? value : '') : inputValue}
       onChange={(event, value) => {handleChangeValue(value);}}
       onInputChange={(event, value) => {handleChangeInputValue(value);}}

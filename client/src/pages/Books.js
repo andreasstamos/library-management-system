@@ -36,7 +36,7 @@ function Books() {
                     ...(searchValue) && {title: searchValue},
                     ...(categoriesValue?.length) && {categories: categoriesValue},
                     ...(keywordsValue?.length) && {keywords: keywordsValue},
-                    ...(publishersValue?.length) && {publisher_name: publishersValue},
+                    ...(publishersValue?.length) && {publishers: publishersValue},
                     ...(authorsValue?.length) && {authors: authorsValue},
                     fetch_fields: ["isbn", "title", "summary", "image_uri", "rate"],
                     limit: BooksPerPage,

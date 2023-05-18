@@ -128,7 +128,7 @@ function BookAdd() {
                     const payload = {
                         "isbn": isbn,
                         "title": title,
-                        "publisher_name": publisher,
+                        "publisher": publisher,
                         "page_number": pageNumber,
                         "summary": summary,
                         "language": language,
@@ -138,18 +138,10 @@ function BookAdd() {
                         "insert_item": true,
                     }
 
-                    if (!editing) {
-                        response = await axios.post('http://127.0.0.1:5000/book/insert/', payload, {headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${auth.authTokens}`,
-                        }});
-                    }
-                    else {
-                        response = await axios.post('http://127.0.0.1:5000/book/update/', payload, {headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${auth.authTokens}`,
-                        }});
-                    }
+                    response = await axios.post('http://127.0.0.1:5000/book/insert-update/', payload, {headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${auth.authTokens}`,
+                    }});
                 }
                 setLoadingInsert(false);
                 if (!response?.data?.success) {
