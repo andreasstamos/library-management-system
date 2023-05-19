@@ -9,45 +9,74 @@ function ItemIdForm({itemid, setItemId, handleNext, handleReturn}) {
 	const [inputItemId, setInputItemId] = useState(itemid || "");
 	const [item, setItem] = useState(null);
 	const [itemLoading, setItemLoading] = useState(false);
+	const [user, setUser] = useState(null);
+	const [userLoading, setUserLoading] = useState(false);
 	const [error, setError] = useState(null);
 	const auth = useContext(AuthContext);
 
-	useEffect(() => {
-		setItem(null);
-		if (!itemid) return;
-		setItemLoading(true);
-		const fetchItem = async () => {
-			try {
-				const payload = {
-					item_id: parseInt(itemid)
-				};
-				const response = await axios.post('http://127.0.0.1:5000/item/get-details/', payload, {headers: {
-					'Content-Type': 'application/json',
-					'Authorization': `Bearer ${auth.authTokens}`,
-				}});
-				setItemLoading(false);
-				if (!response.data.success) {
-					setError("Κάτι πήγε λάθος. Παρακολούμε προσπαθήστε ξανά.");
-				}
+        useEffect(() => {
+               const fetchItem = async () => {
+                        try {
+                                const payload = {
+                                        item_id: parseInt(itemid),
+					fetch_fields: ["image_uri", "title", "authors", "isbn", "rate", "summary",
+						"categories", "keywords", "language", "page_number", "publisher_name"]
+                                };
+                                const response = await axios.post('http://127.0.0.1:5000/book/get/', payload, {headers: {
+                                        'Content-Type': 'application/json',
+                                        'Authorization': `Bearer ${auth.authTokens}`,
+                                }});
+                                setItemLoading(false);
+                                if (!response?.data?.success) {
+                                        setError("Κάτι πήγε λάθος. Παρακολούμε προσπαθήστε ξανά.");
+					return;
+                                }
 
-				if (response.data.item) {
-					setItem(response.data.item);
-				}
-				else {
-					setError("Δυστυχώς το αντίτυπο δεν βρέθηκε.");
-				}
-			} catch (e) {
-				setItemLoading(false);
-				setError("Κάτι πήγε λάθος. Παρακολούμε προσπαθήστε ξανά.");
-			}
-		};
+                                if (response?.data?.books?.length) {
+                                        setItem(response?.data?.books[0]);
+                                }
+                                else {
+                                        setError("Δυστυχώς το αντίτυπο δεν βρέθηκε.");
+                                }
+                        } catch (e) {
+                                setItemLoading(false);
+                                setError("Κάτι πήγε λάθος. Παρακολούμε προσπαθήστε ξανά.");
+                        }
+                };
+                const fetchUser = async () => {
+                        try {
+                                const payload = {
+                                        item_id: parseInt(itemid)
+                                };
+                                const response = await axios.post('http://127.0.0.1:5000/item/is-borrowed/', payload, {headers: {
+                                        'Content-Type': 'application/json',
+                                        'Authorization': `Bearer ${auth.authTokens}`,
+                                }});
+                                setUserLoading(false);
+                                if (!response?.data?.success) {
+                                        setError("Κάτι πήγε λάθος. Παρακολούμε προσπαθήστε ξανά.");
+					return;
+                                }
+				setUser(response?.data?.user);
+                        } catch (e) {
+                                setUserLoading(false);
+                                setError("Κάτι πήγε λάθος. Παρακολούμε προσπαθήστε ξανά.");
+                        }
+                };
 
-		fetchItem();
-	}, [itemid])
+		setError(null);
+                setItem(null);
+                if (!itemid) return;
+                setItemLoading(true);
+		setUserLoading(true);
+
+                fetchItem();
+		fetchUser();
+        }, [itemid])
 
 	return (
 		<Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start', rowGap: '1rem'}}>
-			{error && <Alert severity="error" onClose={() => setError(null)} >{error}</Alert>}
+			{error && <Alert severity="error">{error}</Alert>}
 			<Box sx={{display: 'flex', columnGap:'1rem'}}>
 				<TextField
 					label="Κωδικός Αντιτύπου"
@@ -104,20 +133,20 @@ function ItemIdForm({itemid, setItemId, handleNext, handleReturn}) {
 									<Typography variant="body1">{item?.publisher_name}</Typography>
 								</div>
 							</Box>
-							{item.isBorrowed &&
+							{!userLoading && user &&
 							<Box sx={{display: 'flex', flexDirection: 'column', rowGap: '1rem'}}>
 								<Typography variant="h5">Δανειζόμενος χρήστης</Typography>
 								<div className='book-detail'>
 									<Typography variant="h6">Όνομα</Typography>
-									<Typography variant="body1">{item?.first_name}</Typography>
+									<Typography variant="body1">{user?.first_name}</Typography>
 								</div>
 								<div className='book-detail'>
 									<Typography variant="h6">Επώνυμο</Typography>
-									<Typography variant="body1">{item?.last_name}</Typography>
+									<Typography variant="body1">{user?.last_name}</Typography>
 								</div>
 								<div className='book-detail'>
 									<Typography variant="h6">e-mail</Typography>
-									<Typography variant="body1">{item?.email}</Typography>
+									<Typography variant="body1">{user?.email}</Typography>
 								</div>
 							</Box>
 							}	
@@ -125,8 +154,8 @@ function ItemIdForm({itemid, setItemId, handleNext, handleReturn}) {
 					</Box>
 				</Box>
 			}
-			{item && !item?.isBorrowed && <Button variant="contained" sx={{ml: 'auto'}} onClick={handleNext}>ΕΠΟΜΕΝΟ</Button>}
-			{item && item?.isBorrowed && <Button variant="contained" sx={{ml: 'auto'}} onClick={handleReturn}>ΕΠΙΣΤΡΟΦΗ</Button>}
+			{item && !user && <Button variant="contained" sx={{ml: 'auto'}} onClick={handleNext}>ΕΠΟΜΕΝΟ</Button>}
+			{item && user && <Button variant="contained" sx={{ml: 'auto'}} onClick={handleReturn}>ΕΠΙΣΤΡΟΦΗ</Button>}
 
 		</Box>
 	)
@@ -140,9 +169,6 @@ function UserIdForm({userid, setUserId, handleBorrow, handleBack}) {
 	const auth = useContext(AuthContext);
 
 	useEffect(() => {
-		setUser(null);
-		if (!userid) return;
-		setUserLoading(true);
 		const fetchUser = async () => {
 			try {
 				const payload = {
@@ -169,12 +195,16 @@ function UserIdForm({userid, setUserId, handleBorrow, handleBack}) {
 			}
 		};
 
+		setError(null);
+		setUser(null);
+		if (!userid) return;
+		setUserLoading(true);
 		fetchUser();
 	}, [userid])
 
 	return (
 		<Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start', rowGap: '1rem'}}>
-			{error && <Alert severity="error" onClose={() => setError(null)} >{error}</Alert>}
+			{error && <Alert severity="error">{error}</Alert>}
 
 			<Box sx={{display: 'flex', columnGap:'1rem'}}>
 				<TextField
@@ -236,11 +266,17 @@ function BorrowForm() {
 				'Authorization': `Bearer ${auth.authTokens}`,
 			}});
 			setLoading(false);
-			if (response.data.success) {
+			if (response?.data?.success) {
 				setBorrowed(true);
+				return;
 			}
 			else {
+				if (response?.data?.failed_due_bookings) {
+					setError("Δυστυχώς λόγω κρατήσεων ο δανεισμός δεν κατέστη δυνατός. ΜΗΝ ΠΑΡΑΔΩΣΕΤΕ ΤΟ ΑΝΤΙΤΥΠΟ ΣΤΟΝ ΧΡΗΣΤΗ.");
+					return;
+				}
 				setError("Κάτι πήγε λάθος. Παρακολούμε προσπαθήστε ξανά.");
+				return;
 			}
 		} catch (e) {
 			setError("Κάτι πήγε λάθος. Παρακολούμε προσπαθήστε ξανά.");
@@ -275,6 +311,7 @@ function BorrowForm() {
 		setStep(0);
 		setBorrowed(null);
 		setReturned(null);
+		setError(null);
 	}
 
 	return (

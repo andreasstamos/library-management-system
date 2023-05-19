@@ -123,7 +123,7 @@ def borrow_item():
             allowed = cur.fetchone()[0]
             if not allowed:
                 g.db_conn.rollback()
-                return {"success": False, "allowed_bookings": False}, 200
+                return {"success": False, "failed_due_bookings": True}, 200
             else:
                 g.db_conn.commit()
                 return {"success": True}, 200
@@ -166,45 +166,34 @@ def return_item():
         print(err)
         return {"success": False, "error": "unknown"}, 400
 
-
-GET_ITEM_DETAILS_JSONSCHEMA = {
+IS_BORROWED_JSONSCHEMA = {
         "type": "object",
         "properties": {
             "item_id": {"type": "integer"},
             },
         "additionalProperties": False,
-        "required": ["item_id"]
+        "required": ["item_id"] 
         }
 
-@bp.route("/get-details/", methods=["POST"])
-@check_roles(["lib_editor"])
-def get_item_details():
+@bp.route("/is-borrowed/", methods=["POST"])
+@check_roles()
+def is_borrowed():
     data = request.get_json()
     try:
-        jsonschema.validate(data, GET_ITEM_DETAILS_JSONSCHEMA)
+        jsonschema.validate(data, IS_BORROWED_JSONSCHEMA)
     except jsonschema.ValidationError as err:
         return {"success": False, "error": err.message}, 400
+  
+    query = """SELECT first_name, last_name, email\
+            FROM borrow\
+            JOIN "user" ON (borrow.borrower_id = "user".user_id)\
+            WHERE item_id = %s AND NOW() <@ period"""
 
     try:
         with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
-            cur.execute("SELECT book.isbn, book.title, book.image_uri, book.publisher_name,\
-                    array_remove(array_agg(DISTINCT book_author.author_name), NULL) AS authors,\
-                    array_remove(array_agg(DISTINCT book_keyword.keyword_name), NULL) AS keywords,\
-                    array_remove(array_agg(DISTINCT book_category.category_name), NULL) AS categories,\
-                    \"user\".user_id, \"user\".first_name, \"user\".last_name, \"user\".email\
-                    FROM item\
-                    LEFT JOIN book USING (isbn)\
-                    LEFT JOIN book_author USING (isbn)\
-                    LEFT JOIN book_category USING (isbn)\
-                    LEFT JOIN book_keyword USING (isbn)\
-                    LEFT JOIN borrow ON item.item_id = borrow.item_id AND upper_inf(borrow.period)\
-                    LEFT JOIN \"user\" ON user_id = borrower_id\
-                    WHERE item.item_id = %s\
-                    GROUP BY book.isbn, \"user\".user_id", (data["item_id"],))
-            item = cur.fetchone()
-            item["isBorrowed"] = item["user_id"] is not None
-            return {"success": True, "item": item}, 200
+            cur.execute(query, (data["item_id"],))
+            user_borrowed = cur.fetchone()
+            return {"success": True, "user": user_borrowed}, 200
     except psycopg2.Error as err:
         print(err)
         return {"success": False, "error": "unknown"}, 400
-

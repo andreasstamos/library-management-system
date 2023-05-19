@@ -97,7 +97,9 @@ def insert_update_book():
 GET_BOOK_JSONSCHEMA = {
         "type": "object",
         "properties": {
+            "item_id": {"type": "integer"},
             "isbn": {"type": "string", "pattern": "^[0-9]{13}$"},
+
             "title": {"type": "string"},
             
             "publishers": {"type": "array", "items": {"type": "string"}, "minItems": 1},
@@ -105,20 +107,19 @@ GET_BOOK_JSONSCHEMA = {
             "keywords": {"type": "array", "items": {"type": "string"}, "minItems": 1},
             "categories": {"type": "array", "items": {"type": "string"}, "minItems": 1},
 
-            "school_id": {"type": "integer"},
-            
             "limit": {"type": "integer", "minimum": 1},
             "offset": {"type": "integer", "minimum": 0},
             
             "fetch_fields": {"type": "array", "minItems": 1, "items": {"type": "string", "enum":\
                     ["isbn", "title", "publisher_name", "page_number", "language", "summary", "image_uri",
-                        "authors", "keywords", "categories", "rate", "item_number"]}}
+                        "authors", "keywords", "categories", "rate", "items_available"]}}
             },
         "additionalProperties": False,
         "required": ["fetch_fields"],
         }
 
 @bp.route("/get/", methods=["POST"])
+@check_roles()
 def get_book():
     data = request.get_json()
     try:
@@ -126,7 +127,11 @@ def get_book():
     except jsonschema.ValidationError as err:
         return {"success": False, "error": err.message}, 400
 
-    select_clause = set(data["fetch_fields"]) - {"item_number"}
+    select_clause = []
+    select_clause += set(data["fetch_fields"]) - {"items_available"}
+    if "items_available" in data["fetch_fields"]:
+        select_clause.append("items_available(isbn, %(user_id)s) AS items_available")
+        data["user_id"] = get_jwt_identity()["user_id"]
     select_clause = ','.join(select_clause)
 
     join_clause = []
@@ -177,6 +182,8 @@ def get_book():
     
     if 'isbn' in data.keys():
         where_clause = "isbn = %(isbn)s"
+    if 'item_id' in data.keys():
+        where_clause = "isbn = (SELECT isbn FROM item WHERE item_id = %(item_id)s)"
     if where_clause:
         where_clause = f"WHERE {where_clause}"
 
