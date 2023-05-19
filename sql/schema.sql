@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS booking;
 DROP TABLE IF EXISTS borrow;
 DROP TABLE IF EXISTS review;
 DROP TABLE IF EXISTS item;
@@ -29,7 +30,7 @@ CREATE TABLE book (
 	page_number SMALLINT CHECK (page_number > 0),
 	summary VARCHAR(10000),
 	language VARCHAR(30),
-	publisher_id SERIAL REFERENCES publisher,
+	publisher_id INTEGER REFERENCES publisher,
 	image_uri VARCHAR(1000)
 );
 
@@ -39,8 +40,8 @@ CREATE TABLE author (
 );
 
 CREATE TABLE book_author (
-	isbn varchar(13) REFERENCES book ON UPDATE CASCADE,
-	author_id SERIAL REFERENCES author,
+	isbn VARCHAR(13) NOT NULL REFERENCES book ON UPDATE CASCADE,
+	author_id INTEGER NOT NULL REFERENCES author,
 	UNIQUE(isbn, author_id)
 );
 
@@ -50,8 +51,8 @@ CREATE TABLE category (
 );
 
 CREATE TABLE book_category (
-	isbn varchar(13) REFERENCES book,
-	category_id SERIAL REFERENCES category,
+	isbn VARCHAR(13) NOT NULL REFERENCES book,
+	category_id INTEGER NOT NULL REFERENCES category,
 	UNIQUE(isbn, category_id)
 );
 
@@ -61,8 +62,8 @@ CREATE TABLE keyword (
 );
 
 CREATE TABLE book_keyword (
-	isbn varchar(13) REFERENCES book,
-	keyword_id SERIAL REFERENCES keyword,
+	isbn VARCHAR(13) NOT NULL REFERENCES book,
+	keyword_id INTEGER NOT NULL REFERENCES keyword,
 	UNIQUE(isbn, keyword_id)
 );
 
@@ -77,7 +78,7 @@ CREATE TABLE school (
 
 CREATE TABLE "user" (
 	user_id SERIAL PRIMARY KEY,
-	school_id SERIAL REFERENCES school ON DELETE CASCADE,
+	school_id INTEGER NOT NULL REFERENCES school,
 	first_name VARCHAR(50) NOT NULL,
 	last_name VARCHAR(50) NOT NULL,
 	email VARCHAR(256) UNIQUE CHECK (email ~ '^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-z]{2,}$'),
@@ -109,8 +110,8 @@ CREATE TABLE teacher (
 
 CREATE TABLE item (
 	item_id SERIAL PRIMARY KEY,
-	isbn varchar(13) REFERENCES book ON UPDATE CASCADE,
-	school_id SERIAL REFERENCES school
+	isbn varchar(13) NOT NULL REFERENCES book ON UPDATE CASCADE,
+	school_id INTEGER NOT NULL REFERENCES school
 );
 
 CREATE TABLE review (
@@ -127,17 +128,20 @@ CREATE TABLE review (
 CREATE EXTENSION IF NOT EXISTS btree_gist;
 
 CREATE TABLE borrow (
-	item_id SERIAL REFERENCES item,
-	borrower_id SERIAL REFERENCES "user",
-	period TSTZRANGE DEFAULT TSTZRANGE(NOW(), NULL),
+	borrow_id SERIAL PRIMARY KEY,
+	item_id INTEGER NOT NULL REFERENCES item,
+	borrower_id INTEGER NOT NULL REFERENCES "user",
+	period TSTZRANGE NOT NULL DEFAULT TSTZRANGE(NOW(), NULL),
 	expected_return DATE CHECK (expected_return >= LOWER(period)),
 	EXCLUDE USING GIST (item_id WITH =, period WITH &&)
 );
 
--- CREATE TABLE booking (
--- 	booking_id SERIAL PRIMARY KEY,
--- 	isbn VARCHAR(13) NOT NULL REFERENCES "book" ON DELETE CASCADE,
--- 	user_id INT NOT NULL REFERENCES "user" ON DELETE CASCADE,
--- 	period TSTZRANGE DEFAULT (TSTZRANGE(NOW(), NOW() + INTERVAL '1 week')),
+CREATE TABLE booking (
+ 	booking_id SERIAL PRIMARY KEY,
+	borrow_id INTEGER REFERENCES borrow,
+ 	isbn VARCHAR(13) NOT NULL REFERENCES book,
+ 	user_id INTEGER NOT NULL REFERENCES "user",
+ 	period TSTZRANGE NOT NULL DEFAULT (TSTZRANGE(NOW(), NOW() + INTERVAL '1 week')),
+	EXCLUDE USING GIST (user_id WITH =, isbn WITH =, period WITH &&)
+);
 
--- )

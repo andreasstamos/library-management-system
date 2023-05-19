@@ -119,13 +119,14 @@ def borrow_item():
 
     try:
         with g.db_conn.cursor() as cur:
-            cur.execute("INSERT INTO borrow (item_id, borrower_id, expected_return) VALUES (%s, %s, %s)",\
-                    (data["item_id"], data["borrower_id"], expected_return))
-            g.db_conn.commit()
-            return {"success": True}, 200
-    except psycopg2.IntegrityError as err:
-        g.db_conn.rollback()
-        return {"success": False, "error": err.pgerror}, 400
+            cur.execute("select * from borrow_item(%s,%s,%s)", (data["item_id"], data["borrower_id"], expected_return))
+            allowed = cur.fetchone()[0]
+            if not allowed:
+                g.db_conn.rollback()
+                return {"success": False, "allowed_bookings": False}, 200
+            else:
+                g.db_conn.commit()
+                return {"success": True}, 200
     except psycopg2.Error as err:
         g.db_conn.rollback()
         print(err)
