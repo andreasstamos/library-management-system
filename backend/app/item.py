@@ -120,12 +120,12 @@ def borrow_item():
     lender_id = get_jwt_identity()["user_id"]
 
     try:
-        with g.db_conn.cursor() as cur:
+        with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
             cur.execute("select * from borrow_item(%s,%s,%s,%s)", (data["item_id"], lender_id, data["borrower_id"], expected_return))
-            allowed = cur.fetchone()[0]
-            if not allowed:
+            status = cur.fetchone()
+            if not all(status.values()):
                 g.db_conn.rollback()
-                return {"success": False, "failed_due_bookings": True}, 200
+                return {"success": False, **{f:bool(v) for f,v in status}}, 200
             else:
                 g.db_conn.commit()
                 return {"success": True}, 200

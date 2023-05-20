@@ -29,13 +29,18 @@ def insert_booking():
     except jsonschema.ValidationError as err:
         return {"success": False, "error": err.message}, 400
     
-    identity = get_jwt_identity()
+    user_id = get_jwt_identity()["user_id"]
 
     try:
-        with g.db_conn.cursor() as cur:
-            cur.execute("INSERT INTO booking (user_id, isbn) VALUES (%s, %s)", (identity["user_id"], data["isbn"]))
-            g.db_conn.commit()
-            return {"success": True}, 200
+        with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
+            cur.execute("SELECT * from booking_book(%s,%s)", (data["isbn"], user_id))
+            status = cur.fetchone()
+            if not all(status.values()):
+                g.db_conn.rollback()
+                return {"success": False, "error": "unknown"}, 200
+            else:
+                g.db_conn.commit()
+                return {"success": True}, 200
     except psycopg2.Error as err:
         g.db_conn.rollback()
         print(err)
@@ -63,13 +68,13 @@ def exists_booking():
 
     try:
         with g.db_conn.cursor() as cur:
-            cur.execute("SELECT 1 FROM booking WHERE user_id = %s AND isbn = %s AND borrow_id IS NULL AND NOW() <@ period",\
+            cur.execute("SELECT 1 FROM booking WHERE user_id = %s AND isbn = %s AND NOW() <@ period",\
                     (identity["user_id"], data["isbn"]))
-            exists = cur.fetchone()
-            print(exists)
-            if exists is None: exists = False
-            else: exists = True
-            return {"success": True, "exists": exists}, 200
+            exists_booking = bool(cur.fetchone())
+            cur.execute("SELECT COUNT(1) >= 2 FROM booking WHERE user_id = %s AND NOW() <@ period",\
+                    (identity["user_id"],))
+            exceeded_max = cur.fetchone()[0]
+            return {"success": True, "exists_booking": exists_booking, "exceeded_max": exceeded_max}, 200
     except psycopg2.Error as err:
         print(err)
         return {"success": False, "error": "unknown"}, 400

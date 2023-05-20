@@ -271,11 +271,21 @@ function BorrowForm() {
 				return;
 			}
 			else {
-				if (response?.data?.failed_due_bookings) {
-					setError("Δυστυχώς λόγω κρατήσεων ο δανεισμός δεν κατέστη δυνατός. ΜΗΝ ΠΑΡΑΔΩΣΕΤΕ ΤΟ ΑΝΤΙΤΥΠΟ ΣΤΟΝ ΧΡΗΣΤΗ.");
-					return;
-				}
-				setError("Κάτι πήγε λάθος. Παρακολούμε προσπαθήστε ξανά.");
+				if (response?.data?.v_bookings_constraint === false)
+					setError("Δυστυχώς ο δανεισμός δεν κατέστη δυνατός λόγω κρατήσεων.");
+				else if (response?.data?.v_borrow_number_constraint === false)
+					setError("Δυστυχώς ο δανεισμός δεν κατέστη δυνατός διότι\
+						ο χρήστης έχει υπερβεί τον επιτρεπτό αριθμό ταυτόχρονων δανεισμών.");
+				else if (response?.data?.v_book_same_constraint === false)
+					setError("Δυστυχώς ο δανεισμός δεν κατέστη δυνατός διότι\
+						ο χρήστης έχει ήδη δανειστεί αντίτυπο ίδιου βιβλίου");
+				else if (response?.data?.v_item_school_constraint === false)
+					setError("Δυστυχώς ο δανεισμός δεν κατέστη δυνατός διότι\
+						το αντίτυπο ανήκει σε άλλο σχολείο από τον χρήστη.");
+				else if (response?.data?.v_borrower_school_constraint === false)
+					setError("Δυστυχώς ο δανεισμός δεν κατέστη δυνατός διότι\
+						ο χρήστης ανήκει σε άλλο σχολείο από εσάς.");
+				else setError("Κάτι πήγε λάθος. Παρακολούμε προσπαθήστε ξανά.");
 				return;
 			}
 		} catch (e) {

@@ -13,6 +13,7 @@ function Book() {
     const navigate = useNavigate();
     const [book, setBook] = useState(null);
     const [bookingExists, setBookingExists] = useState(null);
+    const [bookingExceededMax, setBookingExceededMax] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     let {bookISBN} = useParams();
@@ -54,7 +55,9 @@ function Book() {
                 return navigate("/404");
             }
             setBook(response_book.data.books[0]);
-            setBookingExists(response_booking?.data?.exists)
+            console.log(response_booking?.data);
+            setBookingExists(response_booking?.data?.exists_booking);
+            setBookingExceededMax(response_booking?.data?.exceeded_max);
         } catch (e) {
             setLoading(false);
             setError("Κάτι πήγε λάθος. Παρακαλούμε δοκιμάστε ξανά.");
@@ -151,15 +154,26 @@ function Book() {
 
                         <div className='book-detail'>
                             <Typography variant="h6">Διαθεσιμότητα για δανεισμό</Typography>
-                            <Typography variant="body1" sx={{color: book?.items_available > 0 ? 'success.main' : 'error.main'}}>
-                                {book?.items_available} αντίτυπ{book?.items_available == 1 ? 'ο' : 'α'}
-                            </Typography>
+                            {book?.items_available > 0 && <Typography variant="body1" sx={{color: 'success.main'}}>
+                                {book?.items_available} αντίτυπα άμεσα διαθέσιμα
+                            </Typography>}
+
+                            {book?.items_available <= 0 && <Typography variant="body1" sx={{color: 'error.main'}}>
+                                Αυτή την στιγμή δεν υπάρχουν διαθέσιμα αντίτυπα για δανεισμό.
+                            </Typography>}
+
+
                         </div>
 
-                        {bookingExists === false && <Button variant="contained" sx={{mr: 'auto'}} onClick={handleBooking}>ΚΡΑΤΗΣΗ</Button>}
+                        {bookingExists === false && bookingExceededMax === false &&
+                            <Button variant="contained" sx={{mr: 'auto'}} onClick={handleBooking}>ΚΡΑΤΗΣΗ</Button>}
                         {bookingExists === true && <Alert severity="info" sx={{mr: 'auto'}}>
                             Έχετε ήδη ενεργή κράτηση για το συγκεκριμένο βιβλίο.
                         </Alert>}
+                        {bookingExists === false && bookingExceededMax === true && <Alert severity="info" sx={{mr: 'auto'}}>
+                            Έχετε ήδη εκτελέσει τον μέγιστο αριθμό επιτρεπτών κρατήσεων.
+                        </Alert>}
+
 
                     </div>
 
