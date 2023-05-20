@@ -28,13 +28,13 @@ AND school_id = (SELECT school_id FROM "user" WHERE user_id = items_available.us
 );
 $$ LANGUAGE SQL;
 
-CREATE OR REPLACE FUNCTION borrow_item(v_item_id INTEGER, v_user_id INTEGER, v_expected_return DATE, OUT v_bookings_constraint BOOLEAN) AS $$
+CREATE OR REPLACE FUNCTION borrow_item(v_item_id INTEGER, v_lender_id INTEGER, v_user_id INTEGER, v_expected_return DATE, OUT v_bookings_constraint BOOLEAN) AS $$
 DECLARE
 	v_borrow_id INTEGER;
 	v_isbn VARCHAR(13);
 BEGIN
        	SELECT isbn INTO v_isbn FROM item WHERE item_id = v_item_id;
-        INSERT INTO borrow (item_id, borrower_id, expected_return) VALUES (v_item_id, v_user_id, v_expected_return)
+        INSERT INTO borrow (item_id, lender_id, borrower_id, expected_return) VALUES (v_item_id, v_lender_id, v_user_id, v_expected_return)
 		RETURNING borrow_id INTO v_borrow_id;
 	v_bookings_constraint := items_available(v_isbn, v_user_id) >= 0;
 	UPDATE booking SET borrow_id = v_borrow_id, period = TSTZRANGE(LOWER(period), NOW(), '[]') 

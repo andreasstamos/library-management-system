@@ -130,6 +130,7 @@ CREATE EXTENSION IF NOT EXISTS btree_gist;
 CREATE TABLE borrow (
 	borrow_id SERIAL PRIMARY KEY,
 	item_id INTEGER NOT NULL REFERENCES item,
+	lender_id INTEGER NOT NULL REFERENCES "user",
 	borrower_id INTEGER NOT NULL REFERENCES "user",
 	period TSTZRANGE NOT NULL DEFAULT TSTZRANGE(NOW(), NULL),
 	expected_return DATE CHECK (expected_return >= LOWER(period)),

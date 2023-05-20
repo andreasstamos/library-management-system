@@ -117,9 +117,11 @@ def borrow_item():
     
     expected_return = datetime.date.today() + datetime.timedelta(days=14) #TODO: CHECK/QUERY/HARDCODE/... LIBRARY POLICY FOR RETURN DATES
 
+    lender_id = get_jwt_identity()["user_id"]
+
     try:
         with g.db_conn.cursor() as cur:
-            cur.execute("select * from borrow_item(%s,%s,%s)", (data["item_id"], data["borrower_id"], expected_return))
+            cur.execute("select * from borrow_item(%s,%s,%s,%s)", (data["item_id"], lender_id, data["borrower_id"], expected_return))
             allowed = cur.fetchone()[0]
             if not allowed:
                 g.db_conn.rollback()
