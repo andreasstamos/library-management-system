@@ -13,7 +13,10 @@ import ContentCopy from '@mui/icons-material/ContentCopy';
 import ContentPaste from '@mui/icons-material/ContentPaste';
 import RateReviewIcon from '@mui/icons-material/RateReview';
 import Cloud from '@mui/icons-material/Cloud';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
+import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 import { Link, NavLink } from 'react-router-dom';
+
 import './DashboardMenu.css'
 
 export default function DashboardMenu() {
@@ -37,6 +40,18 @@ export default function DashboardMenu() {
             <RateReviewIcon fontSize="small" />
           </ListItemIcon>
           <ListItemText><NavLink to='/lib-editor/activate-reviews/'>Reviews</NavLink></ListItemText>
+        </MenuItem>
+        <MenuItem>
+          <ListItemIcon>
+            <BookmarkIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText><NavLink to='/lib-editor/bookings/'>Bookings</NavLink></ListItemText>
+        </MenuItem>
+        <MenuItem>
+          <ListItemIcon>
+            <LibraryBooksIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText><NavLink to='/lib-editor/borrows/'>Borrows</NavLink></ListItemText>
         </MenuItem>
         <Divider />
         <MenuItem>

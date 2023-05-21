@@ -27,6 +27,8 @@ import LibraryUsersControlDashboard from './pages/admin/library_editors/LibraryU
 import AddLibraryEditor from './pages/admin/library_editors/AddLibraryEditor';
 import AdminMenu from './pages/admin/AdminMenu';
 import MyBorrows from './pages/MyBorrows';
+import Bookings from './pages/lib_editor/Bookings';
+import Borrows from './pages/lib_editor/Borrows';
 
 
 function App() {
@@ -58,6 +60,8 @@ function App() {
               <Route path='activate-users' element={<UsersControl action={"activate"} />} />
               <Route path='deactivate-users' element={<UsersControl action={"deactivate"}/>} />
               <Route path='activate-reviews' element={<ReviewControl />} />
+              <Route path='bookings/' element={<Bookings />} />
+              <Route path='borrows/' element={<Borrows />} />
             </Route>
 
             <Route path='/admin' element={<AdminDashboard />}>

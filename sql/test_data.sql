@@ -66,7 +66,13 @@ INSERT INTO "user" (school_id, first_name, last_name, email, username, password_
 --letmein123
 (1, 'Jane', 'Doe', 'janedoe@example.com', 'janedoe', '$2b$12$vZXec/tilJiOhvexjbKxguJXVKwzwk4FZklfMkeQWwdHT7ZDIkfOu', '1995-05-05', true);
 
+
 INSERT INTO lib_user (user_id) VALUES (1);
+
+-- kostaras
+INSERT INTO "user" (user_id, school_id,first_name, last_name, username, email, password_hash, dob, active) VALUES 
+(15, 1, 'admin', 'admin', 'admin', 'admin@example.com', '$2b$12$6tR3o8yFEuG15ajoez06uOMGKXVU.4n/xPCy6OHevHPmNBbdZXBki', '02-04-2002', true);
+INSERT INTO "admin" (user_id) VALUES (15);
 
 INSERT INTO review (isbn, user_id, rate, body, active) VALUES
     ('9780000000001', 1, 5, 'This book exceeded my expectations. The writing was superb, and the plot twists were unexpected.', true),
@@ -75,4 +81,3 @@ INSERT INTO review (isbn, user_id, rate, body, active) VALUES
     ('9780000000001', 2, 2, 'Unfortunately, this book did not resonate with me. I struggled to connect with the characters.', true),
     ('9780000000002', 2, 3, 'The book had its moments, but I felt that it lacked depth in certain areas.', true),
     ('9780000000003', 2, 5, 'I couldn''t put this book down! The author created a vivid and immersive world.', true);
-

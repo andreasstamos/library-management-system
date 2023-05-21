@@ -93,6 +93,28 @@ def activate_user():
         return {"success": False, "error": "unknown"}, 400
 
 
+
+@bp.route('/get-borrows/', methods=['POST'])
+@check_roles(['lib_editor'])
+def get_borrows():
+    user = get_jwt_identity()
+    try:
+        with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
+            # Get all bookings from specific school
+            cur.execute("""
+                SELECT borrow.item_id, lender.username AS lender, borrower.username AS borrower, LOWER(borrow.period) AS borrowed_on, expected_return, book.title, book.isbn AS isbn
+                FROM borrow
+                INNER JOIN "user" AS lender ON borrow.lender_id = lender.user_id AND lender.school_id = (%s)
+                INNER JOIN "user" AS borrower ON borrow.borrower_id = borrower.user_id AND borrower.school_id = (%s)
+                INNER JOIN item ON item.item_id = borrow.item_id
+                INNER JOIN book ON item.isbn = book.isbn
+            """, [user['school_id'], user['school_id']])
+            borrows = cur.fetchall()
+            return {"success": True, "borrows": borrows}, 200
+    except psycopg2.Error as err:
+        print(err.pgerror)
+        return {"success": False, "error": "unknown"}
+
 @bp.route('/get-reviews/', methods=['POST'])
 @check_roles(["lib_editor"])
 def get_reviews():
@@ -117,10 +139,11 @@ def get_reviews():
             # Get all non active reviews from users that are in the same school as the lib editor.
             cur.execute("""
                 SELECT review.review_id, review.body, review.active, book.isbn, book.title, "user".username,
-                array_remove(array_agg(DISTINCT book_author.author_name), NULL) AS authors
+                ARRAY_AGG(author.author_name) AS authors
                 FROM review
                 INNER JOIN book ON book.isbn = review.isbn
                 INNER JOIN book_author ON book_author.isbn = review.isbn
+                INNER JOIN author ON book_author.author_id = author.author_id
                 INNER JOIN "user" ON "user".user_id = review.user_id
                 WHERE review.active = (%s) AND "user".school_id = (%s)
                 GROUP BY review.review_id, book.isbn, review.body, "user".username

@@ -23,9 +23,10 @@ def my_borrows():
 
     try:
         with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
-            cur.execute("SELECT book.title, book.publisher_name, item.isbn ,item.item_id, lower(borrow.period) AS borrowed_on,upper(borrow.period) as returned, borrow.expected_return \
+            cur.execute("SELECT book.title, item.isbn ,item.item_id,publisher.publisher_name, lower(borrow.period) AS borrowed_on,upper(borrow.period) as returned, borrow.expected_return \
             FROM book\
             INNER JOIN item ON book.isbn = item.isbn \
+            INNER JOIN publisher ON book.publisher_id = publisher.publisher_id\
             INNER JOIN borrow ON item.item_id = borrow.item_id \
             AND borrow.borrower_id = (%s)", (user['user_id'],))
             results = cur.fetchall()
