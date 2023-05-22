@@ -72,7 +72,7 @@ function Books() {
 
     return (
         <Box sx={{display: 'flex', flexDirection: 'column', rowGap: '1.5rem'}}>
-            <Typography variant="h3" component="h1">Βιβλία</Typography>
+            <Typography variant="h3" component="h1" className='title-with-hr'>Βιβλία</Typography>
             <Box sx={{display: 'flex', columnGap: '1rem'}}>
                 <FilterBarAuthor value={authorsValue} handleChangeValue={(value) => {setAuthorsValue(value);}} />
                 <FilterBarPublisher value={publishersValue} handleChangeValue={(value) => {setPublishersValue(value);}} />

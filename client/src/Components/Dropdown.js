@@ -4,13 +4,12 @@ import './Dropdown.css'
 
 function Dropdown({schools, schoolSelected, setSchoolSelected}) {
 
-
   return (
     <>
 <div class="select" for="school_select">
   <label for="school">Select your school:    </label>
   <select id="school_select" name="school" required="required" value={schoolSelected} onChange={(e) => setSchoolSelected(e.target.value)}>
-  <option value="" disabled="disabled" >Select option:</option>
+  <option value="" disabled="disabled">Select option:</option>
 
     {schools.map((school) => {
         return <option value={school?.school_id}>{school?.name}</option>

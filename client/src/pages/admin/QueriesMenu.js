@@ -10,34 +10,32 @@ import ContentCut from '@mui/icons-material/ContentCut';
 import ContentCopy from '@mui/icons-material/ContentCopy';
 import ContentPaste from '@mui/icons-material/ContentPaste';
 import Cloud from '@mui/icons-material/Cloud';
-import TextSnippetIcon from '@mui/icons-material/TextSnippet';
+import ContentPasteIcon from '@mui/icons-material/ContentPaste';
+import CategoryIcon from '@mui/icons-material/Category';
 import { NavLink } from 'react-router-dom';
 
-export default function AdminMenu() {
+export default function QueriesMenu() {
   return (
     <Paper sx={{ width: 320, maxWidth: '100%' }} id='dashboard-menu'>
       <MenuList>
         <MenuItem>
           <ListItemIcon>
+            <ContentPasteIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText><NavLink to="/admin/queries/3_1_1/">3.1.1</NavLink></ListItemText>
+        </MenuItem>
+        <MenuItem>
+          <ListItemIcon>
+            <CategoryIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText><NavLink to="/admin/queries/3_1_2/">3.1.2</NavLink></ListItemText>
+        </MenuItem>
+        <MenuItem>
+          <ListItemIcon>
             <ContentCut fontSize="small" />
           </ListItemIcon>
-          <ListItemText><NavLink to='/admin/schools/all-schools/'>Schools</NavLink></ListItemText>
+          <ListItemText>3.1.3</ListItemText>
         </MenuItem>
-
-        <MenuItem>
-          <ListItemIcon>
-            <ContentCopy fontSize="small" />
-          </ListItemIcon>
-          <ListItemText><NavLink to='/admin/lib-editors/all-lib-editors/'>Library Editors</NavLink></ListItemText>
-        </MenuItem>
-
-        <MenuItem>
-          <ListItemIcon>
-            <TextSnippetIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText><NavLink to='/admin/queries/'>Queries</NavLink></ListItemText>
-        </MenuItem>
-
       </MenuList>
     </Paper>
   );

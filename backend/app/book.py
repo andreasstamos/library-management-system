@@ -312,7 +312,7 @@ def get_category():
 
     try:
         with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
-            cur.execute("SELECT category_name FROM category")
+            cur.execute("SELECT category_id, category_name FROM category")
             categories = cur.fetchall()
             return {"success": True, "categories": categories}, 200
     except psycopg2.Error as err:

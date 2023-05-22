@@ -29,6 +29,9 @@ import AdminMenu from './pages/admin/AdminMenu';
 import MyBorrows from './pages/MyBorrows';
 import Bookings from './pages/lib_editor/Bookings';
 import Borrows from './pages/lib_editor/Borrows';
+import Queries from './pages/admin/Queries';
+import Admin_3_1_1 from './pages/admin/queries/Admin_3_1_1';
+import Admin_3_1_2 from './pages/admin/queries/Admin_3_1_2';
 
 
 function App() {
@@ -62,6 +65,7 @@ function App() {
               <Route path='activate-reviews' element={<ReviewControl />} />
               <Route path='bookings/' element={<Bookings />} />
               <Route path='borrows/' element={<Borrows />} />
+
             </Route>
 
             <Route path='/admin' element={<AdminDashboard />}>
@@ -77,6 +81,12 @@ function App() {
                   <Route path='all-lib-editors/' element={<LibUsersControl />} />
                   <Route path='add-lib-editor/' element={<AddLibraryEditor />} />
               </Route>
+              <Route path='queries/' element={<Queries />} >
+                <Route path='3_1_1/' element={<Admin_3_1_1/>} />
+                <Route path='3_1_2/' element={<Admin_3_1_2/>} />
+
+              </Route>
+
               {/* <Route path='activate-library-editors' element={<LibUsersControl />} /> */}
             
             </Route>

@@ -212,37 +212,109 @@ def delete_library_user():
         print(error)
         return {'success': False, 'error': 'unknown'}, 400
 
+# QUERIES
 
-# @bp.route('/activate-library-users/', methods=['POST'])
-# def activate_library_user():
-#     activate_user_json = {
-#         'type': 'object',
-#         'properties' : {
-#            'user_id': {'type':'integer', 'minValue':0}
-#         },
-#         "required": ["user_id"],
-#         "additionalProperties": False,
-#     }
-#     data = request.get_json()
-#     try:
-#         jsonschema.validate(data, activate_user_json)
-#     except jsonschema.ValidationError as err:
-#         return {"success": False, "error": err.message}, 400
 
-#     try:
-#         with g.db_conn.cursor() as cur:
-#             # Library user must be in the same school with the user that has written the review....
-#             cur.execute("""
-#                 UPDATE "user" 
-#                 SET active=true 
-#                 WHERE "user".user_id = (%s)
-#             """, [data['user_id']])
-#             g.db_conn.commit() 
-#     except psycopg2.IntegrityError as err:
-#         g.db_conn.rollback()
-#         return {"success": False, "error": err.pgerror}, 400
-#     except psycopg2.Error as err:
-#         print(err.pgerror)
-#         return {"success": False, "error": "unknown"}
 
-#     return {"success": True}, 200
+
+#3_1_1
+@bp.route('/queries/3_1_1/', methods=['POST'])
+@check_roles(['admin'])
+def get_filtered_borrows():
+    # We need to get borrows per school either with month/year filter.
+    # month/year filter is based on when borrow HAPPENED (LOWER(period))
+    GET_FILTERED_BORROWS_JSON = {
+        "type": "object",
+        "properties": {
+            "school_id": {"type": "integer"},
+            "timefilter": {"type": "string",}
+            },
+        "required": ["school_id"],
+        "additionalProperties": False,
+    }
+    data = request.get_json()
+    try:
+        jsonschema.validate(data, GET_FILTERED_BORROWS_JSON)
+    except jsonschema.ValidationError as err:
+        return {"success": False, "error": err.message}, 400
+    
+    
+    where_clause = ""
+    if 'timefilter' in data.keys():
+        date_format = "%Y-%m"
+        month = datetime.strptime(data['timefilter'], date_format).month
+        year = datetime.strptime(data['timefilter'], date_format).year
+        where_clause = f"WHERE EXTRACT(MONTH FROM LOWER(borrow.period)) = {month}\
+                         AND EXTRACT(YEAR FROM LOWER(borrow.period)) = {year};"
+
+    try:
+        with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
+            # Get all bookings from specific school
+            # perhaps latest school_id's check on borrower and lender are useless
+            cur.execute("""
+               SELECT borrow.borrow_id, book.title, borrower.first_name || ' ' || borrower.last_name as borrower_full_name,
+               lender.first_name || ' ' || lender.last_name as lender_full_name,
+               LOWER(borrow.period) AS borrowed_on, borrow.expected_return
+               FROM borrow
+               INNER JOIN item ON borrow.item_id = item.item_id AND item.school_id = (%s)
+               INNER JOIN book ON book.isbn = item.isbn
+               INNER JOIN "user" AS borrower ON borrower.user_id = borrow.borrower_id AND borrower.school_id = (%s)
+               INNER JOIN "user" AS lender ON lender.user_id = borrow.lender_id AND lender.school_id = (%s)
+            """ + where_clause, [data['school_id'], data['school_id'], data['school_id']])
+            borrows = cur.fetchall()
+            return {"success": True, "borrows": borrows}, 200
+    except psycopg2.Error as err:
+        print(err.pgerror)
+        return {"success": False, "error": "unknown"}
+    
+
+
+#3.1.2
+@bp.route('/queries/3_1_2/', methods=['POST'])
+@check_roles(['admin'])
+def get_authors_teacher():
+    AUTHOR_TEACHER_OF_CATEGORY_JSON = {
+        "type": "object",
+        "properties": {
+            "category": {"type": "integer"},
+        },
+        "required": ["category"],
+        "additionalProperties": False,
+    }
+    data = request.get_json()
+    try:
+        jsonschema.validate(data, AUTHOR_TEACHER_OF_CATEGORY_JSON)
+    except jsonschema.ValidationError as err:
+        return {"success": False, "error": err.message}, 400
+    
+    try:
+        with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
+
+            # get authors...
+            cur.execute("""
+            SELECT DISTINCT author.author_id AS id, author.author_name as name
+            FROM author
+            INNER JOIN book_author ON author.author_id = book_author.author_id
+            INNER JOIN book_category ON book_category.isbn = book_author.isbn
+            INNER JOIN category ON book_category.category_id = category.category_id
+            WHERE category.category_id = (%s)
+            """, [data['category']])
+            authors = cur.fetchall()
+            
+            current_year = datetime.now().year
+
+            cur.execute("""
+            SELECT DISTINCT teacher.*, "user".first_name || ' ' || "user".last_name AS name, "user".user_id AS id
+            FROM teacher
+            INNER JOIN "user" ON "user".user_id = teacher.user_id
+            INNER JOIN borrow ON borrow.borrower_id = "user".user_id
+            INNER JOIN item ON item.item_id = borrow.item_id
+            INNER JOIN book_category ON book_category.isbn = item.isbn
+            WHERE book_category.category_id = (%s) AND EXTRACT(YEAR FROM LOWER(borrow.period)) =(%s)
+            """, [data['category'], current_year])
+            teachers = cur.fetchall()
+            return {"success": True, "results": {"authors": authors, "teachers": teachers}}, 200
+    except psycopg2.Error as err:
+        print(err.pgerror)
+        return {"success": False, "error": "unknown"}
+    

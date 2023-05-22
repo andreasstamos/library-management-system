@@ -12,3 +12,11 @@
 .admin-subcontainer-title {
     margin: 0 auto;
 }
+.queries-filter {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    margin-top:1rem;
+    align-items: center;
+    column-gap: 1rem;
+}
