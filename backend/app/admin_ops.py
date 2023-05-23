@@ -238,14 +238,15 @@ def get_filtered_borrows():
     except jsonschema.ValidationError as err:
         return {"success": False, "error": err.message}, 400
     
-    
     where_clause = ""
     if 'timefilter' in data.keys():
         date_format = "%Y-%m"
         month = datetime.strptime(data['timefilter'], date_format).month
         year = datetime.strptime(data['timefilter'], date_format).year
-        where_clause = f"WHERE EXTRACT(MONTH FROM LOWER(borrow.period)) = {month}\
-                         AND EXTRACT(YEAR FROM LOWER(borrow.period)) = {year};"
+        print(month, year)
+
+        where_clause = f"WHERE EXTRACT(MONTH FROM LOWER(borrow.period) AT TIME ZONE 'UTC') = {month}\
+                         AND EXTRACT(YEAR FROM LOWER(borrow.period) AT TIME ZONE 'UTC') = {year};"
 
     try:
         with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
@@ -260,6 +261,7 @@ def get_filtered_borrows():
                INNER JOIN book ON book.isbn = item.isbn
                INNER JOIN "user" AS borrower ON borrower.user_id = borrow.borrower_id AND borrower.school_id = (%s)
                INNER JOIN "user" AS lender ON lender.user_id = borrow.lender_id AND lender.school_id = (%s)
+
             """ + where_clause, [data['school_id'], data['school_id'], data['school_id']])
             borrows = cur.fetchall()
             return {"success": True, "borrows": borrows}, 200
@@ -310,7 +312,7 @@ def get_authors_teacher():
             INNER JOIN borrow ON borrow.borrower_id = "user".user_id
             INNER JOIN item ON item.item_id = borrow.item_id
             INNER JOIN book_category ON book_category.isbn = item.isbn
-            WHERE book_category.category_id = (%s) AND EXTRACT(YEAR FROM LOWER(borrow.period)) =(%s)
+            WHERE book_category.category_id = (%s) AND EXTRACT(YEAR FROM LOWER(borrow.period) AT TIME ZONE 'UTC') =(%s)
             """, [data['category'], current_year])
             teachers = cur.fetchall()
             return {"success": True, "results": {"authors": authors, "teachers": teachers}}, 200

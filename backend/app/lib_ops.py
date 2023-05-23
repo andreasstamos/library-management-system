@@ -238,3 +238,63 @@ def delete_review():
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
         return {'success': False, 'error': 'unknown'}, 400
+    
+
+
+
+# QUERIES GO HERE..
+
+# 3.2.1
+@bp.route('/queries/3_2_2/', methods=['POST'])
+@check_roles(["lib_editor"])
+def get_late_borrowers():
+    LATE_BORROWERS_JSON = {
+        'type': 'object',
+        "properties": {
+            "first_name": {"type": "string"},
+            "last_name": {'type': 'string'},
+            "dates_late": {'type': 'integer', 'minValue': 0},
+            },
+        "additionalProperties": False,
+        "required": []
+    }
+    data = request.get_json()
+    try:
+        jsonschema.validate(data, LATE_BORROWERS_JSON)
+    except jsonschema.ValidationError as err:
+        return {"success": False, "error": err.message}, 400
+    user = get_jwt_identity()
+
+
+    # if no dates lates filter has been set then get everything...
+    if 'dates_late' not in data.keys():
+        data['dates_late'] = 0
+
+    params = [user['school_id'], str(data['dates_late'])]
+    first_name_where_clause = ''
+    last_name_where_clause = ''
+    
+    if 'first_name' in data.keys():
+        first_name_where_clause = 'AND first_name ILIKE %s'
+        params.append(f"%{data['first_name']}%")
+    if 'last_name' in data.keys():
+        last_name_where_clause = 'AND last_name ILIKE %s'
+        params.append(f"%{data['last_name']}%")
+
+    try:
+        with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
+            # Get all non active reviews from users that are in the same school as the lib editor.
+            cur.execute(f"""
+                    SELECT user_id, first_name || ' ' || last_name AS full_name, borrow.expected_return, EXTRACT(DAY FROM AGE(NOW()::date, borrow.expected_return::date)) AS date_difference
+                    FROM "user"
+                    INNER JOIN borrow ON borrower_id = user_id
+                    WHERE "user".school_id = (%s) AND EXTRACT(DAY FROM AGE(NOW()::date, borrow.expected_return::date)) >= (%s) 
+                    {first_name_where_clause}
+                    {last_name_where_clause}
+                    ORDER BY date_difference DESC
+            """, params)
+            users = cur.fetchall()
+            return {"success": True, "users": users}, 200
+    except psycopg2.Error as err:
+        print(err)
+        return {"success": False, "error": "unknown"}

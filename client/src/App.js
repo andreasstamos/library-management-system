@@ -32,6 +32,7 @@ import Borrows from './pages/lib_editor/Borrows';
 import Queries from './pages/admin/Queries';
 import Admin_3_1_1 from './pages/admin/queries/Admin_3_1_1';
 import Admin_3_1_2 from './pages/admin/queries/Admin_3_1_2';
+import DelayedReturns from './pages/lib_editor/DelayedReturns';
 
 
 function App() {
@@ -65,6 +66,7 @@ function App() {
               <Route path='activate-reviews' element={<ReviewControl />} />
               <Route path='bookings/' element={<Bookings />} />
               <Route path='borrows/' element={<Borrows />} />
+              <Route path='delayed-returns/' element={<DelayedReturns />} />
 
             </Route>
 

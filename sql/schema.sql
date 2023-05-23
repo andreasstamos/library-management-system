@@ -145,4 +145,3 @@ CREATE TABLE booking (
  	period TSTZRANGE NOT NULL DEFAULT (TSTZRANGE(NOW(), NOW() + INTERVAL '1 week')),
 	EXCLUDE USING GIST (user_id WITH =, isbn WITH =, period WITH &&)
 );
-

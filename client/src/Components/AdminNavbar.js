@@ -29,6 +29,8 @@ export default function AdminNavbar() {
           <Button color="inherit" component={Link} to="/admin/" className='navLink'>Home</Button>
           <Button color="inherit" component={Link} to="schools/all-schools/" className='navLink'>School</Button>
           <Button color="inherit" component={Link} to="lib-editors/all-lib-editors/" className='navLink'>Library Editors</Button>
+          <Button color="inherit" component={Link} to="queries/" className='navLink'>Queries</Button>
+
         </Toolbar>
       </AppBar>
     </Box>
