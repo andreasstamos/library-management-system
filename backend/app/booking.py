@@ -10,16 +10,6 @@ from .roles_decorators import check_roles
 
 bp = Blueprint("booking", __name__)
 
-
-
-
-
-
-
-
-
-
-
 GET_BOOKINGS_JSON = {
         "type": "object",
         "properties": {
@@ -150,15 +140,15 @@ def delete_bookin():
             query = psycopg2.sql.SQL("""
             DELETE FROM booking
             WHERE booking_id = (%s)
-            AND user_id IN (
-                SELECT user_id
+            AND EXISTS (
+                SELECT 1
                 FROM "user"
-                WHERE "user".school_id = (%s)
+                WHERE "user".school_id = (%s) AND "user".user_id = booking.user_id
             )
             """)
             cur.execute(query, [data['booking_id'], user['school_id']])
             g.db_conn.commit()
-            return {'success': True,}, 200
+            return {'success': cur.rowcount >= 1}, 200
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
         return {'success': False, 'error': 'unknown'}, 400

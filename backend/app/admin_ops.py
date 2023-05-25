@@ -227,7 +227,7 @@ def get_filtered_borrows():
         "type": "object",
         "properties": {
             "school_id": {"type": "integer"},
-            "timefilter": {"type": "string",}
+            "timefilter": {"type": "string", "format": "date"}
             },
         "required": ["school_id"],
         "additionalProperties": False,
@@ -237,13 +237,11 @@ def get_filtered_borrows():
         jsonschema.validate(data, GET_FILTERED_BORROWS_JSON)
     except jsonschema.ValidationError as err:
         return {"success": False, "error": err.message}, 400
-    
     where_clause = ""
     if 'timefilter' in data.keys():
         date_format = "%Y-%m"
         month = datetime.strptime(data['timefilter'], date_format).month
         year = datetime.strptime(data['timefilter'], date_format).year
-        print(month, year)
 
         where_clause = f"WHERE EXTRACT(MONTH FROM LOWER(borrow.period) AT TIME ZONE 'UTC') = {month}\
                          AND EXTRACT(YEAR FROM LOWER(borrow.period) AT TIME ZONE 'UTC') = {year};"
@@ -319,4 +317,181 @@ def get_authors_teacher():
     except psycopg2.Error as err:
         print(err.pgerror)
         return {"success": False, "error": "unknown"}
+#3.1.3
+@bp.route('/queries/3_1_3/', methods=['POST'])
+@check_roles(['admin'])
+def get_most_borrows_young_teachers():
+    GET_MOST_BORROWS_YOUNG_TEACHERS_JSONSCHEMA = {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": False,
+    }
+    data = request.get_json()
+    try:
+        jsonschema.validate(data, GET_MOST_BORROWS_YOUNG_TEACHERS_JSONSCHEMA)
+    except jsonschema.ValidationError as err:
+        return {"success": False, "error": err.message}, 400
     
+    try:
+        with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
+            cur.execute("""
+            SELECT first_name, last_name, COUNT(1) as cnt
+            FROM teacher
+            INNER JOIN "user" USING (user_id)
+            LEFT JOIN borrow ON user_id = borrower_id
+            WHERE NOW() - dob < '40 years'
+            GROUP BY "user".user_id
+            ORDER BY cnt DESC""")
+            teachers = cur.fetchall()
+            
+            return {"success": True, "teachers": teachers}, 200
+    except psycopg2.Error as err:
+        print(err.pgerror)
+        return {"success": False, "error": "unknown"} #3.1.3
+
+@bp.route('/queries/3_1_4/', methods=['POST'])
+@check_roles(['admin'])
+def get_authors_without_borrowed_books():
+    GET_AUTHORS_WITHOUT_BORROWED_BOOKS_JSONSCHEMA = {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": False,
+    }
+    data = request.get_json()
+    try:
+        jsonschema.validate(data, GET_AUTHORS_WITHOUT_BORROWED_BOOKS_JSONSCHEMA)
+    except jsonschema.ValidationError as err:
+        return {"success": False, "error": err.message}, 400
+    
+    try:
+        with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
+            cur.execute("""
+            SELECT DISTINCT ON (author_id) author_name
+            FROM author
+            INNER JOIN book_author USING (author_id)
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM item
+                INNER JOIN borrow USING (item_id)
+                WHERE isbn = book_author.isbn)""")
+
+            authors = cur.fetchall()
+            
+            return {"success": True, "authors": authors}, 200
+    except psycopg2.Error as err:
+        print(err.pgerror)
+        return {"success": False, "error": "unknown"}
+
+@bp.route('/queries/3_1_5/', methods=['POST'])
+@check_roles(['admin'])
+def lib_editors_count_borrows():
+    LIB_EDITORS_COUNT_BORROWS_JSONSCHEMA = {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": False,
+    }
+    data = request.get_json()
+    try:
+        jsonschema.validate(data, LIB_EDITORS_COUNT_BORROWS_JSONSCHEMA)
+    except jsonschema.ValidationError as err:
+        return {"success": False, "error": err.message}, 400
+    
+    try:
+        with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
+            cur.execute("""
+            SELECT ARRAY_AGG(first_name || ' ' || last_name) as editors, cnt
+            FROM (
+            SELECT first_name, last_name, COUNT(1) as cnt
+            FROM lib_user
+            INNER JOIN "user" USING (user_id)
+            INNER JOIN borrow ON user_id = lender_id
+            GROUP BY "user".user_id) editors_with_count
+            WHERE cnt > 20
+            GROUP BY cnt
+            ORDER BY cnt""")
+
+            results = cur.fetchall()
+            
+            return {"success": True, "results": results}, 200
+    except psycopg2.Error as err:
+        print(err.pgerror)
+        return {"success": False, "error": "unknown"}
+
+@bp.route('/queries/3_1_6/', methods=['POST'])
+@check_roles(['admin'])
+def top_3_category_pairs():
+    TOP_3_CATEGORY_PAIRS_JSONSCHEMA = {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": False,
+    }
+    data = request.get_json()
+    try:
+        jsonschema.validate(data, TOP_3_CATEGORY_PAIRS_JSONSCHEMA)
+    except jsonschema.ValidationError as err:
+        return {"success": False, "error": err.message}, 400
+    
+    try:
+        with g.db_conn.cursor() as cur:
+            cur.execute("""
+            SELECT c1.category_name AS category_name_1, c2.category_name AS category_name_2
+            FROM 
+            (category JOIN book_category USING (category_id)) c1
+            JOIN
+            (category JOIN book_category USING (category_id)) c2
+            USING (isbn)
+            JOIN item USING (isbn)
+            JOIN borrow USING (item_id)
+            WHERE c1.category_id < c2.category_id
+            GROUP BY c1.category_id, c2.category_id
+            ORDER BY COUNT(1) DESC
+            LIMIT 3""")
+
+            category_pairs = cur.fetchall()
+            
+            return {"success": True, "category_pairs": category_pairs}, 200
+    except psycopg2.Error as err:
+        print(err.pgerror)
+        return {"success": False, "error": "unknown"}
+
+@bp.route('/queries/3_1_7/', methods=['POST'])
+@check_roles(['admin'])
+def query_3_1_7():
+    QUERY_3_1_7 = {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": False,
+    }
+    data = request.get_json()
+    try:
+        jsonschema.validate(data, QUERY_3_1_7)
+    except jsonschema.ValidationError as err:
+        return {"success": False, "error": err.message}, 400
+    
+    try:
+        with g.db_conn.cursor() as cur:
+            cur.execute("""
+            SELECT author_name
+            FROM book_author
+            JOIN author USING (author_id)
+            GROUP BY author.author_id
+            HAVING COUNT(1) <=
+                (SELECT COUNT(1) AS cnt
+                FROM book_author
+                GROUP BY author_id
+                ORDER BY cnt DESC
+                LIMIT 1) - 5
+            """)
+
+            authors = cur.fetchall()
+            
+            return {"success": True, "authors": (authors[0] for author in authors)}, 200
+    except psycopg2.Error as err:
+        print(err.pgerror)
+        return {"success": False, "error": "unknown"}
+
