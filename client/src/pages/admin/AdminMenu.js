@@ -19,7 +19,7 @@ export default function AdminMenu() {
     <Box sx={{display: 'flex', columnGap: '1rem'}}>
       <Paper sx={{mr: 'auto'}} className='dashboard-menu'>
         <MenuList>
-          <NavLink to='/admin/schools/all-schools/'>
+          <NavLink to='/admin/schools/'>
             <MenuItem>
               <ListItemIcon>
                 <SchoolIcon fontSize="small" />
@@ -28,7 +28,7 @@ export default function AdminMenu() {
             </MenuItem>
           </NavLink>
 
-          <NavLink to='/admin/lib-editors/all-lib-editors/'>
+          <NavLink to='/admin/lib-editors/'>
             <MenuItem>
               <ListItemIcon>
                 <ManageAccountsIcon fontSize="small" />

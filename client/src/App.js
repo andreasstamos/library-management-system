@@ -5,8 +5,10 @@ import Register from './pages/Auth/Register';
 import './App.css';
 import ForgotPassword from './pages/Auth/ForgotPassword';
 import ResetPassword from './pages/Auth/ResetPassword';
+import Logout from './pages/Auth/Logout';
 import { AuthProvider } from './context/AuthContext';
 import LibraryEditorPrivateRoute from './utils/LibraryEditorPrivateRoute';
+import AdminPrivateRoute from './utils/AdminPrivateRoute';
 import Dashboard from './pages/lib_editor/Dashboard';
 import UsersControl from './pages/lib_editor/UsersControl';
 import BorrowForm from './pages/Borrow';
@@ -63,6 +65,7 @@ function App() {
               <Route path='register/' element={<Register />} />
               <Route path='forgot-password/' element={<ForgotPassword />} />
               <Route path='reset-password/:token/' element={<ResetPassword />} />
+              <Route path='logout/' element={<Logout />} />
             </Route>
 
             <Route path='/lib-editor' element={<LibraryEditorPrivateRoute><Dashboard /></LibraryEditorPrivateRoute>}>
@@ -75,8 +78,8 @@ function App() {
 
             </Route>
 
-            <Route path='/admin' element={<AdminDashboard />}>
-              <Route index path='' element={<AdminMenu />} />
+            <Route path='/admin' element={<AdminPrivateRoute><AdminDashboard /></AdminPrivateRoute>}>
+              <Route index element={<AdminMenu />} />
               
               <Route path='schools/' element={<SchoolDashboard/>}>
                   <Route path='add-school/' element={<AddSchool/>} />

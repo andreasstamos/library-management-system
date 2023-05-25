@@ -26,9 +26,9 @@ export default function AdminNavbar() {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             Πίνακας ελέγχου διαχειριστή
           </Typography>
-          <Button color="inherit" component={Link} to="/admin/" className='navLink'>ΑΡΧΙΚΗ</Button>
-          <Button color="inherit" component={Link} to="schools/all-schools/" className='navLink'>ΣΧΟΛΕΙΑ</Button>
-          <Button color="inherit" component={Link} to="lib-editors/all-lib-editors/" className='navLink'>ΧΕΙΡΙΣΤΕΣ ΒΙΒΛΙΟΘΗΚΩΝ</Button>
+          <Button color="inherit" component={Link} to="" className='navLink'>ΑΡΧΙΚΗ</Button>
+          <Button color="inherit" component={Link} to="schools/" className='navLink'>ΣΧΟΛΕΙΑ</Button>
+          <Button color="inherit" component={Link} to="lib-editors/" className='navLink'>ΧΕΙΡΙΣΤΕΣ ΒΙΒΛΙΟΘΗΚΩΝ</Button>
           <Button color="inherit" component={Link} to="queries/" className='navLink'>ΣΤΑΤΙΣΤΙΚΑ</Button>
 
         </Toolbar>
