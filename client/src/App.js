@@ -32,6 +32,11 @@ import Borrows from './pages/lib_editor/Borrows';
 import Queries from './pages/admin/Queries';
 import Admin_3_1_1 from './pages/admin/queries/Admin_3_1_1';
 import Admin_3_1_2 from './pages/admin/queries/Admin_3_1_2';
+import Admin_3_1_3 from './pages/admin/queries/Admin_3_1_3';
+import Admin_3_1_4 from './pages/admin/queries/Admin_3_1_4';
+import Admin_3_1_5 from './pages/admin/queries/Admin_3_1_5';
+import Admin_3_1_6 from './pages/admin/queries/Admin_3_1_6';
+import Admin_3_1_7 from './pages/admin/queries/Admin_3_1_7';
 import DelayedReturns from './pages/lib_editor/DelayedReturns';
 
 
@@ -86,6 +91,11 @@ function App() {
               <Route path='queries/' element={<Queries />} >
                 <Route path='3_1_1/' element={<Admin_3_1_1/>} />
                 <Route path='3_1_2/' element={<Admin_3_1_2/>} />
+                <Route path='3_1_3/' element={<Admin_3_1_3/>} />
+                <Route path='3_1_4/' element={<Admin_3_1_4/>} />
+                <Route path='3_1_5/' element={<Admin_3_1_5/>} />
+                <Route path='3_1_6/' element={<Admin_3_1_6/>} />
+                <Route path='3_1_7/' element={<Admin_3_1_7/>} />
 
               </Route>
 

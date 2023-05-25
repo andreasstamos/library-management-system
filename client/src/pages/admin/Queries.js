@@ -5,7 +5,7 @@ import QueriesMenu from './QueriesMenu'
 function Queries() {
   return (
     <div>
-        <h1 className='title-with-hr'>Queries</h1>
+        <h1 className='title-with-hr'>Στατιστικά</h1>
         <QueriesMenu />
         <Outlet />
     </div>

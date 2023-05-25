@@ -336,7 +336,7 @@ def get_most_borrows_young_teachers():
     try:
         with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
             cur.execute("""
-            SELECT first_name, last_name, COUNT(1) as cnt
+            SELECT "user".user_id, first_name, last_name, COUNT(1) as cnt
             FROM teacher
             INNER JOIN "user" USING (user_id)
             LEFT JOIN borrow ON user_id = borrower_id
@@ -413,9 +413,9 @@ def lib_editors_count_borrows():
             GROUP BY cnt
             ORDER BY cnt""")
 
-            results = cur.fetchall()
+            editors = cur.fetchall()
             
-            return {"success": True, "results": results}, 200
+            return {"success": True, "editors": editors}, 200
     except psycopg2.Error as err:
         print(err.pgerror)
         return {"success": False, "error": "unknown"}
@@ -490,7 +490,7 @@ def query_3_1_7():
 
             authors = cur.fetchall()
             
-            return {"success": True, "authors": (authors[0] for author in authors)}, 200
+            return {"success": True, "authors": authors}, 200
     except psycopg2.Error as err:
         print(err.pgerror)
         return {"success": False, "error": "unknown"}

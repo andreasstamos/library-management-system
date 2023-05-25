@@ -15,7 +15,7 @@ import { NavLink } from 'react-router-dom';
 
 export default function AdminMenu() {
   return (
-    <Paper sx={{ width: 320, maxWidth: '100%' }} id='dashboard-menu'>
+    <Paper sx={{ width: 320, maxWidth: '100%' }} className='dashboard-menu'>
       <MenuList>
         <MenuItem>
           <ListItemIcon>

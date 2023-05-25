@@ -25,7 +25,7 @@ function Admin_3_1_1() {
     const [loading, setLoading] = useState(true);
     
     const [schoolSelected, setSchoolSelected] = useState('');
-    const [timeFilter, setTimeFilter] = useState('');
+    const [timeFilter, setTimeFilter] = useState(null);
     
     const [loadingSchools, setLoadingSchools] = useState(true);
 
@@ -38,7 +38,7 @@ function Admin_3_1_1() {
             school_id: parseInt(schoolSelected)
         }
 
-        if (timeFilter) payload['timefilter'] = timeFilter
+        if (timeFilter) payload['timefilter'] = `${timeFilter.$y}-${timeFilter.$M}`
 
         const response = await axios.post('http://localhost:5000/admin-api/queries/3_1_1/', payload, {
             headers: {
@@ -48,7 +48,6 @@ function Admin_3_1_1() {
                 'Authorization': `Bearer ${localStorage.getItem('authTokens')}`,
             }
         })
-        console.log(response?.data?.borrows);
         setBorrows(response?.data?.borrows);
         setLoading(false);
     }
@@ -60,7 +59,6 @@ function Admin_3_1_1() {
         const response = await axios.post('http://127.0.0.1:5000/school/get-schools/', payload, {headers: {
           'Content-Type': 'application/json'
         }});
-        console.log(response);
         setLoadingSchools(false);
         setSchools(response?.data?.schools);
       }
@@ -73,58 +71,57 @@ function Admin_3_1_1() {
         if (!schoolSelected) return;
         setLoading(true);
         fetchBorrows();
-      }, [schoolSelected])
+      }, [schoolSelected, timeFilter])
 
   return (
     <>
         <h2 className='title-with-hr'>Παρουσίαση λίστας με συνολικό αριθμό δανεισμών ανά σχολείο</h2>
         <div className='queries-filter'>
-            {schools && <Dropdown schoolSelected={schoolSelected} setSchoolSelected={setSchoolSelected} schools={schools} />}
-            {/* <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker label={'"month" and "year"'} views={['month', 'year']} value={dayjs(timeFilter)} onChange={(e) => setTimeFilter(e)} />
-            </LocalizationProvider> */}
-            <input type="month" id="bdaymonth" name="bdaymonth" value={timeFilter} onChange={(e) => setTimeFilter(e.target.value)} />
-
-            <Button variant="contained" disabled={!schoolSelected && true} onClick={fetchBorrows}>Search</Button>
+          {schools && <Dropdown schoolSelected={schoolSelected} setSchoolSelected={setSchoolSelected} schools={schools} />}
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DatePicker label="Μήνας και έτος" views={['month', 'year']} value={timeFilter} maxDate={dayjs()} onChange={(e) => setTimeFilter(e)} />
+          </LocalizationProvider>
+          {/*<input type="month" id="bdaymonth" name="bdaymonth" value={timeFilter} onChange={(e) => setTimeFilter(e.target.value)} /> */}
+          {/*<Button variant="contained" disabled={!schoolSelected && true} onClick={fetchBorrows}>Search</Button> */}
         </div>
 
-            {borrows && (borrows.length > 0 ?
-                <TableContainer component={Paper}>
-                  <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Borrows ID</TableCell>
-                        <TableCell>Book</TableCell>
-                        <TableCell>Borrower</TableCell>
-                        <TableCell>Lender</TableCell>
-                        <TableCell>Borrowed On</TableCell>
-                        <TableCell>Expected Return</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {borrows.map((row) => (
-                        <TableRow
-                          key={row.name}
-                          sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                        >
-                          <TableCell component="th" scope="row">
-                            {row.borrow_id}
-                          </TableCell>
-                          <TableCell>{row.title}</TableCell>
-                          <TableCell>{row.borrower_full_name}</TableCell>
-                          <TableCell>{row.lender_full_name}</TableCell>
-                          <TableCell>{row.borrowed_on}</TableCell>
-                          <TableCell>{row.expected_return}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer> : <h3>No Borrows</h3>)
-        }
+      {borrows && (borrows.length > 0 ?
+        <TableContainer component={Paper}>
+          <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
+            <TableHead>
+              <TableRow>
+                <TableCell>Borrows ID</TableCell>
+                <TableCell>Book</TableCell>
+                <TableCell>Borrower</TableCell>
+                <TableCell>Lender</TableCell>
+                <TableCell>Borrowed On</TableCell>
+                <TableCell>Expected Return</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {borrows.map((row) => (
+                <TableRow
+                  key={row.name}
+                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                >
+                  <TableCell component="th" scope="row">
+                    {row.borrow_id}
+                  </TableCell>
+                  <TableCell>{row.title}</TableCell>
+                  <TableCell>{row.borrower_full_name}</TableCell>
+                  <TableCell>{row.lender_full_name}</TableCell>
+                  <TableCell>{row.borrowed_on}</TableCell>
+                  <TableCell>{row.expected_return}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer> : <h3>No Borrows</h3>)
+      }
 
-        <div className='queries-container'>
+      <div className='queries-container'>
         {loading && schoolSelected && <CircularProgress />}
-        </div>
+      </div>
     </>
   )
 }

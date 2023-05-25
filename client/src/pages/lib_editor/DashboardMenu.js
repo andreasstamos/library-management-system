@@ -21,7 +21,7 @@ import './DashboardMenu.css'
 
 export default function DashboardMenu() {
   return (
-    <Paper sx={{ width: 250, maxWidth: '100%' }} id='dashboard-menu'>
+    <Paper sx={{ width: 250, maxWidth: '100%' }} className='dashboard-menu'>
       <MenuList>
         <MenuItem>
           <ListItemIcon>

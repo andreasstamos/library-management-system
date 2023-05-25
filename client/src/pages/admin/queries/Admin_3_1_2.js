@@ -60,7 +60,7 @@ function Admin_3_1_2() {
 
   return (
     <>
-    <h2 className='title-with-hr'>Για δεδομένη κατηρορία βιβλίων, ποιοί συγγραφείς ανήκουν σε αυτήν και ποιοι εκπαιδευτικοί εχουν δανειστεί βιβλία αυτής της κατηγορίας το τελευταίο έτος</h2>
+    <h2 className='title-with-hr'>Στατιστικά ανά κατηγορία</h2>
     <div className='queries-filter'>
             <CategorySelect categorySelected={categorySelected} setCategorySelected={setCategorySelected} />
 
@@ -69,8 +69,8 @@ function Admin_3_1_2() {
     <Box sx={{ width: '100%' }}>
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Tabs value={tab} onChange={handleChange} aria-label="basic tabs example">
-          <Tab label="Συγγραφείς" {...a11yProps(0)} />
-          <Tab label="Καθηγητές" {...a11yProps(1)} />
+          <Tab label="ΣΥΓΓΡΑΦΕΙΣ" {...a11yProps(0)} />
+          <Tab label="ΕΚΠΑΙΔΕΥΤΙΚΟΙ ΠΟΥ ΕΧΟΥΝ ΔΑΝΕΙΣΤΕΙ ΤΟ ΤΕΛΕΥΤΑΙΟ ΕΤΟΣ" {...a11yProps(1)} />
         </Tabs>
       </Box>
       <TabPanel value={tab} index={0}>
@@ -79,7 +79,7 @@ function Admin_3_1_2() {
        {data?.authors && data?.authors.length > 0 && <UserTable data={data?.authors} />}
       </TabPanel>
       <TabPanel value={tab} index={1}>
-        <h3 className='title-with-hr'>Καθηγητές</h3>
+        <h3 className='title-with-hr'>Εκπαιδευτικοί που εχουν δανειστεί βιβλίο της κατηγορίας το τελευταίο έτος</h3>
         {loading && <CircularProgress />}
        {data?.teachers && data?.teachers.length > 0 && <UserTable data={data?.teachers} />}
 
