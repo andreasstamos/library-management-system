@@ -64,20 +64,20 @@ export default function SchoolCard({name, schoolID, address, city, email, fetchS
     <Card sx={{ minWidth: 275 }}>
       <CardContent>
         <form onSubmit={(e) => e.preventDefault()} style={{display:'flex',flexDirection:'column'}} id='change-school-form'>
-            <Input placeholder={name} readOnly={!edit} onChange={(e) => {setNewName(e.target.value)}}>
+            <Input placeholder={name} value={edit ? newName : name} readOnly={!edit} onChange={(e) => {setNewName(e.target.value)}}>
             </Input>
-            <Input  placeholder={city} readOnly={!edit}  onChange={(e) => {setNewCity(e.target.value)}}>
+            <Input placeholder={city} value={edit ? newCity : city} readOnly={!edit}  onChange={(e) => {setNewCity(e.target.value)}}>
             </Input>
-            <Input placeholder={address} readOnly={!edit}  onChange={(e) => {setNewAddress(e.target.value)}}>
+            <Input placeholder={address} value={edit ? newAddress : address} readOnly={!edit}  onChange={(e) => {setNewAddress(e.target.value)}}>
             </Input>        
-            <Input placeholder={email} readOnly={!edit}  onChange={(e) => {setNewEmail(e.target.value)}}>
+            <Input placeholder={email} value={edit ? newEmail : email} readOnly={!edit} onChange={(e) => {setNewEmail(e.target.value)}}>
             </Input>
         </form>
       </CardContent>
       <CardActions>
-        <Button size="small" onClick={() => setEdit(!edit)}>Edit School</Button>
-        <Button disabled={!edit} size='small' onClick={() => updateSchool()}>Update School</Button>
-        <Button size="small" type='submit' color="error" onClick={(e) => {deleteSchool()}}>Delete School</Button>
+        <Button size="small" onClick={() => setEdit(!edit)}>ΕΠΕΞΕΡΓΑΣΙΑ</Button>
+        <Button disabled={!edit} size='small' onClick={() => updateSchool()}>ΕΝΗΜΕΡΩΣΗ</Button>
+        <Button size="small" type='submit' color="error" onClick={(e) => {deleteSchool()}}>ΔΙΑΓΡΑΦΗ</Button>
       </CardActions>
     </Card>
   );

@@ -32,26 +32,27 @@ function AllSchools() {
         fetchSchools();
     }, [])
 
-  return (
-<>        <h1 className='title-with-hr'>Schools</h1>
+    return (
+        <>
+            <h2 className='title-with-hr'>Σχολεία</h2>
 
-<div className='all-schools-container'>
-        {loading && <CircularProgress />}
-       {schools && schools.map((school, index) => {
-        return <SchoolCard 
-            key={index}
-            name={school?.name} 
-            schoolID={school?.school_id} 
-            address={school?.address} 
-            city={school?.city} 
-            email={school?.email}
-            fetchSchools={fetchSchools}
-        />
-       })}
+            <div className='all-schools-container'>
+                {loading && <CircularProgress />}
+                {schools && schools.map((school, index) => {
+                    return <SchoolCard 
+                        key={index}
+                        name={school?.name} 
+                        schoolID={school?.school_id} 
+                        address={school?.address} 
+                        city={school?.city} 
+                        email={school?.email}
+                        fetchSchools={fetchSchools}
+                    />
+                })}
 
-    </div>
-    </>
-  )
+            </div>
+        </>
+    );
 }
 
 export default AllSchools

@@ -86,26 +86,26 @@ function AddLibraryEditor() {
 
   return (
     <div className='school-container'>
-        <h1 className='title-with-hr admin-subcontainer-title'>Insert Library Editor</h1>
+        <h2 className='title-with-hr admin-subcontainer-title'>Προσθήκη νέου χειριστή βιβλιοθήκης</h2>
         <form className='add-school-form insert-library-editor-form' onSubmit={(e) => insertLibraryEditor(e) }>
             
             <div className='form-input'>
-                <label for='username'>Username:</label>
+                <label for='username'>Όνομα χρήστη</label>
                 <input required type='text' name='username' value={username} onChange={(e) => setUsername(e.target.value)}/>
             </div>
 
             <div className='form-input'>
-                <label for='first-name'>First Name:</label>
+                <label for='first-name'>Όνομα</label>
                 <input  required type='text' name='first-name' value={firstName} onChange={(e) =>setFirstName(e.target.value)}/>
             </div>
 
             <div className='form-input'>
-                <label for='last-name'>Last Name:</label>
+                <label for='last-name'>Επώνυμο</label>
                 <input required type='text' name='last-name' value={lastName} onChange={(e) => setLastName(e.target.value)} />
             </div>
 
             <div className='form-input'>
-                <label for='email'>Email:</label>
+                <label for='email'>Email</label>
                 <input required type='email' name='email' value={email} onChange={(e) => setEmail(e.target.value)}/>
             </div>
 
@@ -115,24 +115,24 @@ function AddLibraryEditor() {
             }
 
             <div className='form-input'>
-                <label for='dob'>Date of Birth:</label>
+                <label for='dob'>Ημερομηνία γέννησης</label>
                 <input required type='date' name='dob' value={dob} onChange={(e) => setDob(e.target.value)}/>
             </div>
 
             <div className='form-input'>
-                <label for='password'>Password:</label>
+                <label for='password'>Κωδικός πρόσβασης</label>
                 <input required type='password' name='password' value={password} onChange={(e) => setPassword(e.target.value)}/>
             </div>
 
             <div className='form-input'>
-                <label for='confirmPassword'>Confirm Password:</label>
+                <label for='confirmPassword'>Επιβεβαίωση κωδικού πρόσβασης</label>
                 <input required type='password' name='confirmPassword' value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}/>
             </div>
 
             {err && <Alert severity="error">{err}</Alert>}
             {succ && <Alert severity="success">{succ}</Alert>}
 
-            <Button variant="contained" type='submit'>Insert Library Editor</Button>
+            <Button variant="contained" type='submit'>ΕΙΣΑΓΩΓΗ</Button>
 
         </form>
     </div>

@@ -39,17 +39,17 @@ function LibUsersControl() {
   return (
     <div className='admin-subcontainer'>
         <div className='dashboard-inline'>
-            <h1 className='title-with-hr'>Library Editors</h1>
+            <h2 className='title-with-hr'>Χειριστές βιβλιοθηκών</h2>
             <div className='active-filter'>
                 <FormControlLabel
-                control={
+                    control={
                     <Switch name='lib-editors'
-                    checked={activeUsers}
-                    onChange={() => {setActiveUsers(!activeUsers)}}
-                    inputProps={{ 'aria-label': 'controlled' }} />
-          }
-          label="Active Users"
-        />
+                        checked={activeUsers}
+                        onChange={() => {setActiveUsers(!activeUsers)}}
+                        inputProps={{ 'aria-label': 'controlled' }} />
+                    }
+                    label={activeUsers ? "Προβολή ενεργών χρηστών": "Προβολή ανενεργών χρηστών"}
+                />
                 {/* <Switch
                     name='lib-editors'
                     checked={activeUsers}
@@ -65,7 +65,7 @@ function LibUsersControl() {
             {users && users.map((user) => {
                 return <LibraryUserCard data={user} fetchUsers={fetchLibraryUsers}/>
             })}
-            {!loading && users.length == 0 && <h3>Δεν βρέθηκαν χειριστές βιβλιοθήκης με αυτά τα κριτήρια.</h3>}
+            {!loading && users.length == 0 && <h3>Δεν βρέθηκαν {activeUsers ? "ενεργοί" : "ανενεργοί"} χειριστές βιβλιοθήκης.</h3>}
         </div>
     </div>
   )

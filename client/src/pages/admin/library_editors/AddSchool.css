@@ -1,0 +1,61 @@
+.school-container {
+
+}
+.add-school-form {
+    width: 320px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    row-gap: 1rem;
+    margin: 2rem auto 0 auto;
+}
+.add-school-form .form-input {
+    display: flex;
+    flex-direction: column;
+    margin: 0 auto;
+}
+
+.add-school-form .form-input label {
+    color: #303554;
+    font-weight: 700;
+}
+.add-school-form .form-input input {
+    width: 320px;
+    -webkit-appearance: none;
+    padding: 7px 40px 7px 12px;
+    border: 1px solid #e8eaed;
+    border-radius: 5px;
+    background: #fff;
+    box-shadow: 0 1px 3px -2px #9098a9;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 16px;
+    transition: all 150ms ease;
+    margin-bottom: 2px;
+}
+.add-school-form .form-input input:focus {
+    outline: none;
+    border-color: hotpink;
+    box-shadow: 0 0 0 2px rgba(255, 105, 180, 0.4);
+}
+.add-school-form .form-input input::placeholder {
+    font-size: 0.9rem;
+    color: var(--material-ui-theme);;
+}
+.add-school-form  button {
+    background-color: var(--material-ui-theme);
+    color: #fff;
+    border-radius: 4px;
+    padding: 0.4rem 0.7rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-bottom: 5px;
+    max-width: 150px;
+    margin: 0 auto;
+}
+
+.add-school-form  button:hover {
+    background-color: #fff;
+    color: var(--material-ui-theme);
+    transition: 150ms ease-in;
+}

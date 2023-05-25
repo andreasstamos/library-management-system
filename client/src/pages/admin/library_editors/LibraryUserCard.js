@@ -1,10 +1,12 @@
 import * as React from 'react';
+import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import axios from 'axios';
+import FormControlLabel from '@mui/material/FormControlLabel';
 import { Switch, TextField } from '@mui/material';
 import './LibraryUserCard.css'
 import { DateField } from '@mui/x-date-pickers/DateField';
@@ -75,7 +77,7 @@ export default function LibraryUserCard({data, fetchUsers}) {
       <TextField
           required
           id="filled-required"
-          label="Username"
+          label="Όνομα χρήστη"
           defaultValue={data.username}
           onChange={(e) => setNewUsername(e.target.value)}
           variant={edit ? 'outlined' : 'filled'}
@@ -86,7 +88,7 @@ export default function LibraryUserCard({data, fetchUsers}) {
       <TextField
           required
           id="filled-required"
-          label="First Name"
+          label="Όνομα"
           defaultValue={data.first_name}
           onChange={(e) => setNewFirstName(e.target.value)}
           variant={edit ? 'outlined' : 'filled'}
@@ -97,7 +99,7 @@ export default function LibraryUserCard({data, fetchUsers}) {
       <TextField
           required
           id="filled-required"
-          label="Last Name"
+          label="Επώνυμο"
           defaultValue={data.last_name}
           onChange={(e) => {setNewLastName(e.target.value)}}
           variant={edit ? 'outlined' : 'filled'}
@@ -117,7 +119,7 @@ export default function LibraryUserCard({data, fetchUsers}) {
         
         <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DateField 
-                label="Date of Birth" 
+                label="Ημερομηνία γέννησης" 
                 readOnly={!edit}
                 defaultValue={dayjs(data.dob)}
                 variant={edit === false ? 'filled' : 'outlined'} 
@@ -125,23 +127,25 @@ export default function LibraryUserCard({data, fetchUsers}) {
                 disabled={!edit}
             />
           </LocalizationProvider>
-            
 
-        <Switch
-        disabled={!edit}
-        // defaultValue={newActive}
-        defaultChecked={newActive}
-        onChange={() => setNewActive(!newActive)}
-        inputProps={{ 'aria-label': 'controlled' }}
-            />
-    </form>
+          <FormControlLabel
+              control={<Switch
+                  disabled={!edit}
+                  // defaultValue={newActive}
+                  defaultChecked={newActive}
+                  onChange={() => setNewActive(!newActive)}
+                  inputProps={{ 'aria-label': 'controlled' }}
+              />}
+              label={newActive ? "Ενεργός" : "Ανενεργός"} 
+          />
+      </form>
       
       </CardContent>
-      <CardActions>
-        <Button size="small" type='button' onClick={(e) => setEdit(!edit)}>Edit</Button>
-        <Button color="secondary" disabled={!edit} onClick={(e) => updateLibraryUser()}>Update</Button>
-        <Button color="error" onClick={deleteLibraryUser}>Delete</Button>
-      </CardActions>
+        <CardActions>
+            <Button onClick={(e) => setEdit(!edit)}>ΕΠΕΞΕΡΓΑΣΙΑ</Button>
+            <Button color="secondary" disabled={!edit} onClick={(e) => updateLibraryUser()}>ΕΝΗΜΕΡΩΣΗ</Button>
+            <Button color="error" onClick={deleteLibraryUser}>ΔΙΑΓΡΑΦΗ</Button>
+        </CardActions>
     </Card>
-  );
+    );
 }

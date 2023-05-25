@@ -47,37 +47,37 @@ function AddSchool() {
 
   return (
     <div className='school-container'>
-        <h1 className='title-with-hr admin-subcontainer-title'>Add School</h1>
+        <h2 className='title-with-hr admin-subcontainer-title'>Προσθήκη νέου σχολείου</h2>
         <form className='add-school-form' onSubmit={(e) => insertSchool(e)}>
             
             <div className='form-input'>
-                <label for='school-name'>Name:</label>
+                <label for='school-name'>Όνομα/επωνυμία</label>
                 <input value={schoolName} onChange={(e) => {setSchoolName(e.target.value)}} required type='text' name='school-name' />
             </div>
 
             <div className='form-input'>
-                <label for='school-address'>Address:</label>
+                <label for='school-address'>Διεύθυνση</label>
                 <input value={schoolAddress} onChange={(e) => {setSchoolAddress(e.target.value)}} required type='text' name='school-address' />
             </div>
 
             <div className='form-input'>
-                <label for='school-email'>Email:</label>
+                <label for='school-email'>Email</label>
                 <input value={schoolEmail} onChange={(e) => {setSchoolEmail(e.target.value)}} required type='email' name='school-email' />
             </div>
 
             <div className='form-input'>
-                <label for='school-city'>City:</label>
+                <label for='school-city'>Πόλη</label>
                 <input value={schoolCity} onChange={(e) => {setSchoolCity(e.target.value)}} required type='text' name='school-city' />
             </div>
 
             <div className='form-input'>
-                <label for='school-phone'>Phone:</label>
+                <label for='school-phone'>Τηλέφωνο</label>
                 <input value={schoolPhone} onChange={(e) => {setSchoolPhone(e.target.value)}} required type='text' name='school-phone' />
             </div>
             {err && <Alert severity="error">{err}</Alert>}
             {succ && <Alert severity="success">{succ}</Alert>}
 
-            <Button variant="contained" type='submit'>Insert School</Button>
+            <Button variant="contained" type='submit'>ΕΙΣΑΓΩΓΗ</Button>
 
         </form>
     </div>

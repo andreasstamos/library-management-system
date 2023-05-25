@@ -24,12 +24,12 @@ export default function AdminNavbar() {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Admin Dashboard
+            Πίνακας ελέγχου διαχειριστή
           </Typography>
-          <Button color="inherit" component={Link} to="/admin/" className='navLink'>Home</Button>
-          <Button color="inherit" component={Link} to="schools/all-schools/" className='navLink'>School</Button>
-          <Button color="inherit" component={Link} to="lib-editors/all-lib-editors/" className='navLink'>Library Editors</Button>
-          <Button color="inherit" component={Link} to="queries/" className='navLink'>Queries</Button>
+          <Button color="inherit" component={Link} to="/admin/" className='navLink'>ΑΡΧΙΚΗ</Button>
+          <Button color="inherit" component={Link} to="schools/all-schools/" className='navLink'>ΣΧΟΛΕΙΑ</Button>
+          <Button color="inherit" component={Link} to="lib-editors/all-lib-editors/" className='navLink'>ΧΕΙΡΙΣΤΕΣ ΒΙΒΛΙΟΘΗΚΩΝ</Button>
+          <Button color="inherit" component={Link} to="queries/" className='navLink'>ΣΤΑΤΙΣΤΙΚΑ</Button>
 
         </Toolbar>
       </AppBar>

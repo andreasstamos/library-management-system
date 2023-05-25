@@ -11,7 +11,7 @@ function AdminDashboard() {
     
 
     <div className='admin-dashboard'>
-        <h1 className='title-with-hr admin-dashboard-title'>Admin Dashboard</h1>
+        <h1 className='title-with-hr admin-dashboard-title'>Πίνακας ελέγχου διαχειριστή</h1>
         <div className='admin-dashboard-container'>
           <Outlet />
         </div>
