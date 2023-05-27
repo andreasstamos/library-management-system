@@ -489,3 +489,6 @@ def average_ratings_per_category():
     except psycopg2.Error as err:
         print(err)
         return {"success": False, "error": "unknown"}
+
+
+

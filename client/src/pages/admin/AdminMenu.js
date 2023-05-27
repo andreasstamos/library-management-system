@@ -27,6 +27,14 @@ export default function AdminMenu() {
               <ListItemText>Διαχείριση σχολείων</ListItemText>
             </MenuItem>
           </NavLink>
+          <NavLink to='/admin/authors/'>
+            <MenuItem>
+              <ListItemIcon>
+                <SchoolIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Διαχείριση συγγραφέων</ListItemText>
+            </MenuItem>
+          </NavLink>
 
           <NavLink to='/admin/lib-editors/'>
             <MenuItem>

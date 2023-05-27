@@ -41,6 +41,7 @@ import Admin_3_1_6 from './pages/admin/queries/Admin_3_1_6';
 import Admin_3_1_7 from './pages/admin/queries/Admin_3_1_7';
 import DelayedReturns from './pages/lib_editor/DelayedReturns';
 import AverageRatings from './pages/lib_editor/AverageRatings';
+import AuthorControl from './pages/lib_editor/AuthorControl';
 
 
 function App() {
@@ -76,12 +77,13 @@ function App() {
               <Route path='average-ratings/' element={<AverageRatings />} />
               <Route path='lend-return/' element={<BorrowForm />} />
               <Route path='add-book/' element={<BookAdd />} />
-
+              <Route path='authors-control' element={<AuthorControl />} />
             </Route>
 
             <Route path='/admin' element={<AdminPrivateRoute><AdminDashboard /></AdminPrivateRoute>}>
               <Route index element={<AdminMenu />} />
-              
+              <Route path='authors/' element={<AuthorControl />} />
+
               <Route path='schools/' element={<SchoolDashboard/>}>
                   <Route path='add-school/' element={<AddSchool/>} />
                   <Route path='all-schools/' element={<AllSchools/>} />

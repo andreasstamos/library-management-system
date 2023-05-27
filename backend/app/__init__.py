@@ -25,7 +25,7 @@ def setup_database(app):
         db_pool.putconn(g.db_conn)
 
 def register_blueprints(app):
-    from . import book, auth, school, item, user, admin_ops, students_ops, lib_ops, booking
+    from . import book, auth, school, item, user, admin_ops, students_ops, lib_ops, booking, authors
     app.register_blueprint(book.bp,     url_prefix="/book")
     app.register_blueprint(auth.bp,     url_prefix="/auth")
     app.register_blueprint(school.bp,   url_prefix="/school")
@@ -36,7 +36,7 @@ def register_blueprints(app):
     app.register_blueprint(admin_ops.bp,     url_prefix="/admin-api")
     app.register_blueprint(students_ops.bp, url_prefix='/student-api')
     app.register_blueprint(lib_ops.bp,      url_prefix='/lib-api')
-
+    app.register_blueprint(authors.bp, url_prefix='/authors')
 
 def create_app(test_config=None):
     app = Flask(__name__)

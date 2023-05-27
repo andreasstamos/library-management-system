@@ -94,6 +94,14 @@ export default function DashboardMenu() {
               <ListItemText>Διαχείριση χρηστών</ListItemText>
             </MenuItem>
           </NavLink>
+          <NavLink to='/lib-editor/authors-control/'>
+            <MenuItem>
+              <ListItemIcon>
+                <CheckCircleOutlineIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Διαχείριση συγγραφέων</ListItemText>
+            </MenuItem>
+          </NavLink>
           <NavLink to='/lib-editor/average-ratings/'>
             <MenuItem>
               <ListItemIcon>
