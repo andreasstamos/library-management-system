@@ -28,9 +28,10 @@ def get_bookings():
         with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
             # Get all non active reviews from users that are in the same school as the lib editor.
             cur.execute("""
-                SELECT booking_id, booking.isbn, book.title, "user".user_id, LOWER(period) AS booked_on,
-                CASE WHEN borrow_id IS NOT NULL THEN true ELSE false
-                END AS lent
+                SELECT booking_id, booking.isbn, book.title, "user".user_id, first_name, last_name, username,
+                LOWER(period) AS booked_on,
+                (borrow_id IS NOT NULL) AS lent,
+                (NOW() <@ period) AS time_valid
                 FROM booking
                 INNER JOIN "user" ON booking.user_id = "user".user_id AND "user".school_id = (%s)
                 INNER JOIN "book" ON booking.isbn = book.isbn

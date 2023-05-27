@@ -43,7 +43,7 @@ function ReviewControl() {
   return (
     <div className='dashboard-component'>
         <div className='dashboard-inline'>
-            <h2 className='component-title'>Reviews</h2>
+            <h2 className='component-title'>Διαχείριση αξιολόγησεων</h2>
             <div className='active-filter'>
                     <FormControlLabel
                     control={
@@ -52,7 +52,7 @@ function ReviewControl() {
                         onChange={() => {setActiveReviews(!activeReview)}}
                         inputProps={{ 'aria-label': 'controlled' }} />
             }
-            label="Active Reviews"
+                        label={activeReview ? "Εγκεκριμένες" : "Αναμένουν έγκριση"}
             />
                 </div>
         </div>
@@ -70,7 +70,9 @@ function ReviewControl() {
                 active={review?.active}
                 />
             })}
-           {!loading && reviews.length == 0 && <h3>Δεν υπάρχουν διαθέσιμες αξιολογήσεις με αυτά τα κριτήρια.</h3>}
+            {!loading && reviews.length == 0 && <h3>
+                {activeReview ? "Δεν υπάρχουν εγκεκριμένες αξιολογήσεις." : "Δεν υπάρχουν αξιολογήσεις που να αναμένουν έγκριση."} 
+            </h3>}
         
 
         </div>

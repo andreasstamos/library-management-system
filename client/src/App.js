@@ -69,7 +69,7 @@ function App() {
 
             <Route path='/lib-editor' element={<LibraryEditorPrivateRoute><Dashboard /></LibraryEditorPrivateRoute>}>
               <Route path='users-control' element={<UsersControl/>} />
-              <Route path='activate-reviews' element={<ReviewControl />} />
+              <Route path='reviews' element={<ReviewControl />} />
               <Route path='bookings/' element={<Bookings />} />
               <Route path='borrows/' element={<Borrows />} />
               <Route path='delayed-returns/' element={<DelayedReturns />} />

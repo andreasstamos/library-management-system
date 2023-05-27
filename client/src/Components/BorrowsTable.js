@@ -69,8 +69,8 @@ function Row({data,fetchBorrows}) {
         <div>{`${data.borrower_first_name} ${data.borrower_last_name}`}</div>
         <div>{`${data.borrower_username}, AM: ${data.borrower_id}`}</div>
       </TableCell>
-      <TableCell align="right">{dayjs(data.borrowed_on).format('HH:mm:ss DD/MM/YYYY')}</TableCell>
-      {data.returned_on ? <TableCell align="right">{dayjs(data.returned_on).format('HH:mm:ss DD/MM/YYYY')}</TableCell> :
+      <TableCell align="right">{dayjs(data.borrowed_on).format('DD/MM/YYYY HH:mm:ss')}</TableCell>
+      {data.returned_on ? <TableCell align="right">{dayjs(data.returned_on).format('DD/MM/YYYY HH:mm:ss')}</TableCell> :
       <TableCell sx={{color: 'warning.main'}}align="right">Δεν έχει επιστραφεί ακόμα</TableCell>}
       <TableCell align="right">{dayjs(data.expected_return).format('DD/MM/YYYY')}</TableCell>
       <TableCell align="center">

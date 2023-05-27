@@ -77,7 +77,7 @@ export default function SchoolCard({name, schoolID, address, city, email, fetchS
       <CardActions>
         <Button size="small" onClick={() => setEdit(!edit)}>ΕΠΕΞΕΡΓΑΣΙΑ</Button>
         <Button disabled={!edit} size='small' onClick={() => updateSchool()}>ΕΝΗΜΕΡΩΣΗ</Button>
-        <Button size="small" type='submit' color="error" onClick={(e) => {deleteSchool()}}>ΔΙΑΓΡΑΦΗ</Button>
+        <Button type='submit' color="error" onClick={(e) => {deleteSchool()}}>ΔΙΑΓΡΑΦΗ</Button>
       </CardActions>
     </Card>
   );

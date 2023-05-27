@@ -73,7 +73,7 @@ export default function DashboardMenu() {
               <ListItemText>Προσθήκη νέου βιβλίου</ListItemText>
             </MenuItem>
           </NavLink>
-          <NavLink to='/lib-editor/activate-reviews/'>
+          <NavLink to='/lib-editor/reviews/'>
             <MenuItem>
               <ListItemIcon>
                 <RateReviewIcon fontSize="small" />

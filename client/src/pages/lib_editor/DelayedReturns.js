@@ -10,6 +10,10 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
+import dayjs from 'dayjs';
+import 'dayjs/locale/el';
+dayjs.locale('el');
+
 
 
 function DelayedReturns() {
@@ -54,7 +58,7 @@ function DelayedReturns() {
 
   return (
     <div className='dashboard-component'>
-    <h2 className='component-title'>Delayed Returns</h2>
+    <h2 className='component-title'>Καθυστερημένες επιστροφές</h2>
     <div className='component-details'>
     <div className='queries-filter'>
            <TextField 
@@ -87,7 +91,7 @@ function DelayedReturns() {
       
       {!loading && users && (users.length > 0 ? <DelayedUsersTable 
         data={users}
-      /> : <h3>No users found with specific search params.</h3>)}
+      /> : <h3>Δεν βρέθηκαν χρήστες με καθυστερημένες επιστροφές που να ικανοποιούν τα κριτήρια αναζήτησης.</h3>)}
       {loading && <CircularProgress/>}
     </div>
     
@@ -105,9 +109,10 @@ function DelayedUsersTable({data}) {
         <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
           <TableHead>
             <TableRow>
-              <TableCell>Full Name</TableCell>
-              <TableCell>Expected Return</TableCell>
-              <TableCell>Dates Late</TableCell>
+              <TableCell>Δανειζόμενος χρήστης</TableCell>
+              <TableCell>Προβλεπόμενη ημερομηνία επιστορφής (του πιο καθυστερημένου αντιτύπου)</TableCell>
+              <TableCell>Ημέρες καθυστέρησης (του πιο καθυστερημένου αντιτύπου)</TableCell>
+              <TableCell>Συνολικός αριθμός καθυστερημένων αντιτύπων</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -117,10 +122,12 @@ function DelayedUsersTable({data}) {
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
               >
                 <TableCell component="th" scope="row">
-                  {row.full_name}
+                    <div>{row.full_name}</div>
+                    <div>{`${row.username}, AM: ${row.user_id}`}</div>
                 </TableCell>
-                <TableCell>{row.expected_return}</TableCell>
+                <TableCell>{dayjs(data.expected_return).format('DD/MM/YYYY')}</TableCell>
                 <TableCell>{row.date_difference}</TableCell>
+                <TableCell>{row.cnt}</TableCell>
               </TableRow>
             ))}
           </TableBody>

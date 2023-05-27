@@ -68,6 +68,7 @@ INSERT INTO "user" (school_id, first_name, last_name, email, username, password_
 
 
 INSERT INTO lib_user (user_id) VALUES (1);
+INSERT INTO student (user_id) VALUES (2);
 
 -- kostaras
 INSERT INTO "user" (user_id, school_id,first_name, last_name, username, email, password_hash, dob, active) VALUES 

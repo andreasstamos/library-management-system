@@ -32,12 +32,12 @@ function Bookings() {
 
   return (
     <div className='dashboard-component'>
-        <h2 className='component-title'>Bookings</h2>
+        <h2 className='component-title'>Κρατήσεις</h2>
         <div className='component-details'>
           {loading && <CircularProgress />}
           {bookings && (bookings.length > 0 ? <BookingsTable 
           data={bookings} fetchBookings={fetchBookings}
-          /> : <h3>No Bookings</h3>)}
+          /> : <h3>Δεν βρέθηκαν κρατήσεις.</h3>)}
         </div>
   </div>
   )

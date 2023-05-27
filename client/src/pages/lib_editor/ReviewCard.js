@@ -84,9 +84,9 @@ export default function ReviewCard({reviewID, title, authors, username, isbn, bo
         
       </CardContent>
       <CardActions>
-        {active && <Button size="small" onClick={activateReview}>Deactivate Review</Button>}
-        {!active && <Button size="small" onClick={activateReview}>Activate Review</Button>}
-        <Button color="error" onClick={deleteReview}>Delete Review</Button>
+        {active && <Button size="small" onClick={activateReview}>ΑΠΕΝΕΡΓΟΠΟΙΗΣΗ</Button>}
+        {!active && <Button size="small" onClick={activateReview}>ΕΝΕΡΓΟΠΟΙΗΣΗ</Button>}
+        <Button color="error" onClick={deleteReview}>ΔΙΑΓΡΑΦΗ</Button>
       </CardActions>
     </Card>
   );
