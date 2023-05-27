@@ -2,41 +2,45 @@ import React, { useEffect, useState } from 'react'
 import './UsersControl.css'
 import axios from 'axios';
 import UserCard from './UserCard';
+import { Switch } from '@mui/material';
 
-
-function UsersControl({action}) {
+function UsersControl() {
 
 
     const [data, setData] = useState();
+    const [activeUsers, setActiveUsers] = useState(false);
 
-    async function getDeactivatedUsers() {
-        console.log(localStorage.getItem('authTokens'));
-        const response = await axios.post(`http://127.0.0.1:5000/lib-api/get-users-active-status/`,{
-            "action": action
-        },{
+
+    async function getUsers() {
+        setData(null);
+        const payload = {
+            active:activeUsers
+        }
+        const response = await axios.post('http://localhost:5000/lib-api/get-users/', payload, {
             headers: {
-               'Access-Control-Expose-Headers' : '*',
-               'Access-Control-Allow-Origin': '*', 
-               'Content-Type': 'application/json',
-               'Authorization': `Bearer ${localStorage.getItem('authTokens')}`,
-            }
+                'Access-Control-Expose-Headers' : '*',
+                'Access-Control-Allow-Origin': '*', 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authTokens')}`,
+             }
         })
-        setData(response?.data?.users);
-
+        setData(response?.data?.users)
+        console.log(response);
     }
 
-
     useEffect( () => {
-            getDeactivatedUsers();
-    }, [action])
+            getUsers();
+    }, [activeUsers])
 
 
   return (
     <div className='dashboard-component'>
-        <h2 className='component-title'>{action == 'deactivate' ? 'Active' : 'Deactivated'} Users</h2>
+        <h2 className='component-title'>Users</h2>
         <div className='component-details users-control'>
-        
-            {data && data.map((item) => {return <UserCard data={item} action={action} getDeactivatedUsers={getDeactivatedUsers} />})}
+        <div className='queries-filter'>
+            <Switch label="Active" checked={activeUsers} onChange={(e) => setActiveUsers(!activeUsers)} />
+        </div>
+            {data && data.map((item) => {return <UserCard data={item} getUsers={getUsers} />})}
             {data && data.length == 0 && <h3>No Users</h3>}
         
 

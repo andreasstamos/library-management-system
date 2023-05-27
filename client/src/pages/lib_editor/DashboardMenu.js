@@ -17,23 +17,19 @@ import BookmarkIcon from '@mui/icons-material/Bookmark';
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 import { Link, NavLink } from 'react-router-dom';
 import WatchLaterIcon from '@mui/icons-material/WatchLater';
+import GradeIcon from '@mui/icons-material/Grade';
 import './DashboardMenu.css'
 
 export default function DashboardMenu() {
   return (
-    <Paper sx={{ width: 250, maxWidth: '100%' }} className='dashboard-menu'>
+    <Paper sx={{ width: 300, maxWidth: '100%' }} className='dashboard-menu'>
       <MenuList>
-        <MenuItem>
-          <ListItemIcon>
-            <CheckCircleOutlineIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText><NavLink to='/lib-editor/activate-users/'>Activate Users</NavLink></ListItemText>
-        </MenuItem>
+
         <MenuItem>
           <ListItemIcon>
             <NotInterestedIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText><NavLink to='/lib-editor/deactivate-users/'>Deactivate Users</NavLink></ListItemText>
+          <ListItemText><NavLink to='/lib-editor/users-control/'>Έλεγχος Χρηστών</NavLink></ListItemText>
         </MenuItem>
         <MenuItem>
           <ListItemIcon>
@@ -53,18 +49,18 @@ export default function DashboardMenu() {
           </ListItemIcon>
           <ListItemText><NavLink to='/lib-editor/borrows/'>Borrows</NavLink></ListItemText>
         </MenuItem>
+        <Divider />
         <MenuItem>
           <ListItemIcon>
             <WatchLaterIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText><NavLink to='/lib-editor/delayed-returns/'>Delayed Returns</NavLink></ListItemText>
+          <ListItemText><NavLink to='/lib-editor/delayed-returns/'>Αργοπορημένοι Δανεισμοί</NavLink></ListItemText>
         </MenuItem>
-        <Divider />
         <MenuItem>
           <ListItemIcon>
-            <Cloud fontSize="small" />
+            <GradeIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Web Clipboard</ListItemText>
+          <ListItemText><NavLink to='/lib-editor/average-ratings/'>Μέσος Όρος Αξιολογήσεων</NavLink></ListItemText>
         </MenuItem>
       </MenuList>
     </Paper>

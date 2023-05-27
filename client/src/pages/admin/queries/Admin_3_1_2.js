@@ -63,7 +63,6 @@ function Admin_3_1_2() {
     <h2 className='title-with-hr'>Στατιστικά ανά κατηγορία</h2>
     <div className='queries-filter'>
             <CategorySelect categorySelected={categorySelected} setCategorySelected={setCategorySelected} />
-
     </div>
 
     <Box sx={{ width: '100%' }}>

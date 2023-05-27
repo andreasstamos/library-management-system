@@ -35,11 +35,10 @@ function Admin_3_1_1() {
         setBorrows(null);
         setLoading(true);
         const payload = {
-            school_id: parseInt(schoolSelected)
         }
 
-        if (timeFilter) payload['timefilter'] = `${timeFilter.$y}-${timeFilter.$M}`
-
+        if (timeFilter) payload['timefilter'] = `${timeFilter.$y}-${timeFilter.$M + 1}`
+        if (schoolSelected) payload['school_id'] = parseInt(schoolSelected)
         const response = await axios.post('http://localhost:5000/admin-api/queries/3_1_1/', payload, {
             headers: {
                 'Access-Control-Expose-Headers' : '*',
@@ -68,7 +67,6 @@ function Admin_3_1_1() {
       }, [])
 
       useEffect( () => {
-        if (!schoolSelected) return;
         setLoading(true);
         fetchBorrows();
       }, [schoolSelected, timeFilter])
@@ -90,33 +88,27 @@ function Admin_3_1_1() {
           <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
             <TableHead>
               <TableRow>
-                <TableCell>Borrows ID</TableCell>
-                <TableCell>Book</TableCell>
-                <TableCell>Borrower</TableCell>
-                <TableCell>Lender</TableCell>
-                <TableCell>Borrowed On</TableCell>
-                <TableCell>Expected Return</TableCell>
+                <TableCell>School ID</TableCell>
+                <TableCell>School Name</TableCell>
+                <TableCell>Borrows Count</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {borrows.map((row) => (
                 <TableRow
-                  key={row.name}
+                  key={row.school_id}
                   sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                 >
                   <TableCell component="th" scope="row">
-                    {row.borrow_id}
+                    {row.school_id}
                   </TableCell>
-                  <TableCell>{row.title}</TableCell>
-                  <TableCell>{row.borrower_full_name}</TableCell>
-                  <TableCell>{row.lender_full_name}</TableCell>
-                  <TableCell>{row.borrowed_on}</TableCell>
-                  <TableCell>{row.expected_return}</TableCell>
+                  <TableCell>{row.name}</TableCell>
+                  <TableCell>{row.borrow_count}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
-        </TableContainer> : <h3>No Borrows</h3>)
+        </TableContainer> : <h3>Δεν υπάρχουν δανεισμοί με τα συγκεκριμένα κριτήρια.</h3>)
       }
 
       <div className='queries-container'>

@@ -57,7 +57,7 @@ function Admin_3_1_6() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {categories.map((index, row) => (
+              {categories.map((row, index) => (
                 <TableRow
                   key={index}
                   sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
@@ -65,7 +65,7 @@ function Admin_3_1_6() {
                   <TableCell component="th" scope="row">
                     {index+1}
                   </TableCell>
-                  <TableCell>{row.categories.join(', ')}</TableCell>
+                  <TableCell>{row.join(', ')}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

@@ -39,9 +39,7 @@ function Bookings() {
           data={bookings} fetchBookings={fetchBookings}
           /> : <h3>No Bookings</h3>)}
         </div>
-        
-    
-</div>
+  </div>
   )
 }
 

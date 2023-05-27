@@ -40,6 +40,7 @@ import Admin_3_1_5 from './pages/admin/queries/Admin_3_1_5';
 import Admin_3_1_6 from './pages/admin/queries/Admin_3_1_6';
 import Admin_3_1_7 from './pages/admin/queries/Admin_3_1_7';
 import DelayedReturns from './pages/lib_editor/DelayedReturns';
+import AverageRatings from './pages/lib_editor/AverageRatings';
 
 
 function App() {
@@ -69,12 +70,12 @@ function App() {
             </Route>
 
             <Route path='/lib-editor' element={<LibraryEditorPrivateRoute><Dashboard /></LibraryEditorPrivateRoute>}>
-              <Route path='activate-users' element={<UsersControl action={"activate"} />} />
-              <Route path='deactivate-users' element={<UsersControl action={"deactivate"}/>} />
+              <Route path='users-control' element={<UsersControl/>} />
               <Route path='activate-reviews' element={<ReviewControl />} />
               <Route path='bookings/' element={<Bookings />} />
               <Route path='borrows/' element={<Borrows />} />
               <Route path='delayed-returns/' element={<DelayedReturns />} />
+              <Route path='average-ratings/' element={<AverageRatings />} />
 
             </Route>
 

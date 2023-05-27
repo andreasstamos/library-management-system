@@ -229,7 +229,7 @@ def get_filtered_borrows():
             "school_id": {"type": "integer"},
             "timefilter": {"type": "string", "format": "date"}
             },
-        "required": ["school_id"],
+        "required": [],
         "additionalProperties": False,
     }
     data = request.get_json()
@@ -237,30 +237,34 @@ def get_filtered_borrows():
         jsonschema.validate(data, GET_FILTERED_BORROWS_JSON)
     except jsonschema.ValidationError as err:
         return {"success": False, "error": err.message}, 400
+    
+    group_by_clause = "GROUP BY school.school_id, school.name"
+    params = []
     where_clause = ""
+    if 'school_id' in data.keys():
+        print(data['school_id'])
+        where_clause += 'WHERE school.school_id = (%s) '
+        params.append(data['school_id'])
     if 'timefilter' in data.keys():
+        print(data['timefilter'])
         date_format = "%Y-%m"
         month = datetime.strptime(data['timefilter'], date_format).month
         year = datetime.strptime(data['timefilter'], date_format).year
-
-        where_clause = f"WHERE EXTRACT(MONTH FROM LOWER(borrow.period) AT TIME ZONE 'UTC') = {month}\
-                         AND EXTRACT(YEAR FROM LOWER(borrow.period) AT TIME ZONE 'UTC') = {year};"
-
+        where_clause += f"AND EXTRACT(MONTH FROM LOWER(borrow.period)) = {month}\
+                         AND EXTRACT(YEAR FROM LOWER(borrow.period)) = {year}"
+    
+    order_by_clause = "ORDER BY borrow_count DESC"
+    
     try:
         with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
             # Get all bookings from specific school
             # perhaps latest school_id's check on borrower and lender are useless
-            cur.execute("""
-               SELECT borrow.borrow_id, book.title, borrower.first_name || ' ' || borrower.last_name as borrower_full_name,
-               lender.first_name || ' ' || lender.last_name as lender_full_name,
-               LOWER(borrow.period) AS borrowed_on, borrow.expected_return
-               FROM borrow
-               INNER JOIN item ON borrow.item_id = item.item_id AND item.school_id = (%s)
-               INNER JOIN book ON book.isbn = item.isbn
-               INNER JOIN "user" AS borrower ON borrower.user_id = borrow.borrower_id AND borrower.school_id = (%s)
-               INNER JOIN "user" AS lender ON lender.user_id = borrow.lender_id AND lender.school_id = (%s)
-
-            """ + where_clause, [data['school_id'], data['school_id'], data['school_id']])
+            cur.execute("""               
+                SELECT school.school_id, school.name, COUNT(borrow.borrow_id) AS borrow_count
+                FROM school
+                LEFT JOIN "user" ON "user".school_id = school.school_id
+                LEFT JOIN borrow ON "borrow".borrower_id = "user".user_id
+            """ + where_clause + "\n" +group_by_clause + "\n" + order_by_clause, params)
             borrows = cur.fetchall()
             return {"success": True, "borrows": borrows}, 200
     except psycopg2.Error as err:
