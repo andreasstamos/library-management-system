@@ -30,12 +30,12 @@ function Borrows() {
 
   return (
     <div className='dashboard-component'>
-        <h2 className='component-title'>Borrows</h2>
+        <h2 className='component-title'>Δανεισμοί</h2>
         <div className='component-details'>
           {loading && <CircularProgress />}
           {borrows && (borrows.length > 0 ? <BorrowsTable 
-          data={borrows}
-          /> : <h3>No Borrows</h3>)}
+          data={borrows} fetchBorrows={fetchBorrows}
+          /> : <h3>Δεν βρέθηκαν δανεισμοί.</h3>)}
         </div>
         
     

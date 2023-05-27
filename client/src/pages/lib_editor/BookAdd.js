@@ -1,10 +1,10 @@
 import { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Alert, Button, Box, TextField, Backdrop, CircularProgress } from '@mui/material';
-import { FilterBarCategory, FilterBarPublisher, FilterBarKeyword, FilterBarAuthor, FilterBarLanguage } from '../Components/FilterBarBooks';
-import InsertedDialog from '../Components/InsertedDialog';
+import { FilterBarCategory, FilterBarPublisher, FilterBarKeyword, FilterBarAuthor, FilterBarLanguage } from '../../Components/FilterBarBooks';
+import InsertedDialog from '../../Components/InsertedDialog';
 
-import AuthContext from "../context/AuthContext";
+import AuthContext from "../../context/AuthContext";
 import axios from "axios";
 import debounce from "lodash/debounce";
 
@@ -162,7 +162,9 @@ function BookAdd() {
     }
 
     return (
-        <>
+        <div>
+	    <h1 className='title-with-hr'>Προσθήκη νέου βιβλίου</h1>
+            
             <Backdrop
                 sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
                 open={loadingInsert ? true : false}
@@ -210,7 +212,7 @@ function BookAdd() {
                     }
                 </Box>
             </Box>
-        </>
+        </div>
     );
 }
 

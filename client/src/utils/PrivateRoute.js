@@ -11,7 +11,7 @@ const PrivateRoute = ({children}) => {
     
     if (!user) return <Navigate to='/auth/login/' />
     if (user?.sub?.role === 'admin') return <Navigate to='/admin/' />
-    if (user?.sub?.role === 'lib-editor') return <Navigate to='/lib-editor/' />
+    if (user?.sub?.role === 'lib_editor') return <Navigate to='/lib-editor/' />
     return children;
 }
 

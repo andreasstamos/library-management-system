@@ -63,6 +63,7 @@ UPDATE_ITEM_JSONSCHEMA = {
         }
 
 @bp.route("/update/", methods=["POST"])
+@check_roles("lib_editor")
 def update_item():
     data = request.get_json()
     try:
@@ -200,3 +201,37 @@ def is_borrowed():
     except psycopg2.Error as err:
         print(err)
         return {"success": False, "error": "unknown"}, 400
+
+DELETE_BORROW_JSONSCHEMA = {
+        "type": "object",
+        "properties": {
+            "borrow_id": {"type": "integer"},
+            },
+        "additionalProperties": False,
+        "required": ["borrow_id"]
+        }
+
+@bp.route("/delete-borrow/", methods=["POST"])
+@check_roles(["lib_editor"])
+def delete_borrow():
+    data = request.get_json()
+    try:
+        jsonschema.validate(data, DELETE_BORROW_JSONSCHEMA)
+    except jsonschema.ValidationError as err:
+        return {"success": False, "error": err.message}, 400
+
+    try:
+        with g.db_conn.cursor() as cur:
+            cur.execute("""DELETE FROM borrow WHERE borrow_id = %s AND
+                    EXISTS (SELECT 1 FROM borrow JOIN "user" ON ("user".user_id = borrow.borrower_id) WHERE borrow_id = %s AND school_id = %s)""",\
+                            (data["borrow_id"], data["borrow_id"], get_jwt_identity()["school_id"]))
+            g.db_conn.commit()
+            return {"success": cur.rowcount > 0}, 200
+    except psycopg2.IntegrityError as err:
+        g.db_conn.rollback()
+        return {"success": False, "error": err.pgerror}, 400
+    except psycopg2.Error as err:
+        g.db_conn.rollback()
+        print(err)
+        return {"success": False, "error": "unknown"}, 400
+

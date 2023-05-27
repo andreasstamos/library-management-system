@@ -11,12 +11,12 @@ import LibraryEditorPrivateRoute from './utils/LibraryEditorPrivateRoute';
 import AdminPrivateRoute from './utils/AdminPrivateRoute';
 import Dashboard from './pages/lib_editor/Dashboard';
 import UsersControl from './pages/lib_editor/UsersControl';
-import BorrowForm from './pages/Borrow';
+import BorrowForm from './pages/lib_editor/BorrowForm';
 import PrivateRoute from './utils/PrivateRoute';
 import Landing from './pages/Landing';
 import Books from './pages/Books';
 import Book from './pages/Book';
-import BookAdd from './pages/BookAdd';
+import BookAdd from './pages/lib_editor/BookAdd';
 import ReviewControl from './pages/lib_editor/ReviewControl';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AddSchool from './pages/admin/school/AddSchool';
@@ -53,8 +53,6 @@ function App() {
             <Route path='/' element={<PrivateRoute><Landing/></PrivateRoute>}>
               <Route index path='' element={<PrivateRoute><Books/></PrivateRoute>} />
               <Route path='/book/:bookISBN' element={<PrivateRoute><Book/></PrivateRoute>} />
-              <Route path='/lend-return/' element={<PrivateRoute><BorrowForm/></PrivateRoute>} />
-              <Route path='/add-book/' element={<PrivateRoute><BookAdd/></PrivateRoute>} />
               <Route path='/profile/' element={<PrivateRoute><Profile /></PrivateRoute>} />
               <Route path='/my-borrows/' element={<PrivateRoute><MyBorrows /></PrivateRoute>} />
 
@@ -76,6 +74,8 @@ function App() {
               <Route path='borrows/' element={<Borrows />} />
               <Route path='delayed-returns/' element={<DelayedReturns />} />
               <Route path='average-ratings/' element={<AverageRatings />} />
+              <Route path='lend-return/' element={<BorrowForm />} />
+              <Route path='add-book/' element={<BookAdd />} />
 
             </Route>
 

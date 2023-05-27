@@ -1,7 +1,7 @@
 import React, {useState, useEffect, useContext} from 'react';
 import axios from 'axios';
-import './Borrow.css';
-import AuthContext from '../context/AuthContext';
+import './BorrowForm.css';
+import AuthContext from '../../context/AuthContext';
 import { Alert, Box, Typography, Button, TextField, Rating, CircularProgress, Stepper, Step, StepLabel } from '@mui/material';
 
 
@@ -325,36 +325,40 @@ function BorrowForm() {
 	}
 
 	return (
-		<Box sx={{display: 'flex', flexDirection: 'column', rowGap: '1rem'}}>
-			<Stepper activeStep={step}>
-				<Step completed={step>0}><StepLabel>Αντίτυπο</StepLabel></Step>
-				<Step completed={step>1}><StepLabel>Χρήστης</StepLabel></Step>
-				<Step completed={step>=2}><StepLabel>Δανεισμός/Επιστροφή</StepLabel></Step>
-			</Stepper>
+		<div>
+			<h1 className='title-with-hr'>Δανεισμός/Επιστροφή</h1>
 
-			{step == 0 &&
-			<ItemIdForm
-				itemid={itemid}
-				setItemId={setItemId}
-				handleReturn={() => {returnItem(); setStep(2);}}
-				handleNext={() => {setStep(1)}}/>}
-			{step == 1 &&
-				<UserIdForm
-					userid={userid}
-					setUserId={setUserId}
-					handleBack={() => {setStep(0)}}
-					handleBorrow={() => {borrowItem(); setStep(2);}}/>
-			}
-			{step == 2 &&
-				<Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start', rowGap: '1rem'}}>
-					{loading && <CircularProgress />}
-					{error && <Alert severity="error">{error}</Alert>}
-					{borrowed && <Alert severity="success">Ο δανεισμός καταχωρήθηκε με επιτυχία!</Alert>}
-					{returned && <Alert severity="success">Η επιστροφή καταχωρήθηκε με επιτυχία!</Alert>}
-					<Button variant="contained" sx={{ml: 'auto'}} onClick={handleStartOver}>ΑΡΧΗ</Button>
-				</Box>
-			}
-		</Box>
+			<Box sx={{display: 'flex', flexDirection: 'column', rowGap: '1rem'}}>
+				<Stepper activeStep={step}>
+					<Step completed={step>0}><StepLabel>Αντίτυπο</StepLabel></Step>
+					<Step completed={step>1}><StepLabel>Χρήστης</StepLabel></Step>
+					<Step completed={step>=2}><StepLabel>Δανεισμός/Επιστροφή</StepLabel></Step>
+				</Stepper>
+
+				{step == 0 &&
+				<ItemIdForm
+					itemid={itemid}
+					setItemId={setItemId}
+					handleReturn={() => {returnItem(); setStep(2);}}
+					handleNext={() => {setStep(1)}}/>}
+				{step == 1 &&
+					<UserIdForm
+						userid={userid}
+						setUserId={setUserId}
+						handleBack={() => {setStep(0)}}
+						handleBorrow={() => {borrowItem(); setStep(2);}}/>
+				}
+				{step == 2 &&
+					<Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start', rowGap: '1rem'}}>
+						{loading && <CircularProgress />}
+						{error && <Alert severity="error">{error}</Alert>}
+						{borrowed && <Alert severity="success">Ο δανεισμός καταχωρήθηκε με επιτυχία!</Alert>}
+						{returned && <Alert severity="success">Η επιστροφή καταχωρήθηκε με επιτυχία!</Alert>}
+						<Button variant="contained" sx={{ml: 'auto'}} onClick={handleStartOver}>ΑΡΧΗ</Button>
+					</Box>
+				}
+			</Box>
+		</div>
 	);
 }
 

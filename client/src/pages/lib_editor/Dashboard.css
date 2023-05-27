@@ -1,20 +1,16 @@
-.dashboard {
-    margin-top:5rem;
-    width: 100%;
-}
 .dashboard .dashboard-title {
-    color: var(--material-ui-theme);
-    text-align: center;
-    font-size: clamp(2.5rem, 4vw, 7rem);
-    margin: 0 auto;
+    margin-left: 4rem;
+    margin-top:4rem;
 }
+
 .dashboard-componentt {
-    margin: 2rem auto;
     width: 90%;
+    margin: 4rem auto;
     border: 2px solid #eee;
-    text-align: center;
-    padding: 2rem 3rem;
+    border-radius: 4px;
+    padding: 1rem;
 }
+
 .dashboard-componentt .component-title {
     font-size: clamp(2rem, 2.2vw, 5rem);
     width: fit-content;

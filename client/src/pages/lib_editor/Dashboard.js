@@ -9,11 +9,7 @@ function Dashboard() {
     <>
     <MenuAppBar />
     <div className='dashboard'>
-        <h1 className='dashboard-title title-with-hr'>Library Editor Dashboard</h1>
-        {/* <div className='dashboard-routes'>
-            <NavLink to='/lib-editor/activate-users/'>Non-Active Users</NavLink>
-            <NavLink to='/lib-editor/deactivate-users/'>Active Users</NavLink>
-        </div> */}
+        <h1 className='dashboard-title title-with-hr'>Πίνακας ελέγχου χειριστή βιβλιοθήκης</h1>
         <div className='dashboard-componentt'>
             <DashboardMenu />
             <Outlet />

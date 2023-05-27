@@ -243,7 +243,10 @@ def get_borrows():
         with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
             # Get all bookings from specific school
             cur.execute("""
-                SELECT borrow.item_id, lender.username AS lender, borrower.username AS borrower, LOWER(borrow.period) AS borrowed_on, expected_return, book.title, book.isbn AS isbn
+                SELECT borrow.borrow_id, borrow.item_id,
+                lender_id, lender.username AS lender_username, lender.first_name AS lender_first_name, lender.last_name AS lender_last_name,
+                borrower_id, borrower.username AS borrower_username, borrower.first_name as borrower_first_name, borrower.last_name AS borrower_last_name,
+                LOWER(borrow.period) AS borrowed_on, UPPER(borrow.period) as returned_on, expected_return, book.title, book.isbn
                 FROM borrow
                 INNER JOIN "user" AS lender ON borrow.lender_id = lender.user_id AND lender.school_id = (%s)
                 INNER JOIN "user" AS borrower ON borrow.borrower_id = borrower.user_id AND borrower.school_id = (%s)
