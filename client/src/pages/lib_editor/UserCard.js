@@ -59,6 +59,18 @@ export default function UserCard({data,  getUsers}) {
   }
 
 
+  async function makeLibCard() {
+    const payload = {
+      user_id:data.user_id
+    }
+    const response = await axios.post('http://localhost:5000/lib-api/make-library-card/', payload,{headers: {
+      'Access-Control-Expose-Headers' : '*',
+      'Access-Control-Allow-Origin': '*', 
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('authTokens')}`,
+   }})
+  }
+
   return (
 
     <Card sx={{ minWidth: 275 }} className='user-card'>
@@ -144,6 +156,7 @@ export default function UserCard({data,  getUsers}) {
   <Button size="small" variant="contained" onClick={(e) => {handleSubmit(data.user_id)}} disabled={!edit}>Update User</Button>
   <Button size="small" variant="contained" color="secondary" onClick={() => setEdit(!edit)}>Επεξεργασία</Button>
   <Button size="small" variant="contained" color="error" onClick={deleteUser}>Διαγραφή</Button>
+  <Button size="small" variant="contained" color="success" onClick={makeLibCard}>Δημιουργια Καρτας</Button>
 
 </CardActions>
 </Card>

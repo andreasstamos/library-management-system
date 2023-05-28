@@ -465,18 +465,18 @@ def average_ratings_per_category():
         return {"success": False, "error": err.message}, 400
     user = get_jwt_identity()
 
-    params = [user['school_id']]
+    params = []
     where_clause = ""
     if 'category_id' in data.keys():
         where_clause += "WHERE category.category_id = (%s)"
         params.append(data['category_id'])
     try:
         with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
-            # counting only reviews that are by students from the same school as the lib editor requesting the stats...
+            # Counting avg rating per category using reviews by ALL users of database (not only same school reviews)
             cur.execute(f"""
                 SELECT category.category_id, category.category_name, AVG(review.rate)
                 FROM review
-                INNER JOIN "user" ON "user".user_id = review.user_id AND "user".school_id = (%s)
+                INNER JOIN "user" ON "user".user_id = review.user_id
                 INNER JOIN borrow ON borrow.borrower_id = "user".user_id
                 INNER JOIN item ON item.item_id = borrow.item_id
                 INNER JOIN book_category ON book_category.isbn = item.isbn
@@ -492,3 +492,85 @@ def average_ratings_per_category():
 
 
 
+@bp.route('/queries/average-rating-per-borrower/', methods=['POST'])
+@check_roles(['lib_editor'])
+def average_rating_per_borrower():
+    AVERAGE_RATING_PER_BORROWER = {
+        'type': 'object',
+        "properties": {
+                "first_name": {'type':'string'},
+                "last_name": {'type': 'string'}
+            },
+        "additionalProperties": False,
+        "required": []
+    }
+    data = request.get_json()
+    try:
+        jsonschema.validate(data, AVERAGE_RATING_PER_BORROWER)
+    except jsonschema.ValidationError as err:
+        return {"success": False, "error": err.message}, 400
+    
+    user = get_jwt_identity()
+    where_clause = ""
+    params = [user['school_id']]
+    for fieldname in data.keys():
+        where_clause += f" AND {fieldname} ILIKE %s"
+        params.append("%"+data[fieldname]+"%")
+
+    print(where_clause)
+    try:
+        with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
+            cur.execute(f"""
+                SELECT "user".user_id, "user".first_name, "user".last_name, "user".username, AVG(review.rate)
+                FROM review
+                INNER JOIN "user" ON "user".user_id = review.user_id
+                INNER JOIN borrow ON borrow.borrower_id = "user".user_id
+                WHERE "user".school_id = (%s)
+                {where_clause}
+                GROUP BY "user".user_id, "user".first_name, "user".last_name, "user".username
+                """,params)
+            users = cur.fetchall()
+            return {"success": True, "users": users}, 200
+    except psycopg2.Error as err:
+        print(err)
+        return {"success": False, "error": "unknown"}
+    
+
+import os
+@bp.route('/make-library-card/', methods=['POST'])
+@check_roles(['lib_editor'])
+def make_libary_card():
+    MAKE_LIBARY_CARD_JSON = {
+        'type': 'object',
+        "properties": {
+                "user_id": {'type':'integer', 'minValue':0},
+            },
+        "additionalProperties": False,
+        "required": ["user_id"]
+    }
+    data = request.get_json()
+    try:
+        jsonschema.validate(data, MAKE_LIBARY_CARD_JSON)
+    except jsonschema.ValidationError as err:
+        return {"success": False, "error": err.message}, 400
+    
+    # open sample latex card content
+    with open(os.path.join(os.getcwd(),'assets','latex',"lib_card.tex"), encoding="utf-8") as f:
+        latex_data = str(f.read())
+    user = get_jwt_identity()
+    try:
+        with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
+            cur.execute("""
+               SELECT "user".user_id, "user".first_name || ' ' || "user".last_name AS full_name, "user".email, school.name AS school_name, school.city AS school_city
+               FROM "user"
+               INNER JOIN school ON "user".user_id = (%s) AND "user".school_id = (%s)
+                """,[data['user_id'], user['school_id']])
+            user = cur.fetchone()
+            latex_data = latex_data.format(user['full_name'], user['email'], user['school_name'], user['school_city'])
+            with open(os.path.join(os.getcwd(),'assets','library_cards',f"{user['user_id']}.tex"), 'w') as f:
+                f.write(latex_data)
+            return {"success": True,}, 201
+    except psycopg2.Error as err:
+        print(err)
+        return {"success": False, "error": "unknown"}
+    

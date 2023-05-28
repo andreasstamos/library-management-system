@@ -2,7 +2,7 @@
     width: 100%;
     display: flex;
     justify-content: flex-start;
-    margin-block: 5rem;
+    /* margin-block: 5rem; */
     flex-wrap: wrap;
     column-gap: 2rem;
 }

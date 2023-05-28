@@ -27,11 +27,11 @@ export default function MyBorrowsTable({data}) {
         <TableHead>
           <TableRow>
             <TableCell>Title</TableCell>
-            <TableCell align="right">ISBN</TableCell>
-            <TableCell align="right">Item ID</TableCell>
-            <TableCell align="right">Publisher</TableCell>
-            <TableCell align="right">Borrowed</TableCell>
-            <TableCell align="right">Returned</TableCell>
+            <TableCell >ISBN</TableCell>
+            <TableCell >Item ID</TableCell>
+            <TableCell >Publisher</TableCell>
+            <TableCell >Borrowed</TableCell>
+            <TableCell >Returned</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -43,11 +43,11 @@ export default function MyBorrowsTable({data}) {
               <TableCell component="th" scope="row">
                 {book.title}
               </TableCell>
-              <TableCell align="right">{book.isbn}</TableCell>
-              <TableCell align="right">{book.item_id}</TableCell>
-              <TableCell align="right">{book.publisher_name}</TableCell>
-              <TableCell align="right">{book.borrowed_on}</TableCell>
-              <TableCell align="right">{book.returned}</TableCell>
+              <TableCell >{book.isbn}</TableCell>
+              <TableCell >{book.item_id}</TableCell>
+              <TableCell >{book.publisher_name}</TableCell>
+              <TableCell >{book.borrowed_on}</TableCell>
+              <TableCell >{book.returned}</TableCell>
             </TableRow>
           ))}
         </TableBody>

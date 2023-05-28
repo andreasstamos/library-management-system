@@ -153,4 +153,3 @@ def delete_bookin():
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
         return {'success': False, 'error': 'unknown'}, 400
-    

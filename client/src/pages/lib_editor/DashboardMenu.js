@@ -21,6 +21,9 @@ import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 import { Link, NavLink } from 'react-router-dom';
 import WatchLaterIcon from '@mui/icons-material/WatchLater';
 import GradeIcon from '@mui/icons-material/Grade';
+import CategoryIcon from '@mui/icons-material/Category';
+import PersonIcon from '@mui/icons-material/Person';
+
 import './DashboardMenu.css'
 
 export default function DashboardMenu() {
@@ -81,6 +84,14 @@ export default function DashboardMenu() {
               <ListItemText>Διαχείριση αξιολογήσεων</ListItemText>
             </MenuItem>
           </NavLink>
+          <NavLink to='/lib-editor/category-control/'>
+            <MenuItem>
+              <ListItemIcon>
+                <CategoryIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Διαχείριση κατηγοριών</ListItemText>
+            </MenuItem>
+          </NavLink>
         </MenuList>
       </Paper>
 
@@ -89,7 +100,7 @@ export default function DashboardMenu() {
           <NavLink to='/lib-editor/users-control/'>
             <MenuItem>
               <ListItemIcon>
-                <CheckCircleOutlineIcon fontSize="small" />
+                <PersonIcon fontSize="small" />
               </ListItemIcon>
               <ListItemText>Διαχείριση χρηστών</ListItemText>
             </MenuItem>
@@ -97,7 +108,7 @@ export default function DashboardMenu() {
           <NavLink to='/lib-editor/authors-control/'>
             <MenuItem>
               <ListItemIcon>
-                <CheckCircleOutlineIcon fontSize="small" />
+                <PersonIcon fontSize="small" />
               </ListItemIcon>
               <ListItemText>Διαχείριση συγγραφέων</ListItemText>
             </MenuItem>

@@ -6,8 +6,9 @@ import Box from '@mui/material/Box';
 import PropTypes from 'prop-types';
 import CategorySelect from '../../Components/CategorySelect';
 import axios from 'axios';
-
-
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import SearchIcon from '@mui/icons-material/Search';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -22,16 +23,38 @@ function AverageRatings() {
 
     const [value, setValue] = React.useState(0);
     const [categorySelected, setCategorySelected] = React.useState(null);
-    const [loading, setLoading] = React.useState(true);
+    const [firstNameSearch, setFirstNameSearch] = React.useState('');
+    const [lastNameSearch, setLastNameSearch] = React.useState('');
+    const [loadingCategories, setLoadingCategories] = React.useState(true);
+    const [loadingUsers, setLoadingUsers] = React.useState(true);
+
 
 
     const [ratingsPerCategory, setRatingsPerCategory] = React.useState(null);
-
+    const [ratingsPerUser, setRatingsPerUser] = React.useState(null);
 
     const handleChange = (event, newValue) => {
       setValue(newValue);
     };
 
+
+    async function fetchRatingsPerUser() {
+        setRatingsPerUser(null);
+        const payload = {}
+        if (lastNameSearch) payload['last_name'] = lastNameSearch
+        if (firstNameSearch) payload['first_name'] = firstNameSearch
+
+        const response = await axios.post('http://localhost:5000/lib-api/queries/average-rating-per-borrower/', payload, {
+          headers: {
+            'Access-Control-Expose-Headers' : '*',
+            'Access-Control-Allow-Origin': '*', 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('authTokens')}`,
+         }
+        })
+        setRatingsPerUser(response?.data?.users);
+        setLoadingUsers(false)
+    }
 
     async function fetchRatingPerCategory() {
       setRatingsPerCategory(null);
@@ -48,13 +71,19 @@ function AverageRatings() {
          }
         })
         setRatingsPerCategory(response?.data?.reviews);
-        setLoading(false);
+        setLoadingCategories(false);
     }
 
     useEffect( () => {
-      setLoading(true)
+      setLoadingCategories(true)
       fetchRatingPerCategory();
     }, [categorySelected])
+
+
+    useEffect( () => {
+      setLoadingUsers(true)
+      fetchRatingsPerUser();
+    }, [])
 
   return (
     <div className='dashboard-component'>
@@ -67,17 +96,40 @@ function AverageRatings() {
         </Tabs>
         </Box>
         <TabPanel value={value} index={0}>
-        Ανά Δανειζόμενο
+          <div className='queries-filter'>
+              <TextField 
+                  label="Όνομα"
+                  id="outlined-size-small"
+                  size="small"
+                  value={firstNameSearch}
+                  onChange={(e) => setFirstNameSearch(e.target.value)}
+                  />
+              <TextField 
+                  label="Επίθετο"
+                  id="outlined-size-small"
+                  size="small"
+                  value={lastNameSearch}
+                  onChange={(e) => setLastNameSearch(e.target.value)}
+                  />
+              <Button variant="contained" endIcon={<SearchIcon />} onClick={fetchRatingsPerUser}>
+                Αναζητηση
+              </Button>
+          </div>
+        {loadingUsers && <CircularProgress/>}
+        {ratingsPerUser && (ratingsPerUser.length > 0 ?(
+            <RatingsPerUserTable data={ratingsPerUser}/>)
+            :<h3>Δεν βρέθηκαν αξιολογήσεις.</h3>
+            )}
         </TabPanel>
         <TabPanel value={value} index={1}>
         <div className='queries-filter'>
             <CategorySelect categorySelected={categorySelected} setCategorySelected={setCategorySelected} />
 
         </div>
-        {loading && <CircularProgress />}
+        {loadingCategories && <CircularProgress />}
             {ratingsPerCategory && (ratingsPerCategory.length > 0 ?(
             <RatingsPerCategoryTable data={ratingsPerCategory}/>)
-            :<h3>Δεν βρέθηκαν αξιολογήσεις για αυτήν την κατηγορία</h3>
+            :<h3>Δεν βρέθηκαν αξιολογήσεις.</h3>
             )}
         </TabPanel>
 
@@ -123,6 +175,40 @@ function a11yProps(index) {
 }
 
 
+
+function RatingsPerUserTable({data}) {
+  return (
+    <TableContainer component={Paper} sx={{mt:3}}>
+      <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
+        <TableHead>
+          <TableRow>
+            <TableCell>ID</TableCell>
+            <TableCell>First Name</TableCell>
+            <TableCell>Last Name</TableCell>
+            <TableCell>Username</TableCell>
+            <TableCell>Average Rating</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {data.map((row) => (
+            <TableRow
+              key={row.user_id}
+              sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+            >
+              <TableCell component="th" scope="row">
+                {row.user_id}
+              </TableCell>
+              <TableCell>{row.first_name}</TableCell>
+              <TableCell>{row.last_name}</TableCell>
+              <TableCell>{row.username}</TableCell>
+              <TableCell>{parseInt(row.avg)}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+}
 
 
 

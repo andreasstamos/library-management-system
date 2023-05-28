@@ -59,21 +59,21 @@ function Row({data,fetchBorrows}) {
       <TableCell component="th" scope="row">
         {data.title}
       </TableCell>
-      <TableCell align="right">{data.isbn}</TableCell>
-      <TableCell align="right">{data.item_id}</TableCell>
-      <TableCell align="right">
+      <TableCell >{data.isbn}</TableCell>
+      <TableCell >{data.item_id}</TableCell>
+      <TableCell >
         <div>{`${data.lender_first_name} ${data.lender_last_name}`}</div>
         <div>{`${data.lender_username}, AM: ${data.lender_id}`}</div>
       </TableCell>
-      <TableCell align="right">
+      <TableCell>
         <div>{`${data.borrower_first_name} ${data.borrower_last_name}`}</div>
         <div>{`${data.borrower_username}, AM: ${data.borrower_id}`}</div>
       </TableCell>
-      <TableCell align="right">{dayjs(data.borrowed_on).format('DD/MM/YYYY HH:mm:ss')}</TableCell>
-      {data.returned_on ? <TableCell align="right">{dayjs(data.returned_on).format('DD/MM/YYYY HH:mm:ss')}</TableCell> :
-      <TableCell sx={{color: 'warning.main'}}align="right">Δεν έχει επιστραφεί ακόμα</TableCell>}
-      <TableCell align="right">{dayjs(data.expected_return).format('DD/MM/YYYY')}</TableCell>
-      <TableCell align="center">
+      <TableCell>{dayjs(data.borrowed_on).format('DD/MM/YYYY HH:mm:ss')}</TableCell>
+      {data.returned_on ? <TableCell >{dayjs(data.returned_on).format('DD/MM/YYYY HH:mm:ss')}</TableCell> :
+      <TableCell sx={{color: 'warning.main'}}>Δεν έχει επιστραφεί ακόμα</TableCell>}
+      <TableCell >{dayjs(data.expected_return).format('DD/MM/YYYY')}</TableCell>
+      <TableCell>
         {data.returned_on === null && <Button onClick={returnBorrow}>ΕΠΙΣΤΡΟΦΗ</Button>}
         <Button color="error" onClick={deleteBorrow}>ΔΙΑΓΡΑΦΗ</Button>
       </TableCell>
@@ -89,12 +89,12 @@ export default function BorrowsTable({data, fetchBorrows}) {
           <TableRow>
             <TableCell>Τίτλος</TableCell>
             <TableCell>ISBN</TableCell>
-            <TableCell align="right">Αριθμός αντιτύπου</TableCell>
-            <TableCell align="right">Χειριστής που εκτέλεσε τον δανεισμό</TableCell>
-            <TableCell align="right">Δανειζόμενος χρήστης</TableCell>
-            <TableCell align="right">Ημερομηνία έναρξης δανεισμού</TableCell>
-            <TableCell align="right">Ημερομηνία επιστροφής</TableCell>
-            <TableCell align="right">Προβλεπόμενη ημερομηνία επιστροφής</TableCell>
+            <TableCell >Αριθμός αντιτύπου</TableCell>
+            <TableCell >Χειριστής που εκτέλεσε τον δανεισμό</TableCell>
+            <TableCell >Δανειζόμενος χρήστης</TableCell>
+            <TableCell >Ημερομηνία έναρξης δανεισμού</TableCell>
+            <TableCell >Ημερομηνία επιστροφής</TableCell>
+            <TableCell >Προβλεπόμενη ημερομηνία επιστροφής</TableCell>
             <TableCell></TableCell>
           </TableRow>
         </TableHead>

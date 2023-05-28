@@ -4,6 +4,9 @@ import axios from 'axios';
 import UserCard from './UserCard';
 import { CircularProgress, Switch, TextField, Button } from '@mui/material';
 import AuthorCard from './AuthorCard';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+
+
 
 function AuthorControl() {
 
@@ -74,8 +77,8 @@ function AddAuthor({getAuthors}) {
 
     return (
         <>
-        <TextField id="outlined-basic" label="Outlined" variant="outlined" size="small" value={authorName} onChange={(e) => setAuthorName(e.target.value)} sx={{mr:2}} />
-        <Button variant="contained" color="success" size="small" onClick={addAuthor}>Add Author</Button>
+        <TextField id="outlined-basic" label="Συγγραφέας" variant="outlined" size="small" value={authorName} onChange={(e) => setAuthorName(e.target.value)} sx={{mr:2}} />
+        <Button variant="contained"  onClick={addAuthor} endIcon={<PersonAddIcon />}>Προσθήκη</Button>
         </>
 
 
