@@ -74,3 +74,36 @@ def insert_review():
 
     return {"success": True} ,200
 
+@bp.route('/my-review/', methods=['POST'])
+@jwt_required(refresh=False,locations=['headers'], verify_type=False)
+def my_review():
+
+    MY_REVIEW_JSON = {
+        "type": "object",
+        "properties": {
+            "isbn": {"type": "string", "maxLength": 15, 'minLength': 3},
+            },
+        "additionalProperties": False,
+        "required": ["isbn"]
+    }
+
+    data = request.get_json()
+    try:
+        jsonschema.validate(data, MY_REVIEW_JSON)
+    except jsonschema.ValidationError as err:
+        return {"success": False, "error": err.message}, 400
+
+    user = get_jwt_identity()
+    try:
+        with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
+            cur.execute("""
+            SELECT review.rate, review.body, review.review_id IS NOT NULL AS exists
+            FROM review
+            WHERE review.user_id = (%s) AND review.isbn = (%s)
+            """, (user['user_id'],data['isbn'],))
+            my_review = cur.fetchone()
+    except psycopg2.Error as err:
+        print(err.pgerror)
+        return {"success": False, "error": "unknown"}
+
+    return {"success": True, "my_review": my_review}, 200

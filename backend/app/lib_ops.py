@@ -536,6 +536,26 @@ def average_rating_per_borrower():
         return {"success": False, "error": "unknown"}
     
 
+
+
+
+
+# function to slugify name of user for 
+# the filename of the library card
+import unicodedata
+import re
+def slugify(value, allow_unicode=True):
+    value = str(value)
+    if allow_unicode:
+        value = unicodedata.normalize('NFKC', value)
+    else:
+        value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
+    value = re.sub(r'[^\w\s-]', '', value.lower()).strip()
+    return re.sub(r'[-\s]+', '-', value)
+
+
+
+
 import os
 @bp.route('/make-library-card/', methods=['POST'])
 @check_roles(['lib_editor'])
@@ -567,7 +587,8 @@ def make_libary_card():
                 """,[data['user_id'], user['school_id']])
             user = cur.fetchone()
             latex_data = latex_data.format(user['full_name'], user['email'], user['school_name'], user['school_city'])
-            with open(os.path.join(os.getcwd(),'assets','library_cards',f"{user['user_id']}.tex"), 'w') as f:
+            output_filepath = os.path.join(os.getcwd(), 'assets', 'library_cards', slugify(user['full_name'])+".tex")
+            with open(output_filepath, 'w') as f:
                 f.write(latex_data)
             return {"success": True,}, 201
     except psycopg2.Error as err:

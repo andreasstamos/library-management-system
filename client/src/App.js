@@ -43,6 +43,8 @@ import DelayedReturns from './pages/lib_editor/DelayedReturns';
 import AverageRatings from './pages/lib_editor/AverageRatings';
 import AuthorControl from './pages/lib_editor/AuthorControl';
 import CategoryControl from './pages/lib_editor/CategoryControl';
+import KeywordControl from './pages/lib_editor/KeywordControl';
+import PublisherControl from './pages/lib_editor/PublisherControl';
 
 
 function App() {
@@ -80,11 +82,15 @@ function App() {
               <Route path='add-book/' element={<BookAdd />} />
               <Route path='authors-control' element={<AuthorControl />} />
               <Route path='category-control' element={<CategoryControl />} />
+              <Route path='keywords-control/' element={<KeywordControl />} />
+              <Route path='publisher-control/' element={<PublisherControl />} />
             </Route>
 
             <Route path='/admin' element={<AdminPrivateRoute><AdminDashboard /></AdminPrivateRoute>}>
               <Route index element={<AdminMenu />} />
               <Route path='authors/' element={<AuthorControl />} />
+              <Route path='categories/' element={<CategoryControl />} />
+              <Route path='keywords/' element={<KeywordControl />} />
 
               <Route path='schools/' element={<SchoolDashboard/>}>
                   <Route path='add-school/' element={<AddSchool/>} />

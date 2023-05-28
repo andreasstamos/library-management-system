@@ -12,6 +12,9 @@ import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import QueryStatsIcon from '@mui/icons-material/QueryStats';
 import Cloud from '@mui/icons-material/Cloud';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
+import CategoryIcon from '@mui/icons-material/Category';
+
+import AbcIcon from '@mui/icons-material/Abc';
 import { NavLink } from 'react-router-dom';
 
 export default function AdminMenu() {
@@ -25,14 +28,6 @@ export default function AdminMenu() {
                 <SchoolIcon fontSize="small" />
               </ListItemIcon>
               <ListItemText>Διαχείριση σχολείων</ListItemText>
-            </MenuItem>
-          </NavLink>
-          <NavLink to='/admin/authors/'>
-            <MenuItem>
-              <ListItemIcon>
-                <SchoolIcon fontSize="small" />
-              </ListItemIcon>
-              <ListItemText>Διαχείριση συγγραφέων</ListItemText>
             </MenuItem>
           </NavLink>
 
@@ -53,7 +48,31 @@ export default function AdminMenu() {
               <ListItemText>Στατιστικά</ListItemText>
             </MenuItem>
           </NavLink>
-
+          <Divider />
+          <NavLink to='/admin/authors/'>
+            <MenuItem>
+              <ListItemIcon>
+                <SchoolIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Διαχείριση συγγραφέων</ListItemText>
+            </MenuItem>
+          </NavLink>
+          <NavLink to='/admin/categories/'>
+            <MenuItem>
+              <ListItemIcon>
+                <CategoryIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Διαχείριση κατηγοριών</ListItemText>
+            </MenuItem>
+          </NavLink>
+          <NavLink to='/admin/keywords/'>
+            <MenuItem>
+              <ListItemIcon>
+                <AbcIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Διαχείριση λέξεων κλειδιών</ListItemText>
+            </MenuItem>
+          </NavLink>
         </MenuList>
       </Paper>
     </Box>

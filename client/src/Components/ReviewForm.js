@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import { Box, Rating, TextField, Button, Typography } from '@mui/material';
 import RateReviewIcon from '@mui/icons-material/RateReview';
 import axios from 'axios';
@@ -8,9 +8,26 @@ function ReviewForm({bookISBN}) {
     // this is the rate that the user submits (if he does so...)
     const [rate, setRate] = useState(null);
     const [reviewBody, setReviewBody] = useState('');
-    const [userHasVotedBefore, setUserHasVotedBefore] = useState(false);
+    const [userHasVotedBefore, setUserHasVotedBefore] = useState(true);
     const [err, setErr] = useState('');
 
+
+    async function checkReview() {
+        const payload = {
+            isbn: bookISBN
+        }
+        const response = await axios.post('http://localhost:5000/student-api/my-review/', payload, {headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('authTokens')}`,
+        }})
+        console.log(response);
+        setUserHasVotedBefore(response?.data?.my_review?.exists);
+        if (response?.data?.my_review?.exists){ setReviewBody(response?.data?.my_review?.body); setRate(parseInt(response?.data?.my_review?.rate))}
+        
+    }
+    useEffect( () => {
+        checkReview();
+    }, [])
 
     async function handleReview(e) {
         e.preventDefault();
@@ -43,8 +60,9 @@ function ReviewForm({bookISBN}) {
     return (
         <form className='review-form' onSubmit={(e) => handleReview(e)}>            
             <Box sx={{display: 'flex', flexDirection: 'column', rowGap: '0.5rem'}}>
+            <Typography variant="body1" sx={{color: 'error.main'}}>{err && err}</Typography>
+
                 <Box sx={{display: 'flex'}}>
-                    <Typography variant="body1" sx={{color: 'error.main'}}>{err && err}</Typography>
                     <Box sx={{display: 'flex', flexDirection: 'column'}}>
                         <Typography variant="body1">{!userHasVotedBefore ? 'Αξιολόγησε το βιβλίο' : 'Η αξιολόγησή μου'}</Typography>
                         <Rating
@@ -60,7 +78,7 @@ function ReviewForm({bookISBN}) {
                             readOnly={userHasVotedBefore}
                         />
                     </Box>
-                    <Button sx={{ml: 'auto'}} variant="contained" type='submit' endIcon={<RateReviewIcon />}>
+                    <Button sx={{ml: 'auto'}} variant="contained" type='submit' endIcon={<RateReviewIcon />} disabled={userHasVotedBefore}>
                         ΑΞΙΟΛΟΓΗΣΗ
                     </Button>
                 </Box>
@@ -69,6 +87,7 @@ function ReviewForm({bookISBN}) {
                     className='review-form-body'
                     label="Κείμενο αξιολόγησης"
                     multiline
+                    disabled={userHasVotedBefore}
                     placeholder='Εδώ μπορείς να γράψεις την αξιολόγησή σου.'
                     rows={4}
                     required

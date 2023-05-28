@@ -23,7 +23,8 @@ import WatchLaterIcon from '@mui/icons-material/WatchLater';
 import GradeIcon from '@mui/icons-material/Grade';
 import CategoryIcon from '@mui/icons-material/Category';
 import PersonIcon from '@mui/icons-material/Person';
-
+import AbcIcon from '@mui/icons-material/Abc';
+import CollectionsBookmarkIcon from '@mui/icons-material/CollectionsBookmark';
 import './DashboardMenu.css'
 
 export default function DashboardMenu() {
@@ -92,6 +93,14 @@ export default function DashboardMenu() {
               <ListItemText>Διαχείριση κατηγοριών</ListItemText>
             </MenuItem>
           </NavLink>
+          <NavLink to='/lib-editor/keywords-control/'>
+            <MenuItem>
+              <ListItemIcon>
+                <AbcIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Διαχείριση Λέξεων Κλειδιών</ListItemText>
+            </MenuItem>
+          </NavLink>
         </MenuList>
       </Paper>
 
@@ -111,6 +120,14 @@ export default function DashboardMenu() {
                 <PersonIcon fontSize="small" />
               </ListItemIcon>
               <ListItemText>Διαχείριση συγγραφέων</ListItemText>
+            </MenuItem>
+          </NavLink>
+          <NavLink to='/lib-editor/publisher-control/'>
+            <MenuItem>
+              <ListItemIcon>
+                <CollectionsBookmarkIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Διαχείριση Εκδοτικών Οίκων</ListItemText>
             </MenuItem>
           </NavLink>
           <NavLink to='/lib-editor/average-ratings/'>
