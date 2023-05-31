@@ -108,9 +108,9 @@ function CategoryCard({data, getCategories}) {
         
         </CardContent>
         <CardActions>
-            <Button size="small" variant="contained" onClick={updateCategory} disabled={!edit}>Ενημέρωση Author</Button>
-            <Button size="small" variant="contained" color="secondary" onClick={() => setEdit(!edit)}>Επεξεργασία</Button>
-            <Button size="small" variant="contained" color="error" onClick={deleteCategory}>Διαγραφή</Button>
+            <Button size="small" variant="contained" onClick={updateCategory} disabled={!edit}>Ενημερωση Συγγραφεα</Button>
+            <Button size="small" variant="contained" color="secondary" onClick={() => setEdit(!edit)}>Επεξεργασια</Button>
+            <Button size="small" variant="contained" color="error" onClick={deleteCategory}>Διαγραφη</Button>
         </CardActions>
     </Card>
     )

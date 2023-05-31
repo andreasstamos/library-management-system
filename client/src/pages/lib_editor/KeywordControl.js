@@ -148,7 +148,7 @@ function AddKeyword({getKeywords}) {
         onChange={(e) => setKeywordName(e.target.value)}
         />
        <Button variant="contained" endIcon={<AddCircleOutlineIcon />} onClick={addKeyword}>
-        Προσθήκη
+        Προσθηκη
        </Button>
         </>
 

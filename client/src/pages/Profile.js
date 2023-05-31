@@ -107,7 +107,7 @@ function Profile() {
         <Typography variant='h4' component='h3'>{GREEK_ROLES[user?.sub?.role]}</Typography>
         <TextField
                   id="filled-read-only-input"
-                  label="School"
+                  label="Σχολείο"
                   defaultValue={profile?.school_name}
                   InputProps={{
                     readOnly: true,
@@ -129,7 +129,7 @@ function Profile() {
         
                 <TextField
                   id="filled-read-only-input"
-                  label="First Name"
+                  label="Όνομα"
                   defaultValue={profile?.first_name}
                   InputProps={{
                     readOnly: !edit,
@@ -141,7 +141,7 @@ function Profile() {
         
                 <TextField
                   id="filled-read-only-input"
-                  label="Last Name"
+                  label="Επίθετο"
                   defaultValue={profile?.last_name}
                   InputProps={{
                     readOnly: !edit,
@@ -162,7 +162,7 @@ function Profile() {
                 />
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DateField 
-                        label="Date of Birth" 
+                        label="Ημερομηνία Γέννησης" 
                         readOnly={!edit}
                         defaultValue={dayjs(profile?.dob)}
                         variant={edit === false ? 'filled' : 'outlined'} 
@@ -174,7 +174,7 @@ function Profile() {
                   {succ && <Alert severity='success'>{succ}</Alert>}
 
 
-            {user?.sub?.role !== 'student' && <Button variant="contained" onClick={() => setEdit(!edit)}>Edit</Button>}
+            {user?.sub?.role !== 'student' && <Button variant="contained" onClick={() => setEdit(!edit)}>Επεξεργασια</Button>}
             {user?.sub?.role !== 'student' && <Button variant="contained" color="secondary" type='submit' disabled={!edit}>Ενημερωση Προφιλ</Button>}
 
                 </form>

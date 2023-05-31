@@ -164,12 +164,12 @@ function CategorySelect({categorySelected, setCategorySelected}) {
   return (
     <Box sx={{ minWidth: 120 }}>
       <FormControl fullWidth>
-        <InputLabel id="demo-simple-select-label">Category</InputLabel>
+        <InputLabel id="demo-simple-select-label">Κατηγορία</InputLabel>
         <Select
           labelId="demo-simple-select-label"
           id="demo-simple-select"
           value={categorySelected}
-          label="Category"
+          label="Κατηγορία"
           onChange={handleChange}
         >
             {options.map((option) => {return <MenuItem value={option.category_id}>{option.category_name}</MenuItem>})}
@@ -189,7 +189,7 @@ function UserTable({data}) {
           <TableHead>
             <TableRow>
                 <TableCell>ID</TableCell>
-              <TableCell>Name</TableCell>
+              <TableCell>Όνομα</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>

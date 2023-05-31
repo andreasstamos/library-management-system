@@ -75,7 +75,7 @@ function Admin_3_1_3() {
               ))}
             </TableBody>
           </Table>
-        </TableContainer></Box> : <h3>Κανένας νέος εκαπιδευτικός (ηλικία &lt; 40 ετών) δεν έχει δανειστεί βιβλίο.</h3>)
+        </TableContainer></Box> : <h3>Κανένας νέος εκπαιδευτικός (ηλικία &lt; 40 ετών) δεν έχει δανειστεί βιβλίο.</h3>)
       }
 
       <div className='queries-container'>

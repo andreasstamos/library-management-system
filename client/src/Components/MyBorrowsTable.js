@@ -7,6 +7,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
 
 function createData(name, calories, fat, carbs, protein) {
   return { name, calories, fat, carbs, protein };
@@ -26,12 +27,12 @@ export default function MyBorrowsTable({data}) {
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
         <TableHead>
           <TableRow>
-            <TableCell>Title</TableCell>
-            <TableCell >ISBN</TableCell>
-            <TableCell >Item ID</TableCell>
-            <TableCell >Publisher</TableCell>
-            <TableCell >Borrowed</TableCell>
-            <TableCell >Returned</TableCell>
+            <TableCell>Τίτλος</TableCell>
+            <TableCell>ISBN</TableCell>
+            <TableCell>Αντίτυπο</TableCell>
+            <TableCell>Εκδότης</TableCell>
+            <TableCell>Δανεισμένο</TableCell>
+            <TableCell>Έχει επιστραφεί</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -43,11 +44,11 @@ export default function MyBorrowsTable({data}) {
               <TableCell component="th" scope="row">
                 {book.title}
               </TableCell>
-              <TableCell >{book.isbn}</TableCell>
-              <TableCell >{book.item_id}</TableCell>
-              <TableCell >{book.publisher_name}</TableCell>
-              <TableCell >{book.borrowed_on}</TableCell>
-              <TableCell >{book.returned}</TableCell>
+              <TableCell>{book.isbn}</TableCell>
+              <TableCell>{book.item_id}</TableCell>
+              <TableCell>{book.publisher_name}</TableCell>
+              <TableCell>{book.borrowed_on}</TableCell>
+              <TableCell>{book.returned ? <CheckCircleIcon style={{ color: "#2e7d32" }}/> : <CancelIcon style={{ color: "#d32f2f" }}/>}</TableCell>
             </TableRow>
           ))}
         </TableBody>
