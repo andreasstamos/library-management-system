@@ -30,7 +30,7 @@ function BookAdd() {
     const [itemid, setItemid] = useState(null);
     const [errorInsert, setErrorInsert] = useState(null);
 
-    const openInsertedDialog = (itemid && !errorInsert && !loadingInsert) ? true : false;
+    const [openInsertedDialog, setOpenInsertedDialog] = useState(false);
 
     const auth = useContext(AuthContext);
     
@@ -108,7 +108,7 @@ function BookAdd() {
         return () => {debounced_fetchBook.cancel();}
     }, [isbn]);
 
-    function handleInsert() {
+    function handleInsert({doInsertItem}) {
         if (!validISBN) return;
         setLoadingInsert(true);
         setErrorInsert(null);
@@ -135,7 +135,7 @@ function BookAdd() {
                         "authors": authors,
                         "keywords": keywords,
                         "categories": categories,
-                        "insert_item": true,
+                        "insert_item": doInsertItem,
                     }
 
                     response = await axios.post('http://127.0.0.1:5000/book/insert-update/', payload, {headers: {
@@ -147,11 +147,14 @@ function BookAdd() {
                 if (!response?.data?.success) {
                     setErrorInsert("Κάτι πήγε λάθος. Παρακαλούμε προσπαθήστε ξανά.");
                 }
-                if (response?.data?.item_id) {
-                    setItemid(response?.data?.item_id);
-                    return;
-                }
-                setErrorInsert("Κάτι πήγε λάθος. Παρακαλούμε προσπαθήστε ξανά.");
+                fetchBook();
+                if (insertItem) {
+                    if (response?.data?.item_id) {
+                        setItemid(response?.data?.item_id);
+                        setOpenInsertedDialog(true);
+                        return;
+                    }
+                } else setErrorInsert("Κάτι πήγε λάθος. Παρακαλούμε προσπαθήστε ξανά.");
             } catch (e) {
                 setLoadingInsert(false);
                 setErrorInsert("Κάτι πήγε λάθος. Παρακαλούμε προσπαθήστε ξανά.");
@@ -163,7 +166,7 @@ function BookAdd() {
 
     return (
         <div>
-	    <h1 className='title-with-hr'>Προσθήκη νέου βιβλίου</h1>
+	    <h1 className='title-with-hr'>Διαχείριση βιβλίων (πρόσθηκη/επεξεργασία)</h1>
             
             <Backdrop
                 sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
@@ -203,9 +206,12 @@ function BookAdd() {
                 <TextField sx={{mr: '40vw'}} label="Περίληψη" multiline
                     InputProps={{readOnly: !editing}} value={summary} onChange={(e) => {setSummary(e.target.value);}} />
                 <Box sx={{display: 'flex', columnGap: '1rem'}}>
-                    <Button variant="contained" onClick={handleInsert}>ΕΙΣΑΓΩΓΗ</Button>
+                    <Button variant="contained" onClick={() => {handleInsert({doInsertItem: true})}}>ΕΙΣΑΓΩΓΗ ΑΝΤΙΤΥΠΟΥ</Button>
                     {exists && !editing &&
                     <Button variant="contained" sx={{mr: 'auto'}} color="secondary" onClick={() => {setEditing(true);}}>ΕΠΕΞΕΡΓΑΣΙΑ</Button>
+                    }
+                    {exists && editing &&
+                        <Button variant="contained" onClick={() => {handleInsert({doInsertItem: false})}}>ΜΟΝΟ ΕΝΗΜΕΡΩΣΗ</Button>
                     }
                     {exists && editing &&
                         <Button variant="contained" sx={{mr: 'auto'}} color="secondary" onClick={() => {fetchBook();}}>ΑΚΥΡΩΣΗ</Button>

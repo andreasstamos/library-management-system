@@ -79,7 +79,7 @@ function App() {
               <Route path='delayed-returns/' element={<DelayedReturns />} />
               <Route path='average-ratings/' element={<AverageRatings />} />
               <Route path='lend-return/' element={<BorrowForm />} />
-              <Route path='add-book/' element={<BookAdd />} />
+              <Route path='book-control/' element={<BookAdd />} />
               <Route path='authors-control' element={<AuthorControl />} />
               <Route path='category-control' element={<CategoryControl />} />
               <Route path='keywords-control/' element={<KeywordControl />} />

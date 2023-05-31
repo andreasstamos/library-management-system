@@ -69,12 +69,12 @@ export default function DashboardMenu() {
 
       <Paper className='dashboard-menu'>
         <MenuList>
-          <NavLink to='/lib-editor/add-book/'>
+          <NavLink to='/lib-editor/book-control/'>
             <MenuItem>
               <ListItemIcon>
                 <CheckCircleOutlineIcon fontSize="small" />
               </ListItemIcon>
-              <ListItemText>Προσθήκη νέου βιβλίου</ListItemText>
+              <ListItemText>Διαχείριση βιβλίων (προσθήκη/επεξεργασία)</ListItemText>
             </MenuItem>
           </NavLink>
           <NavLink to='/lib-editor/reviews/'>
