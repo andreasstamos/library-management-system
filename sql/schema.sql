@@ -24,6 +24,8 @@ CREATE TABLE publisher (
 
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
+CREATE INDEX index_publisher ON publisher USING GIST (publisher_name gist_trgm_ops);
+
 CREATE TABLE book (
 	isbn VARCHAR(13) PRIMARY KEY CHECK (isbn ~ '^[0-9]{13}'),
 	title VARCHAR(200),
@@ -34,21 +36,29 @@ CREATE TABLE book (
 	image_uri VARCHAR(1000)
 );
 
+
+CREATE INDEX index_book_title ON book USING GIST (publisher_name gist_trgm_ops);
+CREATE INDEX index_book_publisher_id ON book (publisher_id);
+
 CREATE TABLE author (
 	author_id SERIAL PRIMARY KEY,
 	author_name VARCHAR(100) UNIQUE NOT NULL UNIQUE
 );
 
+CREATE INDEX index_author ON author USING GIST (author_name gist_trgm_ops);
+
 CREATE TABLE book_author (
 	isbn VARCHAR(13) NOT NULL REFERENCES book ON UPDATE CASCADE,
 	author_id INTEGER NOT NULL REFERENCES author,
-	UNIQUE(isbn, author_id)
+	UNIQUE(isbn, author_id) --builts index
 );
 
 CREATE TABLE category (
 	category_id SERIAL PRIMARY KEY,
 	category_name VARCHAR(20) NOT NULL UNIQUE
 );
+
+CREATE INDEX index_category ON category USING GIST (category_name gist_trgm_ops);
 
 CREATE TABLE book_category (
 	isbn VARCHAR(13) NOT NULL REFERENCES book,
@@ -88,6 +98,10 @@ CREATE TABLE "user" (
 	active BOOLEAN DEFAULT FALSE
 );
 
+CREATE INDEX index_user_username ON "user" (username);
+CREATE INDEX index_user_active ON "user" (active);
+CREATE INDEX index_user_school_id ON "user" (school_id);
+
 CREATE TABLE "admin" (
 	admin_id SERIAL PRIMARY KEY,
 	user_id INT NOT NULL UNIQUE REFERENCES "user" ON DELETE CASCADE
@@ -114,6 +128,8 @@ CREATE TABLE item (
 	school_id INTEGER NOT NULL REFERENCES school ON DELETE CASCADE
 );
 
+CREATE INDEX index_item ON item (isbn, school_id);
+
 CREATE TABLE review (
 	review_id SERIAL PRIMARY KEY,
 	isbn VARCHAR(13) NOT NULL REFERENCES "book" ON DELETE CASCADE,
@@ -125,6 +141,8 @@ CREATE TABLE review (
 	-- One user can do only one review on a specific book
 );
 
+CREATE INDEX index_review ON review (isbn, active);
+
 CREATE EXTENSION IF NOT EXISTS btree_gist;
 
 CREATE TABLE borrow (
@@ -132,10 +150,13 @@ CREATE TABLE borrow (
 	item_id INTEGER NOT NULL REFERENCES item ON DELETE CASCADE,
 	lender_id INTEGER NOT NULL REFERENCES "user" ON DELETE CASCADE,
 	borrower_id INTEGER NOT NULL REFERENCES "user" ON DELETE CASCADE,
-	period NOT NULL DEFAULT TSTZRANGE(NOW(), NULL),
+	period TSTZRANGE NOT NULL DEFAULT TSTZRANGE(NOW(), NULL),
 	expected_return DATE CHECK (expected_return >= LOWER(period)),
 	EXCLUDE USING GIST (item_id WITH =, period WITH &&)
 );
+
+CREATE INDEX index_borrow_item_id ON borrow (item_id);
+CREATE INDEX index_borrow_borrower_id ON borrow (borrower_id);
 
 CREATE TABLE booking (
  	booking_id SERIAL PRIMARY KEY,
@@ -145,3 +166,7 @@ CREATE TABLE booking (
  	period TSTZRANGE NOT NULL DEFAULT (TSTZRANGE(NOW(), NOW() + INTERVAL '1 week')),
 	EXCLUDE USING GIST (user_id WITH =, isbn WITH =, period WITH &&)
 );
+
+CREATE INDEX index_booking_isbn ON booking (isbn);
+CREATE INDEX index_booking_user_id ON booking (user_id);
+
