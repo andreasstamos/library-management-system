@@ -9,6 +9,7 @@ import { DateField } from '@mui/x-date-pickers/DateField';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
+import { saveAs } from 'file-saver';
 
 
 export default function UserCard({data,  getUsers}) {
@@ -63,12 +64,15 @@ export default function UserCard({data,  getUsers}) {
     const payload = {
       user_id:data.user_id
     }
-    const response = await axios.post('http://localhost:5000/lib-api/make-library-card/', payload,{headers: {
+    const response = await axios.post('http://localhost:5000/lib-api/make-library-card/', payload, {responseType: 'blob', headers: {
       'Access-Control-Expose-Headers' : '*',
       'Access-Control-Allow-Origin': '*', 
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${localStorage.getItem('authTokens')}`,
    }})
+    if (response?.data) {
+      saveAs(response?.data, `LibaryCard_${data?.username}.pdf`);
+    }
   }
 
   return (

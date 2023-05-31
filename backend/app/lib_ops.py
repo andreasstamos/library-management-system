@@ -6,6 +6,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from .roles_decorators import check_roles
 from datetime import datetime
 
+import latex
 
 bp = Blueprint("lib-api", __name__)
 
@@ -553,14 +554,16 @@ def slugify(value, allow_unicode=True):
     value = re.sub(r'[^\w\s-]', '', value.lower()).strip()
     return re.sub(r'[-\s]+', '-', value)
 
-
-
-
 import os
+# open sample latex card content
+with open(os.path.join(os.getcwd(),'assets','latex',"lib_card.tex"), encoding="utf-8") as f:
+    latex_template = str(f.read())
+
+
 @bp.route('/make-library-card/', methods=['POST'])
 @check_roles(['lib_editor'])
-def make_libary_card():
-    MAKE_LIBARY_CARD_JSON = {
+def make_library_card():
+    MAKE_LIBRARY_CARD_JSON = {
         'type': 'object',
         "properties": {
                 "user_id": {'type':'integer', 'minValue':0},
@@ -570,13 +573,10 @@ def make_libary_card():
     }
     data = request.get_json()
     try:
-        jsonschema.validate(data, MAKE_LIBARY_CARD_JSON)
+        jsonschema.validate(data, MAKE_LIBRARY_CARD_JSON)
     except jsonschema.ValidationError as err:
         return {"success": False, "error": err.message}, 400
     
-    # open sample latex card content
-    with open(os.path.join(os.getcwd(),'assets','latex',"lib_card.tex"), encoding="utf-8") as f:
-        latex_data = str(f.read())
     user = get_jwt_identity()
     try:
         with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
@@ -586,11 +586,13 @@ def make_libary_card():
                INNER JOIN school ON "user".user_id = (%s) AND "user".school_id = (%s)
                 """,[data['user_id'], user['school_id']])
             user = cur.fetchone()
-            latex_data = latex_data.format(user['full_name'], user['email'], user['school_name'], user['school_city'])
-            output_filepath = os.path.join(os.getcwd(), 'assets', 'library_cards', slugify(user['full_name'])+".tex")
-            with open(output_filepath, 'w') as f:
-                f.write(latex_data)
-            return {"success": True,}, 201
+
+            latex_code = latex_template.format(
+                    full_name=user['full_name'], email=user['email'], school_name=user['school_name'], city=user['school_city'], user_id=user['user_id'])
+
+            pdf = latex.build_pdf(latex_code)
+            
+            return bytes(pdf), 200
     except psycopg2.Error as err:
         print(err)
         return {"success": False, "error": "unknown"}

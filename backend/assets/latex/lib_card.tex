@@ -2,6 +2,7 @@
 
 % Package for setting page margins
 \usepackage[margin=1in]{{geometry}}
+\usepackage{{qrcode}}
 
 % Package for including images
 \usepackage{{graphicx}}
@@ -15,18 +16,18 @@
 
 % Personal Information
 \begin{{tabular}}{{ll}}
-    \textbf{{Name:}} & {} \\
-    \textbf{{Email:}} & {} \\
-    \textbf{{School:}} & {} \\
-    \textbf{{City:}} & {} \\
+    \textbf{{User ID:}} & {user_id} \\
+    \textbf{{Name:}} & {full_name} \\
+    \textbf{{Email:}} & {email} \\
+    \textbf{{School:}} & {school_name} \\
+    \textbf{{City:}} & {city} \\
 \end{{tabular}}
 
 
 % Barcode Section
 \begin{{center}}
-    \textbf{{Barcode}}
-    
     % Generate and display a barcode here (using a package like barcode or pst-barcode)
+    \qrcode[nolinks]{{{user_id}}}
 \end{{center}}
 
 % Library Card Footer
