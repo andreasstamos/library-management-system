@@ -7,7 +7,7 @@ import axios from 'axios';
 import ReviewForm from '../Components/ReviewForm';
 import AuthContext from '../context/AuthContext';
 import Reviews from '../Components/Reviews';
-
+import ItemsTable from '../Components/ItemsTable';
 
 function Book() {
     const navigate = useNavigate();
@@ -19,6 +19,7 @@ function Book() {
     let {bookISBN} = useParams();
 
     const auth = useContext(AuthContext);
+    const isLibEditor = auth?.user?.sub?.role === 'lib_editor';
 
     const fetchBooks = async () => {
         try {
@@ -44,7 +45,6 @@ function Book() {
 
             response_book = await response_book;
             response_booking = await response_booking;
-
 
             setLoading(false);
             if (!response_book?.data?.success || !response_booking?.data?.success) {
@@ -155,7 +155,7 @@ function Book() {
                         <div className='book-detail'>
                             <Typography variant="h6">Διαθεσιμότητα για δανεισμό</Typography>
                             {book?.items_available > 0 && <Typography variant="body1" sx={{color: 'success.main'}}>
-                                {book?.items_available} αντίτυπα άμεσα διαθέσιμα
+                                {book?.items_available} {book?.items_avaliable === 1 ? 'αντίτυπα άμεσα διαθέσιμα' : 'αντίτυπο άμεσα διαθέσιμο'}
                             </Typography>}
 
                             {book?.items_available <= 0 && <Typography variant="body1" sx={{color: 'error.main'}}>
@@ -180,6 +180,8 @@ function Book() {
                 </div>
                 <ReviewForm bookISBN={bookISBN} />
                 <Reviews bookISBN={bookISBN} />
+
+                {isLibEditor && <ItemsTable isbn={bookISBN} />}
 
             </div>
         </>

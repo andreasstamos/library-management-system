@@ -7,26 +7,31 @@ const AuthContext = createContext();
 
 
 export const AuthProvider = ({children}) => {    
-    let [authTokens, setAuthTokens] = useState( () => localStorage.getItem('authTokens') ? localStorage.getItem('authTokens') : null);
-    let [user, setUser] = useState( () => localStorage.getItem('authTokens') ? jwt_decode(localStorage.getItem('authTokens')) : null);
+    const [authTokens, setAuthTokens] = useState( () => localStorage.getItem('authTokens') ? localStorage.getItem('authTokens') : null);
+    const [user, setUser] = useState( () => localStorage.getItem('authTokens') ? jwt_decode(localStorage.getItem('authTokens')) : null);
 
-    let saveTokens = (tokens) => {
+    const saveTokens = (tokens) => {
         localStorage.setItem('authTokens', tokens);
     }
 
-    let logoutUser = () => {
+    const logoutUser = () => {
         setAuthTokens(null);
         setUser(null);
         localStorage.removeItem('authTokens');
     }
-    
-    let contextData = {
-	    authTokens: authTokens,
+
+    const checkValid = () => {
+        if (!(Date.now()/1000 < user?.exp)) logoutUser();
+    }
+
+    const contextData = {
+        authTokens: authTokens,
         user: user,
         setUser:setUser,
         setAuthTokens: setAuthTokens,
         logoutUser: logoutUser,
         saveTokens: saveTokens,
+        checkValid: checkValid,
     }
 
     return (

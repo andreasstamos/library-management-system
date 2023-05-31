@@ -8,7 +8,10 @@ import { useNavigate } from "react-router-dom";
 
 const LibraryEditorPrivateRoute = ({children}) => {
     const navigate = useNavigate();
-    let {user} = useContext(AuthContext);
+    const {user, checkValid} = useContext(AuthContext);
+
+    checkValid();
+    
     if (!user) return < Navigate to='/auth/login/' />
     if (user?.sub?.role !== 'lib_editor') return <Navigate to='/' />
     return children;

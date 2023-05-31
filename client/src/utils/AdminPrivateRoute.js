@@ -7,7 +7,10 @@ import { useNavigate } from "react-router-dom";
 
 const AdminPrivateRoute = ({children}) => {
     const navigate = useNavigate();
-    const {user} = useContext(AuthContext);
+    const {user, checkValid} = useContext(AuthContext);
+
+    checkValid();
+
     if (user?.sub?.role !== 'admin') return <Navigate to='/' />
     return children;
 }

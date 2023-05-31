@@ -235,3 +235,72 @@ def delete_borrow():
         print(err)
         return {"success": False, "error": "unknown"}, 400
 
+
+GET_ITEMS_BY_ISBN_JSONSCHEMA = {
+        "type": "object",
+        "properties": {
+            "isbn": {"type": "string", "pattern": "^[0-9]{13}$"},
+            },
+        "additionalProperties": False,
+        "required": ["isbn"]
+        }
+
+
+@bp.route("/get-by-isbn/", methods=["POST"])
+@check_roles("lib_editor")
+def get_items_by_isbn():
+    data = request.get_json()
+    try:
+        jsonschema.validate(data, GET_ITEMS_BY_ISBN_JSONSCHEMA)
+    except jsonschema.ValidationError as err:
+        return {"success": False, "error": err.message}, 400
+
+    query = """SELECT item_id, time_valid IS NOT NULL AS lent, time_valid\
+            FROM item\
+            LEFT JOIN (SELECT item_id, NOW() < expected_return AS time_valid FROM borrow WHERE NOW() <@ period) status USING (item_id)\
+            WHERE isbn = %s AND school_id = %s"""
+
+    try:
+        with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
+            cur.execute(query, (data["isbn"], get_jwt_identity()["school_id"]))
+            items = cur.fetchall()
+            print(items)
+            return {"success": True, "items": items}, 200
+    except psycopg2.Error as err:
+        print(err)
+        return {"success": False, "error": "unknown"}, 400
+
+DELETE_ITEM_JSONSCHEMA = {
+        "type": "object",
+        "properties": {
+            "item_id": {"type": "integer"},
+            },
+        "additionalProperties": False,
+        "required": ["item_id"]
+        }
+
+@bp.route("/delete/", methods=["POST"])
+@check_roles(["lib_editor"])
+def delete_item():
+    data = request.get_json()
+    try:
+        jsonschema.validate(data, DELETE_ITEM_JSONSCHEMA)
+    except jsonschema.ValidationError as err:
+        return {"success": False, "error": err.message}, 400
+
+    try:
+        with g.db_conn.cursor() as cur:
+            cur.execute("""DELETE FROM item WHERE item_id = %s AND school_id = %s""",
+                            (data["item_id"], get_jwt_identity()["school_id"]))
+            g.db_conn.commit()
+            return {"success": cur.rowcount > 0}, 200
+    except psycopg2.IntegrityError as err:
+        g.db_conn.rollback()
+        print(err)
+        return {"success": False, "error": "unknown"}, 400
+    except psycopg2.Error as err:
+        g.db_conn.rollback()
+        print(err)
+        return {"success": False, "error": "unknown"}, 400
+
+
