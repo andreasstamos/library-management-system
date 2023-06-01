@@ -49,8 +49,9 @@ def fake_books_items(f):
         publisher = random.randint(1, N_PUBLISHERS)
         page_number = random.randint(50,1000)
         image_uri = fake.image_url()
-        return [f"INSERT INTO book (isbn, title, summary, publisher_id, page_number, image_uri) VALUES\
- ('{isbn}', '{title}', '{summary}', {publisher}, {page_number}, '{image_uri}');\n",\
+        language = fake.language_name()
+        return [f"INSERT INTO book (isbn, title, summary, publisher_id, page_number, image_uri, language) VALUES\
+ ('{isbn}', '{title}', '{summary}', {publisher}, {page_number}, '{image_uri}', '{language}');\n",\
                 *[f"INSERT INTO book_author (isbn, author_id) VALUES ('{isbn}', {author_id});\n" for author_id in authors],\
                 *[f"INSERT INTO book_category (isbn, category_id) VALUES ('{isbn}', {category_id});\n" for category_id in categories],\
                 *[f"INSERT INTO book_keyword (isbn, keyword_id) VALUES ('{isbn}', {keyword_id});\n" for keyword_id in keywords]]

@@ -27,13 +27,13 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm;
 CREATE INDEX index_publisher ON publisher USING GIST (publisher_name gist_trgm_ops);
 
 CREATE TABLE book (
-	isbn VARCHAR(13) PRIMARY KEY CHECK (isbn ~ '^[0-9]{13}'),
-	title VARCHAR(200),
-	page_number SMALLINT CHECK (page_number > 0),
-	summary VARCHAR(10000),
-	language VARCHAR(30),
-	publisher_id INTEGER REFERENCES publisher,
-	image_uri VARCHAR(1000)
+	isbn VARCHAR(13) NOT NULL PRIMARY KEY CHECK (isbn ~ '^[0-9]{13}'),
+	title VARCHAR(200) NOT NULL,
+	page_number SMALLINT NOT NULL CHECK (page_number > 0),
+	summary VARCHAR(10000) NOT NULL,
+	language VARCHAR(30) NOT NULL ,
+	publisher_id INTEGER NOT NULL REFERENCES publisher,
+	image_uri VARCHAR(1000) NOT NULL
 );
 
 
@@ -82,8 +82,8 @@ CREATE TABLE school (
 	name VARCHAR(150) NOT NULL,
 	address VARCHAR(100) NOT NULL,
 	city VARCHAR(50) NOT NULL,
-	phone VARCHAR(15) CHECK (phone ~ '^\+?[0-9]+'),
-	email VARCHAR(256) UNIQUE CHECK (email ~ '^[a-zA-Z0-9-]+@[a-zA-Z0-9-]+\.[a-z]{2,}$')
+	phone VARCHAR(15) NOT NULL CHECK (phone ~ '^\+?[0-9]+'),
+	email VARCHAR(256) NOT NULL UNIQUE CHECK (email ~ '^[a-zA-Z0-9-]+@[a-zA-Z0-9-]+\.[a-z]{2,}$')
 );
 
 CREATE TABLE "user" (
@@ -91,11 +91,11 @@ CREATE TABLE "user" (
 	school_id INTEGER NOT NULL REFERENCES school ON DELETE CASCADE,
 	first_name VARCHAR(50) NOT NULL,
 	last_name VARCHAR(50) NOT NULL,
-	email VARCHAR(256) UNIQUE CHECK (email ~ '^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-z]{2,}$'),
+	email VARCHAR(256) NOT NULL UNIQUE CHECK (email ~ '^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-z]{2,}$'),
 	username VARCHAR(50) NOT NULL UNIQUE,
 	password_hash VARCHAR(500) NOT NULL,
 	dob DATE NOT NULL,
-	active BOOLEAN DEFAULT FALSE
+	active BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE INDEX index_user_username ON "user" (username);
@@ -136,7 +136,7 @@ CREATE TABLE review (
 	user_id INT NOT NULL REFERENCES "user" ON DELETE CASCADE,
 	rate SMALLINT NOT NULL CHECK (rate >= 1 AND rate <= 5),
 	body VARCHAR(500) NOT NULL,
-	active BOOLEAN DEFAULT FALSE,
+	active BOOLEAN NOT NULL DEFAULT FALSE,
 	UNIQUE(user_id, isbn)
 	-- One user can do only one review on a specific book
 );
@@ -151,7 +151,7 @@ CREATE TABLE borrow (
 	lender_id INTEGER NOT NULL REFERENCES "user" ON DELETE CASCADE,
 	borrower_id INTEGER NOT NULL REFERENCES "user" ON DELETE CASCADE,
 	period TSTZRANGE NOT NULL DEFAULT TSTZRANGE(NOW(), NULL),
-	expected_return DATE CHECK (expected_return >= LOWER(period)),
+	expected_return DATE NOT NULL CHECK (expected_return >= LOWER(period)),
 	EXCLUDE USING GIST (item_id WITH =, period WITH &&)
 );
 

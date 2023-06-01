@@ -38,7 +38,7 @@ function FilterBar({label, inputValue, value, options, loading, handleChangeValu
       loadingText="Φόρτωση..."
       options={options}
       filterOptions={(x) => x}
-      renderInput={(params) => <TextField {...params} label={label} />}
+      renderInput={(params) => <TextField {...params} required={edit} label={label} />}
  
       sx={{ width: 250 }}
     />

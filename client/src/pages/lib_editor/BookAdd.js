@@ -19,6 +19,7 @@ function BookAdd() {
     const [categories, setCategories] = useState([]);
     const [keywords, setKeywords] = useState([]);
     const [summary, setSummary] = useState('');
+    const [imageURI, setImageURI] = useState('');
 
     const [exists, setExists] = useState(false);
     const [editing, setEditing] = useState(true);
@@ -58,7 +59,7 @@ function BookAdd() {
             try {
                 const payload = {
                     "isbn": isbn,
-                    "fetch_fields": ["title", "authors", "publisher_name", "language", "categories", "keywords", "summary", "page_number"]
+                    "fetch_fields": ["title", "authors", "publisher_name", "language", "categories", "keywords", "summary", "page_number", "image_uri"]
                 };
 
                 const response = await axios.post('http://127.0.0.1:5000/book/get/', payload, {headers: {
@@ -87,6 +88,7 @@ function BookAdd() {
                     setCategories(book?.categories);
                     setKeywords(book?.keywords);
                     setSummary(book?.summary);
+                    setImageURI(book?.image_uri);
                 }
             } catch (e) {
                 setLoading(false);
@@ -110,7 +112,6 @@ function BookAdd() {
 
     function handleInsert({doInsertItem}) {
         if (!validISBN) return;
-        setLoadingInsert(true);
         setErrorInsert(null);
         const insertItem = async () => {
             try {
@@ -120,6 +121,7 @@ function BookAdd() {
                         "isbn": isbn,
                     };
 
+                    setLoadingInsert(true);
                     response = await axios.post('http://127.0.0.1:5000/item/insert/', payload, {headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${auth.authTokens}`,
@@ -135,9 +137,15 @@ function BookAdd() {
                         "authors": authors,
                         "keywords": keywords,
                         "categories": categories,
+                        "image_uri": imageURI,
                         "insert_item": doInsertItem,
                     }
+                    if (!(Object.values(payload).every((value) => value && !(Array.isArray(value) && value?.length === 0)))) {
+                        setErrorInsert("Παρακαλούμε συμπληρώστε όλα τα πεδία.")
+                        return;
+                    }
 
+                    setLoadingInsert(true);
                     response = await axios.post('http://127.0.0.1:5000/book/insert-update/', payload, {headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${auth.authTokens}`,
@@ -146,6 +154,7 @@ function BookAdd() {
                 setLoadingInsert(false);
                 if (!response?.data?.success) {
                     setErrorInsert("Κάτι πήγε λάθος. Παρακαλούμε προσπαθήστε ξανά.");
+                    return;
                 }
                 fetchBook();
                 if (insertItem) {
@@ -154,10 +163,14 @@ function BookAdd() {
                         setOpenInsertedDialog(true);
                         return;
                     }
-                } else setErrorInsert("Κάτι πήγε λάθος. Παρακαλούμε προσπαθήστε ξανά.");
+                } else {
+                    setErrorInsert("Κάτι πήγε λάθος. Παρακαλούμε προσπαθήστε ξανά.");
+                    return;
+                }
             } catch (e) {
                 setLoadingInsert(false);
                 setErrorInsert("Κάτι πήγε λάθος. Παρακαλούμε προσπαθήστε ξανά.");
+                return;
             }
         };
 
@@ -166,7 +179,7 @@ function BookAdd() {
 
     return (
         <div>
-	    <h1 className='title-with-hr'>Διαχείριση βιβλίων (πρόσθηκη/επεξεργασία)</h1>
+	    <h1 className='title-with-hr'>Διαχείριση βιβλίων (προσθήκη/επεξεργασία)</h1>
             
             <Backdrop
                 sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
@@ -180,30 +193,32 @@ function BookAdd() {
                 onClose={() => {navigate("/");}}
             />
             <Box sx={{display: 'flex', flexDirection: 'column', rowGap: '1rem'}}>
-                {errorInsert && <Alert severity="error" sx={{mr: 'auto'}}>{errorInsert}</Alert>}
-                {exists && !editing && <Alert severity="success" sx={{mr: 'auto'}}>
+                {!loading && errorInsert && <Alert severity="error" sx={{mr: 'auto'}}>{errorInsert}</Alert>}
+                {!loading && exists && !editing && <Alert severity="success" sx={{mr: 'auto'}}>
                     Το βιβλίο βρέθηκε καταχωρημένο στο σύστημα. Δεν απαιτείται επανεισαγωγή των στοιχείων του. 
                 </Alert>}
-                {exists && editing && <Alert severity="warning" sx={{mr: 'auto'}}>
+                {!loading && exists && editing && <Alert severity="warning" sx={{mr: 'auto'}}>
                     Η επεξεργασία των στοιχείων του βιβλίου θα εμφανιστεί σε όλα τα αντίτυπα. Παρακολούμε να είστε προσεκτικοί.
                 </Alert>}
-                {!exists && validISBN && !error && <Alert severity="info" sx={{mr: 'auto'}}>
+                {!loading && !exists && validISBN && !error && <Alert severity="info" sx={{mr: 'auto'}}>
                     Το βιβλίο δεν βρέθηκε καταχωρημένο στο σύστημα. Παρακολούμε εισάγετε τα στοιχεία του.
                 </Alert>}
                 <Box sx={{display: 'flex', flexWrap: 'wrap', columnGap: '1rem', rowGap: '1rem'}}>
                     <TextField autoFocus required focused={!validISBN}  label="ISBN" value={isbn} onChange={(e) => {setISBN(e.target.value);}} 
                         color={(!validISBN) ? 'error' : 'primary'}
                     />
-                    <TextField label="Τίτλος" InputProps={{readOnly: !editing}} value={title} onChange={(e) => {setTitle(e.target.value);}} />
+                    <TextField required label="Τίτλος" InputProps={{readOnly: !editing}} value={title} onChange={(e) => {setTitle(e.target.value);}} />
                     <FilterBarAuthor edit readOnly={!editing} value={authors} handleChangeValue={(value) => {setAuthors(value);}} />
                     <FilterBarPublisher edit singlevalue readOnly={!editing} value={publisher} handleChangeValue={(value) => {setPublisher(value);}} />
                     <FilterBarLanguage edit singlevalue readOnly={!editing} value={language} handleChangeValue={(value) => {setLanguage(value);}} />
-                    <TextField label="Αριθμός σελίδων" InputProps={{readOnly: !editing}} value={pageNumber}
+                    <TextField required label="Αριθμός σελίδων" InputProps={{readOnly: !editing}} value={pageNumber}
                         onChange={(e) => {setPageNumber(Number(e.target.value) ? Number(e.target.value): '')}} />
                     <FilterBarCategory edit readOnly={!editing} value={categories} handleChangeValue={(value) => {setCategories(value);}} />
                     <FilterBarKeyword edit readOnly={!editing} value={keywords} handleChangeValue={(value) => {setKeywords(value);}} />
                 </Box>
-                <TextField sx={{mr: '40vw'}} label="Περίληψη" multiline
+                <TextField required sx={{mr: '40vw'}} label="URL εικόνας εξωφύλλου" type="url" InputProps={{readOnly: !editing}}
+                    value={imageURI} onChange={(e) => {setImageURI(e.target.value);}} />
+                <TextField required sx={{mr: '40vw'}} label="Περίληψη" multiline
                     InputProps={{readOnly: !editing}} value={summary} onChange={(e) => {setSummary(e.target.value);}} />
                 <Box sx={{display: 'flex', columnGap: '1rem'}}>
                     <Button variant="contained" onClick={() => {handleInsert({doInsertItem: true})}}>ΕΙΣΑΓΩΓΗ ΑΝΤΙΤΥΠΟΥ</Button>

@@ -6,6 +6,9 @@ client/node_modules/
 node_modules/
 .venv
 venv
+
+fake_data.sql
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

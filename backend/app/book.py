@@ -32,7 +32,7 @@ INSERT_UPDATE_BOOK_JSONSCHEMA = {
             "authors": {"type": "array", "items": {"type": "string"}, "minItems": 1},
             "keywords": {"type": "array", "items": {"type": "string"}},
             "categories": {"type": "array", "items": {"type": "string"}},
-            #"image_uri": {"type" "string"},
+            "image_uri": {"type": "string", "format": "uri"},
             "insert_item": {"type": "boolean"}, #If given will also insert one item (the 1st item) at the school_id in the jwt identity
             },
         "additionalProperties": False,
@@ -59,8 +59,8 @@ def insert_update_book():
             cur.execute("INSERT INTO publisher (publisher_name) VALUES (%s) ON CONFLICT DO NOTHING",\
                     (data["publisher"],))
              
-            cur.execute("INSERT INTO book (isbn, title, page_number, summary, language, publisher_id)\
-                    SELECT %s, %s, %s, %s, %s, publisher_id\
+            cur.execute("INSERT INTO book (isbn, title, page_number, summary, language, image_uri, publisher_id)\
+                    SELECT %s, %s, %s, %s, %s, %s, publisher_id\
                     FROM publisher\
                     WHERE publisher_name = %s\
                     ON CONFLICT (isbn) DO UPDATE SET\
@@ -68,8 +68,9 @@ def insert_update_book():
                         page_number = EXCLUDED.page_number,\
                         summary = EXCLUDED.summary,\
                         language = EXCLUDED.language,\
-                        publisher_id = EXCLUDED.publisher_id",
-                    (data["isbn"], data["title"], data["page_number"], data["summary"], data["language"], data["publisher"]))
+                        publisher_id = EXCLUDED.publisher_id,\
+                        image_uri = EXCLUDED.image_uri",
+                    (data["isbn"], data["title"], data["page_number"], data["summary"], data["language"], data["publisher"], data["image_uri"]))
 
             if "new_isbn" in data.keys():
                 cur.execute("UPDATE book SET isbn = %s WHERE isbn = %s", (data["new_isbn"], data["isbn"]))
