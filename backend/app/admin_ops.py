@@ -340,12 +340,11 @@ def get_most_borrows_young_teachers():
     try:
         with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
             cur.execute("""
-            SELECT "user".user_id, first_name, last_name, COUNT(1) as cnt
+            SELECT "user".user_id, first_name, last_name,
+            COALESCE((SELECT COUNT(1) FROM borrow WHERE borrower_id = "user".user_id), 0) as cnt
             FROM teacher
             INNER JOIN "user" USING (user_id)
-            LEFT JOIN borrow ON user_id = borrower_id
             WHERE NOW() - dob < '40 years'
-            GROUP BY "user".user_id
             ORDER BY cnt DESC""")
             teachers = cur.fetchall()
             
@@ -478,7 +477,7 @@ def query_3_1_7():
         return {"success": False, "error": err.message}, 400
     
     try:
-        with g.db_conn.cursor() as cur:
+        with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
             cur.execute("""
             SELECT author_name
             FROM book_author

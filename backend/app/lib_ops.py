@@ -467,23 +467,23 @@ def average_ratings_per_category():
     user = get_jwt_identity()
 
     params = []
-    where_clause = ""
+    where_clause = []
     if 'category_id' in data.keys():
-        where_clause += "WHERE category.category_id = (%s)"
+        where_clause.append("category.category_id = %s")
         params.append(data['category_id'])
+    where_clause.append("EXISTS (SELECT 1 FROM item JOIN borrow USING (item_id) WHERE review.user_id = borrow.borrower_id AND item.isbn = review.isbn)")
+    where_clause = ' AND '.join(where_clause)
+    where_clause = f"WHERE {where_clause}"
     try:
         with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
             # Counting avg rating per category using reviews by ALL users of database (not only same school reviews)
             cur.execute(f"""
                 SELECT category.category_id, category.category_name, AVG(review.rate)
                 FROM review
-                INNER JOIN "user" ON "user".user_id = review.user_id
-                INNER JOIN borrow ON borrow.borrower_id = "user".user_id
-                INNER JOIN item ON item.item_id = borrow.item_id
-                INNER JOIN book_category ON book_category.isbn = item.isbn
+                INNER JOIN book_category ON book_category.isbn = review.isbn
                 INNER JOIN category ON category.category_id = book_category.category_id
                 {where_clause}
-                GROUP BY category.category_id, category.category_name
+                GROUP BY category.category_id
             """, params)
             reviews = cur.fetchall()
             return {"success": True, "reviews": reviews}, 200
@@ -512,23 +512,24 @@ def average_rating_per_borrower():
         return {"success": False, "error": err.message}, 400
     
     user = get_jwt_identity()
-    where_clause = ""
-    params = [user['school_id']]
+    where_clause = []
+    params = {'school_id': user['school_id']}
     for fieldname in data.keys():
-        where_clause += f" AND {fieldname} ILIKE %s"
-        params.append("%"+data[fieldname]+"%")
+        where_clause.append(f"{fieldname} ILIKE %{fieldname}s")
+        params[fieldname] = data[fieldname]
 
-    print(where_clause)
+    where_clause.append("school_id = %(school_id)s")
+    where_clause.append("EXISTS (SELECT 1 FROM item JOIN borrow USING (item_id) WHERE review.user_id = borrow.borrower_id AND item.isbn = review.isbn)")
+    where_clause = ' AND '.join(where_clause)
+    where_clause = f"WHERE {where_clause}"
     try:
         with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
             cur.execute(f"""
                 SELECT "user".user_id, "user".first_name, "user".last_name, "user".username, AVG(review.rate)
                 FROM review
                 INNER JOIN "user" ON "user".user_id = review.user_id
-                INNER JOIN borrow ON borrow.borrower_id = "user".user_id
-                WHERE "user".school_id = (%s)
                 {where_clause}
-                GROUP BY "user".user_id, "user".first_name, "user".last_name, "user".username
+                GROUP BY "user".user_id
                 """,params)
             users = cur.fetchall()
             return {"success": True, "users": users}, 200
