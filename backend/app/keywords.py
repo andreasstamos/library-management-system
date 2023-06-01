@@ -9,7 +9,6 @@ bp = Blueprint("keywords", __name__)
 
 
 @bp.route('/get-keywords/', methods=['POST'])
-@check_roles(['lib_editor', 'admin'])
 def get_keywords():
     try:
         with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:

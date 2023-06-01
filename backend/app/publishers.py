@@ -16,12 +16,13 @@ def get_publishers():
             cur.execute("""
                 SELECT * 
                 FROM publisher
+                ORDER BY publisher_name
             """)
             publishers = cur.fetchall()
             return {"success": True, "publishers": publishers}, 200
     except psycopg2.Error as err:
         print(err.pgerror)
-        return {"success": False, "error": "unknown"}
+        return {'success': False, 'error': 'unknown'}, 400
 
 
 @bp.route('/update-publisher/', methods=['POST'])

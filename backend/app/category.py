@@ -14,6 +14,7 @@ def get_categories():
         with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
             cur.execute("""
                 SELECT * FROM category
+                ORDER BY category_name
             """)
             categories = cur.fetchall()
             return {"success": True, "categories": categories}, 200
