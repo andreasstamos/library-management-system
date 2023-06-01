@@ -16,6 +16,7 @@ def get_authors():
             cur.execute("""
                 SELECT * 
                 FROM author
+                ORDER BY author_name
             """)
             authors = cur.fetchall()
             return {"success": True, "authors": authors}, 200

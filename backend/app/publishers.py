@@ -16,6 +16,7 @@ def get_publishers():
             cur.execute("""
                 SELECT * 
                 FROM publisher
+                ORDER BY publisher_name
             """)
             publishers = cur.fetchall()
             return {"success": True, "publishers": publishers}, 200

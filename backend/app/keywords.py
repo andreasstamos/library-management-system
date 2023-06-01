@@ -9,13 +9,14 @@ bp = Blueprint("keywords", __name__)
 
 
 @bp.route('/get-keywords/', methods=['POST'])
-@check_roles(['lib_editor', 'admin'])
+#@check_roles(['lib_editor', 'admin'])
 def get_keywords():
     try:
         with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
             cur.execute("""
                 SELECT * 
                 FROM keyword
+                ORDER BY keyword_name
             """)
             keywords = cur.fetchall()
             return {"success": True, "keywords": keywords}, 200
