@@ -37,7 +37,7 @@ CREATE TABLE book (
 );
 
 
-CREATE INDEX index_book_title ON book USING GIST (publisher_name gist_trgm_ops);
+CREATE INDEX index_book_title ON book USING GIST (title gist_trgm_ops);
 CREATE INDEX index_book_publisher_id ON book (publisher_id);
 
 CREATE TABLE author (
@@ -80,10 +80,10 @@ CREATE TABLE book_keyword (
 CREATE TABLE school (
 	school_id SERIAL PRIMARY KEY,
 	name VARCHAR(150) NOT NULL,
-	address VARCHAR(20) NOT NULL,
+	address VARCHAR(100) NOT NULL,
 	city VARCHAR(50) NOT NULL,
-	phone VARCHAR(15) CHECK (phone ~ '^\+[0-9]+'),
-	email VARCHAR(256) UNIQUE CHECK (email ~ '^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-z]{2,}$')
+	phone VARCHAR(15) CHECK (phone ~ '^\+?[0-9]+'),
+	email VARCHAR(256) UNIQUE CHECK (email ~ '^[a-zA-Z0-9-]+@[a-zA-Z0-9-]+\.[a-z]{2,}$')
 );
 
 CREATE TABLE "user" (
