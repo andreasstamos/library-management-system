@@ -116,6 +116,17 @@ function Profile() {
                   variant={'filled'}
                 />
 
+        <TextField
+                  id="filled-read-only-input"
+                  label="Αριθμός χρήστη"
+                  defaultValue={profile?.user_id}
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                  disabled
+                  variant={'filled'}
+                />
+
                 <TextField
                   id="filled-read-only-input"
                   label="Username"

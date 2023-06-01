@@ -47,7 +47,7 @@ def get_profile():
     try:
         with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
             cur.execute("""
-            SELECT username, first_name, last_name, "user".email, dob, school.name AS school_name
+            SELECT user_id, username, first_name, last_name, "user".email, dob, school.name AS school_name
             FROM "user"
             INNER JOIN school
             ON school.school_id = "user".school_id

@@ -82,6 +82,14 @@ export default function UserCard({data,  getUsers}) {
 <form className='lib-editor-card-info'>
 
   <TextField
+          id="filled-required"
+          label="Αριθμός χρήστη"
+          defaultValue={data.user_id}
+          variant="filled"
+          disabled
+
+        />
+   <TextField
           required
           id="filled-required"
           label="Username"

@@ -2,6 +2,7 @@ import random
 import bcrypt
 import faker
 import itertools
+import datetime
 
 N_SCHOOLS = 5
 N_AUTHORS = 50
@@ -11,19 +12,29 @@ N_PUBLISHERS = 30
 N_BOOKS = 1000
 N_ITEMS = 10000
 
-N_USERS = 100
+N_USERS = 500
 P_NACTIVE = 0.05
 P_ADMIN = 0.025
-P_LIBEDITOR = 1.2*N_SCHOOLS/N_USERS
+P_LIBEDITOR = 2*N_SCHOOLS/N_USERS
 P_TEACHER = 0.15 #percentage of teachers of those not libeditors/admins
 
 N_REVIEWS = 10000
 P_NACTIVEREVIEWS = 0.002
 
+N_BORROWS = 5000
+END_DATE = datetime.datetime.now()
+START_DATE = END_DATE - datetime.timedelta(days=365)
+P_LATEBORROW = 0.05
+N_DAYSBORROW = 7
+N_DAYSLATEBORROW = 30
+
 random.seed(42)
 faker.Faker.seed(42)
 
 isbns = []
+user_school = dict()
+item_school = dict()
+lib_editors = set()
 
 def fake_books_items(f):
     global isbns
@@ -44,9 +55,10 @@ def fake_books_items(f):
                 *[f"INSERT INTO book_category (isbn, category_id) VALUES ('{isbn}', {category_id});\n" for category_id in categories],\
                 *[f"INSERT INTO book_keyword (isbn, keyword_id) VALUES ('{isbn}', {keyword_id});\n" for keyword_id in keywords]]
 
-    def build_item():
+    def build_item(item_id):
         isbn = random.choice(isbns)
         school = random.randint(1, N_SCHOOLS)
+        item_school[item_id] = school
         return f"INSERT INTO item (isbn, school_id) VALUES ('{isbn}', {school});\n"
 
     isbns = [fake.unique.isbn13(separator='') for _ in range(N_BOOKS)]
@@ -55,7 +67,7 @@ def fake_books_items(f):
     keywords = (fake.unique.word() for _ in range(N_KEYWORDS))
     publishers = (fake.unique.company() for _ in range(N_PUBLISHERS))
     books = (build_book(isbn) for isbn in isbns) 
-    items = (build_item() for _ in range(N_ITEMS))
+    items = (build_item(item_id) for item_id in range(1,N_ITEMS+1))
 
     for author in authors:
         f.write(f"INSERT INTO author (author_name) VALUES ('{author}');\n")
@@ -97,6 +109,7 @@ def fake_users(f):
 
     def build_user(user_id):
         school = random.randint(1, N_SCHOOLS)
+        user_school[user_id] = school
         first_name = fake.first_name()
         last_name = fake.last_name()
         email = fake.unique.email()
@@ -107,7 +120,9 @@ def fake_users(f):
 
         role = random.random()
         if role < P_ADMIN: role = ['admin']
-        elif role < P_ADMIN+P_LIBEDITOR: role = ['lib_user', 'teacher']
+        elif role < P_ADMIN+P_LIBEDITOR:
+            role = ['lib_user', 'teacher']
+            lib_editors.add(user_id)
         else: role = ['teacher' if random.random() < P_TEACHER else 'student']
 
         if 'student' in role:
@@ -139,6 +154,38 @@ def fake_reviews(f):
     for review in reviews:
         f.write(review)
 
+def fake_borrows(f):
+    fake = faker.Faker()
+
+    def build_borrow():
+        start = fake.date_time_between_dates(START_DATE, END_DATE)
+        late = random.random() < P_LATEBORROW
+
+        end = start + datetime.timedelta(days=random.randint(0,N_DAYSBORROW) if not late else random.randint(N_DAYSBORROW+1, N_DAYSLATEBORROW))
+        if end > datetime.datetime.now(): end = None
+        
+        borrower = random.randint(1, N_USERS)
+        
+        lender = list(filter(lambda x: user_school[x] == user_school[borrower] and x in lib_editors, range(1,N_USERS+1)))
+        if len(lender) == 0: return None
+        lender = random.choice(lender)
+
+        item_id = list(filter(lambda x: item_school[x] == item_school[borrower], range(1,N_ITEMS+1)))
+        if len(item_id) == 0: return None
+        item_id = random.choice(item_id)
+        
+        expected_return = (start + datetime.timedelta(days=7)).date()
+
+        return f"""INSERT INTO borrow (item_id, borrower_id, lender_id, period, expected_return) VALUES\
+ ({item_id}, {borrower}, {lender}, TSTZRANGE('{start.isoformat()}', {f"'{end.isoformat()}'" if end is not None else 'NULL'}), '{expected_return.isoformat()}')\
+ ON CONFLICT DO NOTHING;\n"""
+
+
+    borrows = (build_borrow() for _ in range(N_BORROWS))
+    for borrow in borrows:
+        if borrow is None: continue
+        f.write(borrow)
+
 
 with open("fake_data.sql", "w") as f:
     f.write("BEGIN;\n")
@@ -149,4 +196,6 @@ with open("fake_data.sql", "w") as f:
     fake_users(f)
     f.write("\n")
     fake_reviews(f)
+    f.write("\n")
+    fake_borrows(f)
     f.write("COMMIT;\n")

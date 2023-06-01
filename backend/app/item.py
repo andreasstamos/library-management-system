@@ -124,10 +124,9 @@ def borrow_item():
         with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
             cur.execute("select * from borrow_item(%s,%s,%s,%s)", (data["item_id"], lender_id, data["borrower_id"], expected_return))
             status = cur.fetchone()
-            print(status)
             if not all(status.values()):
                 g.db_conn.rollback()
-                return {"success": False, **{f:bool(v) for f,v in status}}, 200
+                return {"success": False, **{f:bool(v) for f,v in status.items()}}, 200
             else:
                 g.db_conn.commit()
                 return {"success": True}, 200
