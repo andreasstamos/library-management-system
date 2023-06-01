@@ -126,7 +126,7 @@ def borrow_item():
             status = cur.fetchone()
             if not all(status.values()):
                 g.db_conn.rollback()
-                return {"success": False, **{f:bool(v) for f,v in status.items()}}, 200
+                return {"success": False, **status}, 200
             else:
                 g.db_conn.commit()
                 return {"success": True}, 200

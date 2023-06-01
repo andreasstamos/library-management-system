@@ -104,7 +104,7 @@ def exists_booking():
             cur.execute("SELECT 1 FROM booking WHERE user_id = %s AND isbn = %s AND NOW() <@ period",\
                     (identity["user_id"], data["isbn"]))
             exists_booking = bool(cur.fetchone())
-            cur.execute("SELECT COUNT(1) >= 2 FROM booking WHERE user_id = %s AND NOW() <@ period",\
+            cur.execute("SELECT COUNT(1) >= 2 FROM booking WHERE user_id = %s AND lower(period) > NOW() - INTERVAL '7 days'",\
                     (identity["user_id"],))
             exceeded_max = cur.fetchone()[0]
             return {"success": True, "exists_booking": exists_booking, "exceeded_max": exceeded_max}, 200

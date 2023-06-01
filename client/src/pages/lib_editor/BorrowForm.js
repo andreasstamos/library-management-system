@@ -271,11 +271,12 @@ function BorrowForm() {
 				return;
 			}
 			else {
+				console.log(response?.data);
 				if (response?.data?.v_bookings_constraint === false)
 					setError("Δυστυχώς ο δανεισμός δεν κατέστη δυνατός λόγω κρατήσεων.");
 				else if (response?.data?.v_borrow_number_constraint === false)
 					setError("Δυστυχώς ο δανεισμός δεν κατέστη δυνατός διότι\
-						ο χρήστης έχει υπερβεί τον επιτρεπτό αριθμό ταυτόχρονων δανεισμών.");
+						ο χρήστης έχει υπερβεί τον επιτρεπτό αριθμό δανεισμών ανά εβδομάδα.");
 				else if (response?.data?.v_book_same_constraint === false)
 					setError("Δυστυχώς ο δανεισμός δεν κατέστη δυνατός διότι\
 						ο χρήστης έχει ήδη δανειστεί αντίτυπο ίδιου βιβλίου");
@@ -285,7 +286,7 @@ function BorrowForm() {
 				else if (response?.data?.v_borrower_school_constraint === false)
 					setError("Δυστυχώς ο δανεισμός δεν κατέστη δυνατός διότι\
 						ο χρήστης ανήκει σε άλλο σχολείο από εσάς.");
-				else setError("Κάτι πήγε λάθος. Παρακολούμε προσπαθήστε ξανά.");
+				else setError("Κάτι πήγε λάθος. Παρακαλούμε προσπαθήστε ξανά.");
 				return;
 			}
 		} catch (e) {

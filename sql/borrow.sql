@@ -15,19 +15,17 @@ AND NOT EXISTS (SELECT 1 FROM borrow WHERE item_id = item.item_id AND NOW() <@ p
 
 -
 
-(WITH user_booking AS
-(SELECT booking_id
-FROM booking
-WHERE borrow_id IS NULL AND isbn = items_available.isbn AND user_id = items_available.user_id AND NOW() <@ period)
-
 --booked books with higher priority than current user's
-SELECT count(1)
+
+(SELECT COUNT(1)
 FROM booking
 JOIN "user" USING (user_id)
-LEFT JOIN user_booking ON TRUE
-AND isbn = items_available.isbn
+WHERE isbn = items_available.isbn
 AND NOW() <@ period
-AND (user_booking.booking_id is NULL OR booking.booking_id < user_booking.booking_id)
+AND (
+	(SELECT booking_id FROM booking WHERE borrow_id IS NULL AND isbn = items_available.isbn AND user_id = items_available.user_id AND NOW() <@ period) IS NULL
+	OR (SELECT booking_id FROM booking WHERE borrow_id IS NULL AND isbn = items_available.isbn AND user_id = items_available.user_id AND NOW() <@ period) > booking.booking_id
+)
 AND school_id = (SELECT school_id FROM "user" WHERE user_id = items_available.user_id)
 );
 $$ LANGUAGE SQL;
@@ -56,7 +54,7 @@ BEGIN
 	IF NOT v_item_school_constraint THEN RETURN;
 	END IF;
 
-	v_borrow_number_constraint := (SELECT (count(1) <= 2) FROM borrow WHERE borrower_id = v_borrower_id AND NOW() <@ period);
+	v_borrow_number_constraint := (SELECT (count(1) <= 2) FROM borrow WHERE borrower_id = v_borrower_id AND lower(period) > NOW() - INTERVAL '7 days');
 
 	IF NOT v_borrow_number_constraint THEN RETURN;
 	END IF;
@@ -80,7 +78,7 @@ CREATE OR REPLACE FUNCTION booking_book(v_isbn VARCHAR(13), v_user_id INTEGER,
 BEGIN
 	INSERT INTO booking (isbn, user_id) VALUES (v_isbn, v_user_id);
 
-	v_booking_number_constraint := (SELECT (COUNT(1) <= 2) FROM booking WHERE user_id = v_user_id AND NOW() <@ period);
+	v_booking_number_constraint := (SELECT (COUNT(1) <= 2) FROM booking WHERE user_id = v_user_id AND lower(period) > NOW() - INTERVAL '7 days');
 
 	IF NOT v_booking_number_constraint THEN RETURN;
 	END IF;
