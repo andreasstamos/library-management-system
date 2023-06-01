@@ -7,9 +7,22 @@ import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import { Link } from 'react-router-dom';
+import { useContext } from 'react';
+import AuthContext from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 
 export default function AdminNavbar() {
+
+  const navigate = useNavigate();
+
+  const {logoutUser} = useContext(AuthContext);
+
+  function logoutHandle() {
+    logoutUser();
+    navigate('/auth/login/', {replace:true})
+  }
+
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
@@ -30,6 +43,7 @@ export default function AdminNavbar() {
           <Button color="inherit" component={Link} to="schools/" className='navLink'>ΣΧΟΛΕΙΑ</Button>
           <Button color="inherit" component={Link} to="lib-editors/" className='navLink'>ΧΕΙΡΙΣΤΕΣ ΒΙΒΛΙΟΘΗΚΩΝ</Button>
           <Button color="inherit" component={Link} to="queries/" className='navLink'>ΣΤΑΤΙΣΤΙΚΑ</Button>
+          <Button color="inherit" className='navLink' onClick={logoutHandle}>Αποσυνδεση</Button>
 
         </Toolbar>
       </AppBar>

@@ -6,15 +6,22 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
 import { useContext } from 'react';
 
 
-
 export default function ButtonAppBar() {
+  const navigate = useNavigate();
 
-  let {user} = useContext(AuthContext);
+
+
+  let {user, logoutUser} = useContext(AuthContext);
+
+  function logoutHandle() {
+    logoutUser();
+    navigate('/auth/login/', {replace:true})
+  }
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -38,6 +45,8 @@ export default function ButtonAppBar() {
           <Button color="inherit" component={Link} to="/my-borrows/" className='navLink'>ΟΙ ΔΑΝΕΙΣΜΟΙ ΜΟΥ</Button>
 
           {user?.sub?.role === 'lib_editor' && <Button color="inherit" component={Link} to="/lib-editor/" className='navLink'>ΠΙΝΑΚΑΣ ΕΛΕΓΧΟΥ</Button>}
+          <Button color="inherit" className='navLink' onClick={logoutHandle}>Αποσυνδεση</Button>
+
 
         </Toolbar>
       </AppBar>
