@@ -15,6 +15,7 @@ def get_keywords():
             cur.execute("""
                 SELECT * 
                 FROM keyword
+                ORDER BY keyword_name
             """)
             keywords = cur.fetchall()
             return {"success": True, "keywords": keywords}, 200
