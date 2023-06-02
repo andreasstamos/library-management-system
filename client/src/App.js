@@ -29,6 +29,7 @@ import LibraryUsersControlDashboard from './pages/admin/library_editors/LibraryU
 import AddLibraryEditor from './pages/admin/library_editors/AddLibraryEditor';
 import AdminMenu from './pages/admin/AdminMenu';
 import MyBorrows from './pages/MyBorrows';
+import MyBookings from './pages/MyBookings';
 import Bookings from './pages/lib_editor/Bookings';
 import Borrows from './pages/lib_editor/Borrows';
 import Queries from './pages/admin/Queries';
@@ -55,10 +56,11 @@ function App() {
           <Routes>
 
             <Route path='/' element={<PrivateRoute><Landing/></PrivateRoute>}>
-              <Route index path='' element={<PrivateRoute><Books/></PrivateRoute>} />
-              <Route path='/book/:bookISBN' element={<PrivateRoute><Book/></PrivateRoute>} />
-              <Route path='/profile/' element={<PrivateRoute><Profile /></PrivateRoute>} />
-              <Route path='/my-borrows/' element={<PrivateRoute><MyBorrows /></PrivateRoute>} />
+              <Route index path='' element={<Books/>} />
+              <Route path='book/:bookISBN' element={<Book/>} />
+              <Route path='profile/' element={<Profile />} />
+              <Route path='my-borrows/' element={<MyBorrows />} />
+              <Route path='my-bookings/' element={<MyBookings />} />
 
               <Route path='/404' element={<NotFound404 />} />
             </Route>

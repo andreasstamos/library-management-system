@@ -17,9 +17,7 @@ import 'dayjs/locale/el';
 dayjs.locale('el');
 
 
-
 function Row({data, fetchBookings}) {
-
   async function cancelBooking() {
     const payload = {
       booking_id: data.booking_id
@@ -35,23 +33,6 @@ function Row({data, fetchBookings}) {
     await fetchBookings();
     return;
   }
-
-  async function deleteBooking() {
-    const payload = {
-      booking_id: data.booking_id
-    }
-    const response = await axios.post('http://localhost:5000/booking/delete-booking/', payload, {
-      headers: {
-        'Access-Control-Expose-Headers' : '*',
-        'Access-Control-Allow-Origin': '*', 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('authTokens')}`,
-      }
-    });
-    await fetchBookings();
-    return;
-  }
-
   return (
     <TableRow
       key={data.booking_id}
@@ -60,31 +41,23 @@ function Row({data, fetchBookings}) {
       <TableCell  component="th" scope="row">
         {data.booking_id}
       </TableCell>
-      <TableCell >
-        <div>{`${data.first_name} ${data.last_name}`}</div>
-        <div>{`${data.username}, AM: ${data.user_id}`}</div>
-      </TableCell>
       <TableCell >{data.title}</TableCell>
       <TableCell >{data.isbn}</TableCell>
       <TableCell >{dayjs(data.booked_on).format('DD/MM/YYYY HH:mm:ss')}</TableCell>
       <TableCell >{data.lent ? <CheckCircleIcon color="success"/> :
           (data.time_valid ? <PendingIcon color="warning" /> : <CancelIcon color="error"/>)}</TableCell>
-      <TableCell >
-        {data.lent === false && data.time_valid === true && <Button color="secondary" onClick={cancelBooking}>ΑΚΥΡΩΣΗ</Button>}
-        <Button color="error" onClick={deleteBooking}>ΔΙΑΓΡΑΦΗ</Button>
-      </TableCell>
+      <TableCell >{data.lent === false && data.time_valid === true && <Button color="error" onClick={cancelBooking}>ΑΚΥΡΩΣΗ</Button>}</TableCell>
     </TableRow>
   )
 }
 
-export default function BookingsTable({data, fetchBookings}) {
+export default function MyBookingsTable({data, fetchBookings}) {
   return (
     <TableContainer component={Paper}>
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
         <TableHead>
           <TableRow>
             <TableCell >Αριθμός κράτησης</TableCell>
-            <TableCell >Χρήστης</TableCell>
             <TableCell >Τίτλος</TableCell>
             <TableCell >ISBN</TableCell>
             <TableCell>Ημερομηνία κράτησης</TableCell>

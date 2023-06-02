@@ -108,6 +108,8 @@ GET_BOOK_JSONSCHEMA = {
             "keywords": {"type": "array", "items": {"type": "string"}, "minItems": 1},
             "categories": {"type": "array", "items": {"type": "string"}, "minItems": 1},
 
+            "all_schools": {"type": "boolean"},
+
             "limit": {"type": "integer", "minimum": 1},
             "offset": {"type": "integer", "minimum": 0},
             
@@ -168,6 +170,9 @@ def get_book():
                 GROUP BY isbn) AS rate\
                 USING (isbn)""")
 
+    if 'all_schools' not in data or not data["all_schools"]:
+        join_clause.append("INNER JOIN item USING (isbn)")
+
     if 'publishers' in data.keys() or 'publisher_name' in data["fetch_fields"]:
         join_clause.append('LEFT JOIN publisher USING (publisher_id)') 
 
@@ -179,12 +184,18 @@ def get_book():
     if 'publishers' in data.keys():
         data["publishers"] = tuple(data["publishers"])
         where_clause.append("publisher_name IN %(publishers)s")
-    where_clause = ' AND '.join(where_clause)
-    
     if 'isbn' in data.keys():
-        where_clause = "isbn = %(isbn)s"
+        where_clause = ["isbn = %(isbn)s"]
     if 'item_id' in data.keys():
-        where_clause = "isbn = (SELECT isbn FROM item WHERE item_id = %(item_id)s)"
+        where_clause = ["isbn = (SELECT isbn FROM item WHERE item_id = %(item_id)s)"]
+
+
+    if 'all_schools' not in data or not data["all_schools"]:
+        where_clause.append("school_id = %(school_id)s")
+        data["school_id"] = get_jwt_identity()["school_id"]
+
+    where_clause = ' AND '.join(where_clause)
+
     if where_clause:
         where_clause = f"WHERE {where_clause}"
 
@@ -195,7 +206,7 @@ def get_book():
             {'ORDER BY (title <-> %(title)s)' if 'title' in data.keys() else ''}\
             {'OFFSET %(offset)s' if 'offset' in data.keys() else ''}\
             {'LIMIT %(limit)s' if 'limit' in data.keys() else ''}"""
-    
+    print(query)
     try:
         with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
             cur.execute(query, data)

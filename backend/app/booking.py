@@ -129,8 +129,6 @@ def exists_booking():
         return {"success": False, "error": "unknown"}, 400
 
 
-
-
 DELETE_BOOKING_JSON = {
     "type": "object",
     "properties": {
@@ -142,7 +140,7 @@ DELETE_BOOKING_JSON = {
 
 @bp.route("/delete-booking/", methods=['POST'])
 @check_roles(['lib_editor'])
-def delete_bookin():
+def delete_booking():
     data = request.get_json()
     try:
         jsonschema.validate(data, DELETE_BOOKING_JSON)
@@ -166,6 +164,46 @@ def delete_bookin():
             cur.execute(query, [data['booking_id'], user['school_id']])
             g.db_conn.commit()
             return {'success': cur.rowcount >= 1}, 200
-    except (Exception, psycopg2.DatabaseError) as error:
+    except psycopg2.Error as error:
+        g.db_coon.rollback()
         print(error)
         return {'success': False, 'error': 'unknown'}, 400
+
+CANCEL_BOOKING_JSON = {
+    "type": "object",
+    "properties": {
+        "booking_id": {"type": "integer"},
+        },
+    "additionalProperties": False,
+    "required": ["booking_id"] 
+}
+
+@bp.route("/cancel-booking/", methods=['POST'])
+@check_roles()
+def cancel_booking():
+    data = request.get_json()
+    try:
+        jsonschema.validate(data, CANCEL_BOOKING_JSON)
+    except jsonschema.ValidationError as err:
+        return {"success": False, "error": err.message}, 400
+
+    user = get_jwt_identity()
+
+    try:
+        with g.db_conn.cursor() as cur:
+            query = psycopg2.sql.SQL(f"""
+            UPDATE booking
+            SET period = TSTZRANGE(lower(period), NOW())
+            WHERE booking_id = %(booking_id)s
+            AND NOW() <= upper(period) AND borrow_id IS NULL
+            {'AND EXISTS (SELECT 1 FROM "user" WHERE "user".school_id = %(school_id)s AND "user".user_id = booking.user_id)' if user['role'] == 'lib_editor' else 'AND user_id = %(user_id)s'}
+            """)
+            cur.execute(query, {'booking_id': data['booking_id'], 'school_id': user["school_id"], 'user_id': user["user_id"]})
+            g.db_conn.commit()
+            print(cur.rowcount)
+            return {'success': cur.rowcount >= 1}, 200
+    except psycopg2.Error as err:
+        g.db_conn.rollback()
+        print(err)
+        return {'success': False, 'error': 'unknown'}, 400
+

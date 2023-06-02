@@ -80,7 +80,7 @@ function Row({data,fetchBorrows}) {
         {data.returned_on ? <CheckCircleIcon color="success" /> : (data.time_valid ? <PendingIcon color="warning" /> : <WarningIcon color="error" />)}
       </TableCell>
       <TableCell>
-        {data.returned_on === null && <Button onClick={returnBorrow}>ΕΠΙΣΤΡΟΦΗ</Button>}
+        {data.returned_on === null && <Button color="secondary" onClick={returnBorrow}>ΕΠΙΣΤΡΟΦΗ</Button>}
         <Button color="error" onClick={deleteBorrow}>ΔΙΑΓΡΑΦΗ</Button>
       </TableCell>
     </TableRow>
