@@ -45,7 +45,7 @@ import AuthorControl from './pages/lib_editor/AuthorControl';
 import CategoryControl from './pages/lib_editor/CategoryControl';
 import KeywordControl from './pages/lib_editor/KeywordControl';
 import PublisherControl from './pages/lib_editor/PublisherControl';
-
+import Backup from './pages/admin/Backup';
 
 function App() {
   return (
@@ -91,6 +91,8 @@ function App() {
               <Route path='authors/' element={<AuthorControl />} />
               <Route path='categories/' element={<CategoryControl />} />
               <Route path='keywords/' element={<KeywordControl />} />
+              <Route path='backup-restore/' element={<Backup />} />
+
 
               <Route path='schools/' element={<SchoolDashboard/>}>
                   <Route path='add-school/' element={<AddSchool/>} />

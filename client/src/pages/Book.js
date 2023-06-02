@@ -155,7 +155,7 @@ function Book() {
                         <div className='book-detail'>
                             <Typography variant="h6">Διαθεσιμότητα για δανεισμό</Typography>
                             {book?.items_available > 0 && <Typography variant="body1" sx={{color: 'success.main'}}>
-                                {book?.items_available} {book?.items_avaliable === 1 ? 'αντίτυπα άμεσα διαθέσιμα' : 'αντίτυπο άμεσα διαθέσιμο'}
+                                {book?.items_available} {book?.items_available === 1 ? 'αντίτυπο άμεσα διαθέσιμο' : 'αντίτυπα άμεσα διαθέσιμα'}
                             </Typography>}
 
                             {book?.items_available <= 0 && <Typography variant="body1" sx={{color: 'error.main'}}>

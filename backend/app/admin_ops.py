@@ -4,6 +4,14 @@ import jsonschema
 from .roles_decorators import check_roles
 from datetime import datetime
 import bcrypt
+
+#for backup
+from flask import current_app, send_file
+import subprocess
+import tempfile
+import os
+
+
 bp = Blueprint("admin-ops", __name__)
 # ADMIN OPERATIONS
 
@@ -498,3 +506,53 @@ def query_3_1_7():
         print(err.pgerror)
         return {"success": False, "error": "unknown"}
 
+@bp.route('/backup/', methods=['POST'])
+@check_roles(['admin'])
+def backup():
+    BACKUP_JSONSCHEMA = {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": False,
+    }
+    data = request.get_json()
+    try:
+        jsonschema.validate(data, BACKUP_JSONSCHEMA)
+    except jsonschema.ValidationError as err:
+        return {"success": False, "error": err.message}, 400
+    
+    try:
+        with tempfile.TemporaryDirectory() as tempdir:
+            backup_file = os.path.join(tempdir, 'backup.sql')
+            cmd = ['pg_dump', '-h', current_app.config["DB_HOST"], '-p', str(current_app.config["DB_PORT"]),
+                '-d', current_app.config["DB_NAME"], '-U', current_app.config["DB_USER"], '--clean', '--if-exists',
+                '-f', backup_file]
+            env = os.environ.copy()
+            env['PGPASSWORD'] = current_app.config["DB_PASSWORD"]
+            subprocess.run(cmd, check=True, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            return send_file(backup_file, as_attachment=True)
+    except Exception as err:
+        print(err)
+        return {"success": False, "error": "unknown"}, 200
+
+@bp.route('/restore/', methods=['POST'])
+@check_roles(['admin'])
+def restore():
+    try:
+        if 'file' not in request.files:
+            return {"success": False, "error": "No file given"}, 400
+        with tempfile.TemporaryDirectory() as tempdir:
+            backup_file = os.path.join(tempdir, 'backup.sql')
+            request.files['file'].save(backup_file)
+            cmd = ['psql', '-h', current_app.config["DB_HOST"], '-p', str(current_app.config["DB_PORT"]),
+                '-d', current_app.config["DB_NAME"], '-U', current_app.config["DB_USER"], '--single-transaction', '--quiet',
+                '-f', backup_file]
+            env = os.environ.copy()
+            env['PGPASSWORD'] = current_app.config["DB_PASSWORD"]
+            subprocess.run(cmd, check=True, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            return {"success": True}, 200
+    except Exception as err:
+        print(err)
+        raise err
+        return {"success": False, "error": "unknown"}, 200
+ 
