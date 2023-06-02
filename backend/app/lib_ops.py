@@ -471,7 +471,8 @@ def average_ratings_per_category():
     if 'category_id' in data.keys():
         where_clause.append("category.category_id = %s")
         params.append(data['category_id'])
-    where_clause.append("EXISTS (SELECT 1 FROM item JOIN borrow USING (item_id) WHERE review.user_id = borrow.borrower_id AND item.isbn = review.isbn)")
+    #borrowed not required according to Discord answer
+    #where_clause.append("EXISTS (SELECT 1 FROM item JOIN borrow USING (item_id) WHERE review.user_id = borrow.borrower_id AND item.isbn = review.isbn)")
     where_clause = ' AND '.join(where_clause)
     where_clause = f"WHERE {where_clause}"
     try:
@@ -515,7 +516,7 @@ def average_rating_per_borrower():
     where_clause = []
     params = {'school_id': user['school_id']}
     for fieldname in data.keys():
-        where_clause.append(f"{fieldname} ILIKE %{fieldname}s")
+        where_clause.append(f"{fieldname} ILIKE %({fieldname})s")
         params[fieldname] = data[fieldname]
 
     where_clause.append("school_id = %(school_id)s")
