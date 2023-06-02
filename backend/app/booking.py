@@ -48,6 +48,7 @@ INSERT_BOOKING_JSONSCHEMA = {
         "type": "object",
         "properties": {
             "isbn": {"type": "string", "pattern": "^[0-9]{13}$"},
+            "user_id": {"type": "integer"}
             },
         "additionalProperties": False,
         "required": ["isbn"] 
@@ -61,8 +62,15 @@ def insert_booking():
         jsonschema.validate(data, INSERT_BOOKING_JSONSCHEMA)
     except jsonschema.ValidationError as err:
         return {"success": False, "error": err.message}, 400
+ 
+    identity = get_jwt_identity()
     
-    user_id = get_jwt_identity()["user_id"]
+    if "user_id" in data.keys():
+        if identity["role"] != "lib_editor":
+            return {"success": False, "error": "Access Denied"}, 401
+        user_id = data["user_id"]
+    else:
+        user_id = identity["user_id"]
 
     try:
         with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
@@ -83,6 +91,7 @@ EXISTS_BOOKING_JSONSCHEMA = {
         "type": "object",
         "properties": {
             "isbn": {"type": "string", "pattern": "^[0-9]{13}$"},
+            "user_id": {"type": "integer"}
             },
         "additionalProperties": False,
         "required": ["isbn"] 
@@ -98,14 +107,21 @@ def exists_booking():
         return {"success": False, "error": err.message}, 400
    
     identity = get_jwt_identity()
+    
+    if "user_id" in data.keys():
+        if identity["role"] != "lib_editor":
+            return {"success": False, "error": "Access Denied"}, 401
+        user_id = data["user_id"]
+    else:
+        user_id = identity["user_id"]
 
     try:
         with g.db_conn.cursor() as cur:
             cur.execute("SELECT 1 FROM booking WHERE user_id = %s AND isbn = %s AND NOW() <@ period",\
-                    (identity["user_id"], data["isbn"]))
+                    (user_id, data["isbn"]))
             exists_booking = bool(cur.fetchone())
             cur.execute("SELECT COUNT(1) >= 2 FROM booking WHERE user_id = %s AND lower(period) > NOW() - INTERVAL '7 days'",\
-                    (identity["user_id"],))
+                    (user_id,))
             exceeded_max = cur.fetchone()[0]
             return {"success": True, "exists_booking": exists_booking, "exceeded_max": exceeded_max}, 200
     except psycopg2.Error as err:
