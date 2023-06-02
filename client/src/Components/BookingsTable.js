@@ -83,7 +83,7 @@ export default function BookingsTable({data, fetchBookings}) {
         <TableBody>
 
           {data.map((row) => (
-            <Row data={row} fetchBookings={fetchBookings}/>
+            <Row key={row?.booking_id} data={row} fetchBookings={fetchBookings}/>
           ))}
 
         </TableBody>

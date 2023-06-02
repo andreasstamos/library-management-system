@@ -37,7 +37,8 @@ function CategoryControl() {
 
     <div className='component-details users-control'>
     {loading && <CircularProgress />}
-    {categories && (categories.length > 0 ? categories.map(category => <CategoryCard data={category} getCategories={fetchCategories}/>) : <h3>Δεν βρέθηκαν Κατηγορίες</h3>)}
+    {categories && (categories.length > 0 ? categories.map(category => <CategoryCard key={category?.category_id} data={category}
+        getCategories={fetchCategories}/>) : <h3>Δεν βρέθηκαν Κατηγορίες</h3>)}
        
     
 

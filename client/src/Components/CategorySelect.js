@@ -51,7 +51,7 @@ export default function CategorySelect({categorySelected, setCategorySelected}) 
             label="Category"
             onChange={handleChange}
           >
-              {options.map((option) => {return <MenuItem value={option.category_id}>{option.category_name}</MenuItem>})}
+              {options.map((option) => {return <MenuItem key={option.category_id} value={option.category_id}>{option.category_name}</MenuItem>})}
   
           </Select>
         </FormControl>

@@ -101,7 +101,7 @@ export default function BorrowsTable({data, fetchBorrows}) {
         <TableBody>
 
           {data.map((row) => (
-            <Row data={row} fetchBorrows={fetchBorrows}/>
+            <Row key={row?.borrow_id} data={row} fetchBorrows={fetchBorrows}/>
           ))}
 
         </TableBody>

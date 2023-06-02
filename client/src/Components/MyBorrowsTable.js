@@ -38,7 +38,7 @@ export default function MyBorrowsTable({data}) {
         <TableBody>
           {data.map((book) => (
             <TableRow
-              key={book.name}
+              key={book.isbn}
               sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
             >
               <TableCell component="th" scope="row">

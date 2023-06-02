@@ -40,7 +40,7 @@ function UsersControl() {
         <div className='queries-filter'>
             <Switch label="Active" checked={activeUsers} onChange={(e) => setActiveUsers(!activeUsers)} />
         </div>
-            {data && data.map((item) => {return <UserCard data={item} getUsers={getUsers} />})}
+            {data && data.map((item) => {return <UserCard key={item?.user_id} data={item} getUsers={getUsers} />})}
             {data && data.length == 0 && <h3>No Users</h3>}
         
 

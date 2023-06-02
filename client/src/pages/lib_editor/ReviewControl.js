@@ -59,7 +59,8 @@ function ReviewControl() {
         <div className='component-details review-control'>
             {loading && <CircularProgress />}
             {!loading && reviews.map((review) => {
-                return <ReviewCard 
+                return <ReviewCard
+                key={review?.review_id}
                 title={review?.title} 
                 isbn={review?.isbn} 
                 username={review?.username} 
