@@ -22,7 +22,7 @@ function BookingDialog({open, isbn, onClose}) {
     try {
       const payload = {
         isbn: isbn,
-        user_id: parseInt(userid)
+        ...(forMe === "other" && {user_id: parseInt(userid)})
       };
 
       const response = await axios.post('http://127.0.0.1:5000/booking/insert/', payload, {headers: {

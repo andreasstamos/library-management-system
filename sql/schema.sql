@@ -103,24 +103,28 @@ CREATE INDEX index_user_active ON "user" (active);
 CREATE INDEX index_user_school_id ON "user" (school_id);
 
 CREATE TABLE "admin" (
-	admin_id SERIAL PRIMARY KEY,
 	user_id INT NOT NULL UNIQUE REFERENCES "user" ON DELETE CASCADE
 );
+
+CREATE INDEX index_admin ON "admin" (user_id);
 
 CREATE TABLE lib_user (
-	lib_id SERIAL PRIMARY KEY,
 	user_id INT NOT NULL UNIQUE REFERENCES "user" ON DELETE CASCADE
 );
+
+CREATE INDEX index_lib_user ON lib_user (user_id);
 
 CREATE TABLE student (
-	student_id SERIAL PRIMARY KEY,
 	user_id INT NOT NULL UNIQUE REFERENCES "user" ON DELETE CASCADE
 );
 
+CREATE INDEX index_student ON student (user_id);
+
 CREATE TABLE teacher (
-	teacher_id SERIAL PRIMARY KEY,
 	user_id INT NOT NULL UNIQUE REFERENCES "user" ON DELETE CASCADE
 );
+
+CREATE INDEX index_teacher ON teacher (user_id);
 
 CREATE TABLE item (
 	item_id SERIAL PRIMARY KEY,
@@ -150,8 +154,8 @@ CREATE TABLE borrow (
 	item_id INTEGER NOT NULL REFERENCES item ON DELETE CASCADE,
 	lender_id INTEGER NOT NULL REFERENCES "user" ON DELETE CASCADE,
 	borrower_id INTEGER NOT NULL REFERENCES "user" ON DELETE CASCADE,
-	period TSTZRANGE NOT NULL DEFAULT TSTZRANGE(NOW(), NULL),
-	expected_return DATE NOT NULL CHECK (expected_return >= LOWER(period)),
+	period TSTZRANGE NOT NULL DEFAULT TSTZRANGE(NOW(), NULL) CHECK (NOT ISEMPTY(period)),
+	expected_return DATE NOT NULL CHECK (expected_return >= LOWER(period)::date),
 	EXCLUDE USING GIST (item_id WITH =, period WITH &&)
 );
 
@@ -163,7 +167,7 @@ CREATE TABLE booking (
 	borrow_id INTEGER REFERENCES borrow ON DELETE CASCADE,
  	isbn VARCHAR(13) NOT NULL REFERENCES book,
  	user_id INTEGER NOT NULL REFERENCES "user",
- 	period TSTZRANGE NOT NULL DEFAULT (TSTZRANGE(NOW(), NOW() + INTERVAL '1 week')),
+ 	period TSTZRANGE NOT NULL DEFAULT (TSTZRANGE(NOW(), NOW() + INTERVAL '1 week')) CHECK (NOT ISEMPTY(period)),
 	EXCLUDE USING GIST (user_id WITH =, isbn WITH =, period WITH &&)
 );
 

@@ -116,7 +116,7 @@ def borrow_item():
     except jsonschema.ValidationError as err:
         return {"success": False, "error": err.message}, 400
     
-    expected_return = datetime.date.today() + datetime.timedelta(days=14) #TODO: CHECK/QUERY/HARDCODE/... LIBRARY POLICY FOR RETURN DATES
+    expected_return = datetime.date.today() + datetime.timedelta(days=7) #TODO: CHECK/QUERY/HARDCODE/... LIBRARY POLICY FOR RETURN DATES
 
     lender_id = get_jwt_identity()["user_id"]
 
@@ -256,7 +256,7 @@ def get_items_by_isbn():
 
     query = """SELECT item_id, time_valid IS NOT NULL AS lent, time_valid\
             FROM item\
-            LEFT JOIN (SELECT item_id, NOW() < expected_return AS time_valid FROM borrow WHERE NOW() <@ period) status USING (item_id)\
+            LEFT JOIN (SELECT item_id, NOW()::date <= expected_return AS time_valid FROM borrow WHERE NOW() <@ period) status USING (item_id)\
             WHERE isbn = %s AND school_id = %s"""
 
     try:
