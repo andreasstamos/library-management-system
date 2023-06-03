@@ -39,9 +39,9 @@ function AllSchools() {
 
             <div className='all-schools-container'>
                 {loading && <CircularProgress />}
-                {schools && schools.map((school, index) => {
+                {schools && schools.map((school) => {
                     return <SchoolCard 
-                        key={index}
+                        key={school?.school_id}
                         name={school?.name} 
                         schoolID={school?.school_id} 
                         address={school?.address} 

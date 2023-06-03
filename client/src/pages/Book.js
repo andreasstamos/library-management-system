@@ -8,6 +8,7 @@ import ReviewForm from '../Components/ReviewForm';
 import AuthContext from '../context/AuthContext';
 import Reviews from '../Components/Reviews';
 import ItemsTable from '../Components/ItemsTable';
+import BookingDialog from '../Components/BookingDialog';
 
 function Book() {
     const navigate = useNavigate();
@@ -16,6 +17,7 @@ function Book() {
     const [bookingExceededMax, setBookingExceededMax] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [openBookingDialog, setOpenBookingDialog] = useState(false);
     let {bookISBN} = useParams();
 
     const auth = useContext(AuthContext);
@@ -55,7 +57,6 @@ function Book() {
                 return navigate("/404");
             }
             setBook(response_book.data.books[0]);
-            console.log(response_booking?.data);
             setBookingExists(response_booking?.data?.exists_booking);
             setBookingExceededMax(response_booking?.data?.exceeded_max);
         } catch (e) {
@@ -102,6 +103,8 @@ function Book() {
             >
                 <CircularProgress/>
             </Backdrop>
+
+            {isLibEditor && <BookingDialog open={openBookingDialog} isbn={book?.isbn} onClose={() => {setOpenBookingDialog(false);}} />}
 
             <div className='book-page-container'>
                 {error && <Alert severity="error" sx={{mr: 'auto'}}>{error}</Alert>}
@@ -155,7 +158,7 @@ function Book() {
                         <div className='book-detail'>
                             <Typography variant="h6">Διαθεσιμότητα για δανεισμό</Typography>
                             {book?.items_available > 0 && <Typography variant="body1" sx={{color: 'success.main'}}>
-                                {book?.items_available} {book?.items_avaliable === 1 ? 'αντίτυπα άμεσα διαθέσιμα' : 'αντίτυπο άμεσα διαθέσιμο'}
+                                {book?.items_available} {book?.items_available === 1 ? 'αντίτυπο άμεσα διαθέσιμο' : 'αντίτυπα άμεσα διαθέσιμα'}
                             </Typography>}
 
                             {book?.items_available <= 0 && <Typography variant="body1" sx={{color: 'error.main'}}>
@@ -165,14 +168,18 @@ function Book() {
 
                         </div>
 
-                        {bookingExists === false && bookingExceededMax === false &&
+                        {!isLibEditor && <>
+                            {bookingExists === false && bookingExceededMax === false &&
                             <Button variant="contained" sx={{mr: 'auto'}} onClick={handleBooking}>ΚΡΑΤΗΣΗ</Button>}
-                        {bookingExists === true && <Alert severity="info" sx={{mr: 'auto'}}>
-                            Έχετε ήδη ενεργή κράτηση για το συγκεκριμένο βιβλίο.
-                        </Alert>}
-                        {bookingExists === false && bookingExceededMax === true && <Alert severity="info" sx={{mr: 'auto'}}>
-                            Έχετε ήδη εκτελέσει τον μέγιστο αριθμό επιτρεπτών κρατήσεων.
-                        </Alert>}
+                            {bookingExists === true && <Alert severity="info" sx={{mr: 'auto'}}>
+                                Έχετε ήδη ενεργή κράτηση για το συγκεκριμένο βιβλίο.
+                            </Alert>}
+                            {bookingExists === false && bookingExceededMax === true && <Alert severity="info" sx={{mr: 'auto'}}>
+                                Έχετε ήδη εκτελέσει τον μέγιστο αριθμό επιτρεπτών κρατήσεων.
+                            </Alert>}
+                        </>}
+
+                        {isLibEditor && <Button variant="contained" sx={{mr: 'auto'}} onClick={() => {setOpenBookingDialog(true);}}>ΚΡΑΤΗΣΗ (ΓΙΑ ΕΣΑΣ/ΧΡΗΣΤΗ)</Button>}
 
 
                     </div>

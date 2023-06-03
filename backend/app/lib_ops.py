@@ -247,7 +247,8 @@ def get_borrows():
                 SELECT borrow.borrow_id, borrow.item_id,
                 lender_id, lender.username AS lender_username, lender.first_name AS lender_first_name, lender.last_name AS lender_last_name,
                 borrower_id, borrower.username AS borrower_username, borrower.first_name as borrower_first_name, borrower.last_name AS borrower_last_name,
-                LOWER(borrow.period) AS borrowed_on, UPPER(borrow.period) as returned_on, expected_return, book.title, book.isbn
+                LOWER(borrow.period) AS borrowed_on, UPPER(borrow.period) as returned_on, expected_return, book.title, book.isbn,
+                NOW()::date <= expected_return as time_valid
                 FROM borrow
                 INNER JOIN "user" AS lender ON borrow.lender_id = lender.user_id AND lender.school_id = (%s)
                 INNER JOIN "user" AS borrower ON borrow.borrower_id = borrower.user_id AND borrower.school_id = (%s)
@@ -470,7 +471,8 @@ def average_ratings_per_category():
     if 'category_id' in data.keys():
         where_clause.append("category.category_id = %s")
         params.append(data['category_id'])
-    where_clause.append("EXISTS (SELECT 1 FROM item JOIN borrow USING (item_id) WHERE review.user_id = borrow.borrower_id AND item.isbn = review.isbn)")
+    #borrowed not required according to Discord answer
+    #where_clause.append("EXISTS (SELECT 1 FROM item JOIN borrow USING (item_id) WHERE review.user_id = borrow.borrower_id AND item.isbn = review.isbn)")
     where_clause = ' AND '.join(where_clause)
     where_clause = f"WHERE {where_clause}"
     try:

@@ -3,6 +3,8 @@ import psycopg2.sql
 import jsonschema
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
+from .roles_decorators import check_roles
+
 bp = Blueprint("student-ops", __name__)
 
 # STUDENT OPERATIONS
@@ -12,23 +14,73 @@ bp = Blueprint("student-ops", __name__)
 # We must decide what we will do with multiple users first
 # Should we add a 'returned' field in the borrow table? (Someone might return it earlier) 
 
+MY_BOOKINGS_JSONSCHEMA = {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": False,
+        "required": []
+        }
+
+
+@bp.route("/my-bookings/", methods=['POST'])
+@check_roles()
+def my_bookings():
+    data = request.get_json()
+    try:
+        jsonschema.validate(data, MY_BOOKINGS_JSONSCHEMA)
+    except jsonschema.ValidationError as err:
+        return {"success": False, "error": err.message}, 400
+
+    user = get_jwt_identity()
+
+    try:
+        with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
+            cur.execute("""SELECT booking_id, isbn, title, publisher_name, LOWER(period) AS booked_on,\
+                    borrow_id IS NOT NULL as lent, NOW() <= upper(period) as time_valid\
+                    FROM booking\
+                    INNER JOIN book USING (isbn)\
+                    INNER JOIN publisher USING (publisher_id)\
+                    WHERE user_id = %s\
+                    ORDER BY time_valid DESC, booked_on DESC""", (user['user_id'],))
+            bookings = cur.fetchall()
+    except psycopg2.Error as err:
+        print(err)
+        return {"success": False, "error": "unknown"}
+
+    return {"success": True, "bookings": bookings}, 200
+
+
+
+MY_BORROWS_JSONSCHEMA = {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": False,
+        "required": []
+        }
+
 
 
 @bp.route("/my-borrows/", methods=['POST'])
 @jwt_required(refresh=False,locations=['headers'], verify_type=False)
 def my_borrows():
+    data = request.get_json()
+    try:
+        jsonschema.validate(data, MY_BORROWS_JSONSCHEMA)
+    except jsonschema.ValidationError as err:
+        return {"success": False, "error": err.message}, 400
 
     user = get_jwt_identity()
 
-
     try:
         with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
-            cur.execute("SELECT book.title, item.isbn ,item.item_id,publisher.publisher_name, LOWER(borrow.period) AS borrowed_on, UPPER(borrow.period) IS NOT NULL as returned, borrow.expected_return \
-            FROM book\
-            INNER JOIN item ON book.isbn = item.isbn \
-            INNER JOIN publisher ON book.publisher_id = publisher.publisher_id\
-            INNER JOIN borrow ON item.item_id = borrow.item_id \
-            AND borrow.borrower_id = (%s)", (user['user_id'],))
+            cur.execute("SELECT book.title, item.isbn, item.item_id, publisher.publisher_name, LOWER(borrow.period) AS borrowed_on,\
+                    UPPER(borrow.period) as returned_on, UPPER(borrow.period) IS NOT NULL as returned,\
+                    borrow.expected_return, NOW()::date <= expected_return as time_valid\
+                    FROM borrow\
+                    INNER JOIN item ON item.item_id = borrow.item_id\
+                    INNER JOIN book ON book.isbn = item.isbn\
+                    INNER JOIN publisher ON book.publisher_id = publisher.publisher_id\
+                    WHERE borrow.borrower_id = (%s)", (user['user_id'],))
             results = cur.fetchall()
     except psycopg2.Error as err:
         print(err.pgerror)

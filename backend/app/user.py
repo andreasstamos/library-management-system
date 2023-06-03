@@ -31,7 +31,7 @@ def get_user_details():
         with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
             cur.execute("SELECT username, first_name, last_name, email\
                     FROM \"user\"\
-                    WHERE user_id = %s", (data["user_id"],))
+                    WHERE user_id = %s AND school_id = %s", (data["user_id"], get_jwt_identity()["school_id"]))
             user = cur.fetchone()
             return {"success": True, "user": user}, 200
     except psycopg2.Error as err:

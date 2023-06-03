@@ -162,7 +162,7 @@ def fake_borrows(f):
         start = fake.date_time_between_dates(START_DATE, END_DATE)
         late = random.random() < P_LATEBORROW
 
-        end = start + datetime.timedelta(days=random.randint(0,N_DAYSBORROW) if not late else random.randint(N_DAYSBORROW+1, N_DAYSLATEBORROW))
+        end = start + datetime.timedelta(hours=random.randint(1,24*N_DAYSBORROW) if not late else random.randint(24*(N_DAYSBORROW+1), 24*N_DAYSLATEBORROW))
         if end > datetime.datetime.now(): end = None
         
         borrower = random.randint(1, N_USERS)

@@ -37,7 +37,8 @@ function PublisherControl() {
 
     <div className='component-details users-control'>
     {loading && <CircularProgress />}
-    {publishers && (publishers.length > 0 ? publishers.map(publisher => <PublisherCard data={publisher} getPublishers={fetchPublishers}/>) : <h3>Δεν βρέθηκαν Λέξεις Κλειδιά.</h3>)}
+    {publishers && (publishers.length > 0 ? publishers.map(publisher => <PublisherCard key={publisher?.publisher_id}
+        data={publisher} getPublishers={fetchPublishers}/>) : <h3>Δεν βρέθηκαν Λέξεις Κλειδιά.</h3>)}
        
     
 

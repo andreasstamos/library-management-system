@@ -43,6 +43,7 @@ export default function ButtonAppBar() {
           <Button color="inherit" component={Link} to="/" className='navLink'>ΒΙΒΛΙΑ</Button>
           <Button color="inherit" component={Link} to="/profile/" className='navLink'>ΠΡΟΦΙΛ</Button>
           <Button color="inherit" component={Link} to="/my-borrows/" className='navLink'>ΟΙ ΔΑΝΕΙΣΜΟΙ ΜΟΥ</Button>
+          <Button color="inherit" component={Link} to="/my-bookings/" className='navLink'>ΟΙ ΚΡΑΤΗΣΕΙΣ ΜΟΥ</Button>
 
           {user?.sub?.role === 'lib_editor' && <Button color="inherit" component={Link} to="/lib-editor/" className='navLink'>ΠΙΝΑΚΑΣ ΕΛΕΓΧΟΥ</Button>}
           <Button color="inherit" className='navLink' onClick={logoutHandle}>Αποσυνδεση</Button>

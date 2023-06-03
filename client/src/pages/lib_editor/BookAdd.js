@@ -59,6 +59,7 @@ function BookAdd() {
             try {
                 const payload = {
                     "isbn": isbn,
+                    "all_schools": true,
                     "fetch_fields": ["title", "authors", "publisher_name", "language", "categories", "keywords", "summary", "page_number", "image_uri"]
                 };
 

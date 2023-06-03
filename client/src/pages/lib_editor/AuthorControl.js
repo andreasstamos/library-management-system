@@ -43,10 +43,9 @@ function AuthorControl() {
 
         <div className='component-details users-control'>
         {loading && <CircularProgress />}
-        {authors && (authors.length > 0 ? authors.map(author => <AuthorCard data={author} getAuthors={fetchAuthors}/>) : <h3>Δεν βρέθηκαν Συγγραφείς</h3>)}
+        {authors && (authors.length > 0 ? authors.map(author => <AuthorCard key={author?.author_id}
+            data={author} getAuthors={fetchAuthors}/>) : <h3>Δεν βρέθηκαν Συγγραφείς</h3>)}
            
-        
-
         </div>
     </div>
   )

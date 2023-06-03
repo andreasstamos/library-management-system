@@ -7,6 +7,9 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
+import WarningIcon from '@mui/icons-material/Warning';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import PendingIcon from '@mui/icons-material/Pending';
 import { Button } from '@mui/material';
 import axios from 'axios';
 
@@ -74,7 +77,10 @@ function Row({data,fetchBorrows}) {
       <TableCell sx={{color: 'warning.main'}}>Δεν έχει επιστραφεί ακόμα</TableCell>}
       <TableCell >{dayjs(data.expected_return).format('DD/MM/YYYY')}</TableCell>
       <TableCell>
-        {data.returned_on === null && <Button onClick={returnBorrow}>ΕΠΙΣΤΡΟΦΗ</Button>}
+        {data.returned_on ? <CheckCircleIcon color="success" /> : (data.time_valid ? <PendingIcon color="warning" /> : <WarningIcon color="error" />)}
+      </TableCell>
+      <TableCell>
+        {data.returned_on === null && <Button color="secondary" onClick={returnBorrow}>ΕΠΙΣΤΡΟΦΗ</Button>}
         <Button color="error" onClick={deleteBorrow}>ΔΙΑΓΡΑΦΗ</Button>
       </TableCell>
     </TableRow>
@@ -95,13 +101,20 @@ export default function BorrowsTable({data, fetchBorrows}) {
             <TableCell >Ημερομηνία έναρξης δανεισμού</TableCell>
             <TableCell >Ημερομηνία επιστροφής</TableCell>
             <TableCell >Προβλεπόμενη ημερομηνία επιστροφής</TableCell>
+            <TableCell>
+              <Box>Κατάσταση</Box>
+              <Box sx={{display: 'flex', justifyContent: 'flex-start'}}><PendingIcon color="warning" fontSize="small"/>: σε ισχύ</Box>
+              <Box sx={{display: 'flex', justifyContent: 'flex-start'}}><CheckCircleIcon color="success" fontSize="small"/>: έχει επιστραφεί</Box>
+              <Box sx={{display: 'flex', justifyContent: 'flex-start'}}><WarningIcon color="error" fontSize="small"/>: έχει καθυστερήσει η επιστροφή</Box>
+            </TableCell>
+
             <TableCell></TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
 
           {data.map((row) => (
-            <Row data={row} fetchBorrows={fetchBorrows}/>
+            <Row key={row?.borrow_id} data={row} fetchBorrows={fetchBorrows}/>
           ))}
 
         </TableBody>

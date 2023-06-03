@@ -1,8 +1,13 @@
 DROP FUNCTION IF EXISTS items_available;
 DROP FUNCTION IF EXISTS borrow_item;
 DROP FUNCTION IF EXISTS booking_book;
+DROP FUNCTION IF EXISTS quota;
 
-CREATE OR REPLACE FUNCTION items_available(isbn VARCHAR(13), user_id INTEGER) RETURNS integer STABLE AS $$
+CREATE OR REPLACE FUNCTION quota(v_user_id INTEGER) RETURNS integer STABLE STRICT AS $$
+SELECT CASE WHEN (EXISTS (SELECT 1 from student where user_id=v_user_id)) THEN 2 ELSE 1 END;
+$$ LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION items_available(isbn VARCHAR(13), user_id INTEGER) RETURNS integer STABLE STRICT AS $$
 
 SELECT  
  --available items not borrowed
@@ -54,7 +59,7 @@ BEGIN
 	IF NOT v_item_school_constraint THEN RETURN;
 	END IF;
 
-	v_borrow_number_constraint := (SELECT (count(1) <= 2) FROM borrow WHERE borrower_id = v_borrower_id AND lower(period) > NOW() - INTERVAL '7 days');
+	v_borrow_number_constraint := (SELECT (count(1) <= quota(v_user_id)) FROM borrow WHERE borrower_id = v_borrower_id AND lower(period) > NOW() - INTERVAL '7 days');
 
 	IF NOT v_borrow_number_constraint THEN RETURN;
 	END IF;
@@ -78,7 +83,7 @@ CREATE OR REPLACE FUNCTION booking_book(v_isbn VARCHAR(13), v_user_id INTEGER,
 BEGIN
 	INSERT INTO booking (isbn, user_id) VALUES (v_isbn, v_user_id);
 
-	v_booking_number_constraint := (SELECT (COUNT(1) <= 2) FROM booking WHERE user_id = v_user_id AND lower(period) > NOW() - INTERVAL '7 days');
+	v_booking_number_constraint := (SELECT (COUNT(1) <= quota(v_user_id)) FROM booking WHERE user_id = v_user_id AND lower(period) > NOW() - INTERVAL '7 days');
 
 	IF NOT v_booking_number_constraint THEN RETURN;
 	END IF;

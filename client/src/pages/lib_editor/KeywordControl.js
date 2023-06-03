@@ -37,7 +37,8 @@ function KeywordControl() {
 
     <div className='component-details users-control'>
     {loading && <CircularProgress />}
-    {keywords && (keywords.length > 0 ? keywords.map(keyword => <KeywordCard data={keyword} getKeywords={fetchKeywords}/>) : <h3>Δεν βρέθηκαν Λέξεις Κλειδιά.</h3>)}
+    {keywords && (keywords.length > 0 ? keywords.map(keyword => <KeywordCard key={keyword?.keyword_id}
+        data={keyword} getKeywords={fetchKeywords}/>) : <h3>Δεν βρέθηκαν Λέξεις Κλειδιά.</h3>)}
        
     
 

@@ -63,7 +63,7 @@ function LibUsersControl() {
         <div className='library-users-container'>
             {loading && <CircularProgress/>}
             {users && users.map((user) => {
-                return <LibraryUserCard data={user} fetchUsers={fetchLibraryUsers}/>
+                return <LibraryUserCard key={user?.user_id} data={user} fetchUsers={fetchLibraryUsers}/>
             })}
             {!loading && users.length == 0 && <h3>Δεν βρέθηκαν {activeUsers ? "ενεργοί" : "ανενεργοί"} χειριστές βιβλιοθήκης.</h3>}
         </div>

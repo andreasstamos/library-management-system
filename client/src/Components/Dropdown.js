@@ -12,7 +12,7 @@ function Dropdown({schools, schoolSelected, setSchoolSelected}) {
   <option value="" disabled="disabled">Select option:</option>
 
     {schools.map((school) => {
-        return <option value={school?.school_id}>{school?.name}</option>
+        return <option key={school?.school_id} value={school?.school_id}>{school?.name}</option>
     })}
    
   

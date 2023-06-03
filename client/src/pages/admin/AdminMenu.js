@@ -10,6 +10,7 @@ import Typography from '@mui/material/Typography';
 import SchoolIcon from '@mui/icons-material/School';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import QueryStatsIcon from '@mui/icons-material/QueryStats';
+import BackupIcon from '@mui/icons-material/Backup';
 import Cloud from '@mui/icons-material/Cloud';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import CategoryIcon from '@mui/icons-material/Category';
@@ -46,6 +47,14 @@ export default function AdminMenu() {
                 <QueryStatsIcon fontSize="small" />
               </ListItemIcon>
               <ListItemText>Στατιστικά</ListItemText>
+            </MenuItem>
+          </NavLink>
+          <NavLink to='/admin/backup-restore/'>
+            <MenuItem>
+              <ListItemIcon>
+                <QueryStatsIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Δημιουργία αντιγράφου ασφαλείας/Ανάκτηση</ListItemText>
             </MenuItem>
           </NavLink>
           <Divider />
