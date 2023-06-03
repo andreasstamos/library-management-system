@@ -56,7 +56,6 @@ export default function SchoolCard({name, schoolID, address, city, email, fetchS
     })
         console.log(response);
         fetchSchools();
-
     }
 
 
