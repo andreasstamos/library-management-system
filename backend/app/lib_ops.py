@@ -454,14 +454,13 @@ def get_late_borrowers():
 
     try:
         with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
-            # Get all non active reviews from users that are in the same school as the lib editor.
             cur.execute(f"""
                     SELECT user_id, username, first_name || ' ' || last_name AS full_name,
                     MIN(borrow.expected_return), MAX(EXTRACT(DAY FROM AGE(NOW()::date, borrow.expected_return::date))) AS date_difference,
                     COUNT(1) AS cnt
                     FROM "user"
                     INNER JOIN borrow ON borrower_id = user_id
-                    WHERE "user".school_id = (%s) AND EXTRACT(DAY FROM AGE(NOW()::date, borrow.expected_return::date)) >= (%s) 
+                    WHERE "user".school_id = (%s) AND EXTRACT(DAY FROM AGE(NOW()::date, borrow.expected_return::date)) >= (%s)
                     {first_name_where_clause}
                     {last_name_where_clause}
                     GROUP BY "user".user_id

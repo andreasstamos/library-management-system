@@ -82,9 +82,9 @@ def insert_update_book():
             if insert_item:
                 cur.execute("INSERT INTO item (isbn, school_id) VALUES (%s, %s) RETURNING item_id", (data["isbn"], school_id))
                 item_id = cur.fetchone()[0]
-            
+
             g.db_conn.commit()
-            
+
             if insert_item:
                 return {"success": True, "item_id": item_id}, 201
 
@@ -121,6 +121,7 @@ GET_BOOK_JSONSCHEMA = {
         "required": ["fetch_fields"],
         }
 
+# typicaly i think we should prevent students/teachers from searching by item_id
 @bp.route("/get/", methods=["POST"])
 @check_roles()
 def get_book():
@@ -428,4 +429,3 @@ def get_language():
     except psycopg2.Error as err:
         print(err)
         return {"success": False, "error": "unknown"}, 400
-

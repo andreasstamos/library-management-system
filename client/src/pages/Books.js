@@ -6,7 +6,8 @@ import './Books.css';
 import SearchBarBooks from '../Components/SearchBarBooks';
 import { FilterBarCategory, FilterBarPublisher, FilterBarKeyword, FilterBarAuthor } from '../Components/FilterBarBooks';
 import AuthContext from '../context/AuthContext';
-import { Typography, Box, Pagination } from '@mui/material';
+import TextField from '@mui/material/TextField';
+import { Typography, Box, Pagination, Button } from '@mui/material';
 
 function Books() {
 
@@ -16,6 +17,10 @@ function Books() {
     const [page, setPage] = useState(1);
     const [availablePages, setAvailablePages] = useState(10);
 
+    // this is an error which occurs when item id is not found
+    const [searchError, setSearchError] = useState('');
+
+
     const BooksPerPage = 9;
 
     const [searchValue, setSearchValue] = useState(null);
@@ -23,6 +28,7 @@ function Books() {
     const [publishersValue, setPublishersValue] = useState([]);
     const [keywordsValue, setKeywordsValue] = useState([]);
     const [authorsValue, setAuthorsValue] = useState([]);
+    const [itemId, setItemId] = useState(null);
 
     const navigate = useNavigate();
 
@@ -38,7 +44,7 @@ function Books() {
                     ...(keywordsValue?.length) && {keywords: keywordsValue},
                     ...(publishersValue?.length) && {publishers: publishersValue},
                     ...(authorsValue?.length) && {authors: authorsValue},
-                    fetch_fields: ["isbn", "title", "summary", "image_uri", "rate"],
+                    fetch_fields: ["isbn", "title", "summary", "image_uri", "rate", "items_available"],
                     limit: BooksPerPage,
                     offset: page>0 ? (page-1)*BooksPerPage : 0,
                 };
@@ -66,6 +72,29 @@ function Books() {
         fetchBooks();
     }, [searchValue, categoriesValue, publishersValue, keywordsValue, authorsValue, page]);
 
+    // different handling for item_id
+    async function getBookByItemId() {
+        setSearchError('');
+        const payload = {
+            item_id: parseInt(itemId),
+            fetch_fields: ["isbn", "title", "summary", "image_uri", "rate", "items_available"],
+        }
+        try {
+            const response = await axios.post('http://127.0.0.1:5000/book/get/', payload, {headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${auth.authTokens}`,
+            }});
+            if (response?.data?.books.length === 1) navigate(`/book/${response?.data?.books[0]?.isbn}`)
+            if (response?.data?.books.length === 0) setSearchError("Δεν Βρέθηκε.")
+
+        } catch(e) {
+            setSearchError("Κάτι Πήγε Λάθος.")
+
+        }
+        
+        
+    }
+
     useEffect(() => {
         if (searchValue?.isbn) navigate(`/book/${searchValue?.isbn}`);
     }, [searchValue]);
@@ -74,10 +103,27 @@ function Books() {
         <Box sx={{display: 'flex', flexDirection: 'column', rowGap: '1.5rem'}}>
             <Typography variant="h3" component="h1" className='title-with-hr'>Βιβλία</Typography>
             <Box sx={{display: 'flex', columnGap: '1rem'}}>
-                <FilterBarAuthor value={authorsValue} handleChangeValue={(value) => {setAuthorsValue(value);}} />
-                <FilterBarPublisher value={publishersValue} handleChangeValue={(value) => {setPublishersValue(value);}} />
-                <FilterBarCategory value={categoriesValue} handleChangeValue={(value) => {setCategoriesValue(value);}} />
-                <FilterBarKeyword value={keywordsValue} handleChangeValue={(value) => {setKeywordsValue(value);}} />
+                <FilterBarAuthor    value={authorsValue}        handleChangeValue={(value) => {setAuthorsValue(value);}}    />
+                <FilterBarPublisher value={publishersValue}     handleChangeValue={(value) => {setPublishersValue(value);}} />
+                <FilterBarCategory  value={categoriesValue}     handleChangeValue={(value) => {setCategoriesValue(value);}} />
+                <FilterBarKeyword   value={keywordsValue}       handleChangeValue={(value) => {setKeywordsValue(value);}}   />
+                {auth.user.sub.role === 'lib_editor' &&   
+                <Box sx={{display: 'flex', alignItems:'flex-end'}}>
+                    <TextField
+                    id="standard-search"
+                    label="Αντίτυπο"
+                    type="search"
+                    variant="standard"
+                    value={itemId}
+                    onChange={(e) => setItemId(e.target.value)}
+                    helperText={searchError}
+                    error={searchError != ''}
+                    />
+                    <Button variant="text" sx={{padding:'0'}} onClick={getBookByItemId}>Αναζητηση Item</Button>
+                    </Box>      
+                   
+                          }
+                
                 <Box sx={{ml: 'auto'}}>
                     <SearchBarBooks value={searchValue} handleChangeValue={(value) => {setSearchValue(value)}} />
                 </Box>

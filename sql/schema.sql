@@ -173,4 +173,3 @@ CREATE TABLE booking (
 
 CREATE INDEX index_booking_isbn ON booking (isbn);
 CREATE INDEX index_booking_user_id ON booking (user_id);
-

@@ -11,6 +11,7 @@ function AllSchools() {
 
 
     async function fetchSchools() {
+        setSchools(null);
         const payload = {
             fetch_fields: ['school_id', 'name', 'address', 'city', 'phone','email']
         }
