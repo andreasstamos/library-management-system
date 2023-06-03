@@ -13,7 +13,7 @@ function AllSchools() {
     async function fetchSchools() {
         setSchools(null);
         const payload = {
-            fetch_fields: ['school_id', 'name', 'address', 'city', 'phone','email']
+            fetch_fields: ['school_id', 'name', 'address', 'city', 'phone','email', 'headmaster']
         }
         const response = await axios.post('http://localhost:5000/school/get-schools/', payload, {
             headers: {
@@ -47,6 +47,7 @@ function AllSchools() {
                         address={school?.address} 
                         city={school?.city} 
                         email={school?.email}
+                        headmaster={school?.headmaster}
                         fetchSchools={fetchSchools}
                     />
                 })}

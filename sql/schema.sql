@@ -84,7 +84,8 @@ CREATE TABLE school (
 	address VARCHAR(100) NOT NULL,
 	city VARCHAR(50) NOT NULL,
 	phone VARCHAR(15) NOT NULL CHECK (phone ~ '^\+?[0-9]+'),
-	email VARCHAR(256) NOT NULL UNIQUE CHECK (email ~ '^[a-zA-Z0-9-]+@[a-zA-Z0-9-]+\.[a-z]{2,}$')
+	email VARCHAR(256) NOT NULL UNIQUE CHECK (email ~ '^[a-zA-Z0-9-]+@[a-zA-Z0-9-]+\.[a-z]{2,}$'),
+	headmaster VARCHAR(100) NOT NULL
 );
 
 CREATE TABLE "user" (
@@ -165,7 +166,7 @@ CREATE INDEX index_borrow_borrower_id ON borrow (borrower_id);
 
 CREATE TABLE booking (
  	booking_id SERIAL PRIMARY KEY,
-	borrow_id INTEGER REFERENCES borrow ON DELETE CASCADE UNIQUE NULLS DISTINCT,
+	borrow_id INTEGER REFERENCES borrow ON DELETE CASCADE UNIQUE,
  	isbn VARCHAR(13) NOT NULL REFERENCES book ON UPDATE CASCADE ON DELETE CASCADE,
  	user_id INTEGER NOT NULL REFERENCES "user" ON DELETE CASCADE,
  	period TSTZRANGE NOT NULL DEFAULT (TSTZRANGE(NOW(), NOW() + INTERVAL '1 week')) CHECK (NOT ISEMPTY(period)),

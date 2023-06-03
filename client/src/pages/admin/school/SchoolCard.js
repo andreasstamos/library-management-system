@@ -5,11 +5,12 @@ import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import { Input } from '@mui/material';
+import { Input, InputLabel, FormControl, } from '@mui/material';
 import './SchoolCard.css'
 import axios from 'axios';
+import { Form } from 'react-router-dom';
 
-export default function SchoolCard({name, schoolID, address, city, email, fetchSchools}) {
+export default function SchoolCard({name, schoolID, address, city, email, fetchSchools, headmaster}) {
 
     const [edit, setEdit] = React.useState(false);
 
@@ -17,6 +18,7 @@ export default function SchoolCard({name, schoolID, address, city, email, fetchS
     const [newAddress, setNewAddress] = React.useState(address);
     const [newCity, setNewCity] = React.useState(city);
     const [newEmail, setNewEmail] = React.useState(email);
+    const [newHeadmaster, setNewHeadmaster] = React.useState(headmaster);
 
     async function updateSchool() {
         const payload = {
@@ -26,6 +28,7 @@ export default function SchoolCard({name, schoolID, address, city, email, fetchS
                 address: newAddress,
                 city: newCity,
                 email: newEmail,
+                headmaster: newHeadmaster,
             }
         }
         
@@ -63,14 +66,42 @@ export default function SchoolCard({name, schoolID, address, city, email, fetchS
     <Card sx={{ minWidth: 275 }}>
       <CardContent>
         <form onSubmit={(e) => e.preventDefault()} style={{display:'flex',flexDirection:'column'}} id='change-school-form'>
-            <Input placeholder={name} value={edit ? newName : name} readOnly={!edit} onChange={(e) => {setNewName(e.target.value)}}>
+            <FormControl>
+            <InputLabel htmlFor="school-name">Όνομα σχολείου</InputLabel>
+            <Input placeholder={name} value={edit ? newName : name} readOnly={!edit} onChange={(e) => {setNewName(e.target.value)}} id='school-name'>
             </Input>
-            <Input placeholder={city} value={edit ? newCity : city} readOnly={!edit}  onChange={(e) => {setNewCity(e.target.value)}}>
+            </FormControl>
+            <FormControl>
+            <InputLabel htmlFor="school-city">Πόλη</InputLabel>
+
+            <Input placeholder={city} value={edit ? newCity : city} readOnly={!edit}  onChange={(e) => {setNewCity(e.target.value)}} id='school-city'>
             </Input>
-            <Input placeholder={address} value={edit ? newAddress : address} readOnly={!edit}  onChange={(e) => {setNewAddress(e.target.value)}}>
-            </Input>        
-            <Input placeholder={email} value={edit ? newEmail : email} readOnly={!edit} onChange={(e) => {setNewEmail(e.target.value)}}>
+            </FormControl>
+
+
+            <FormControl>
+            <InputLabel htmlFor="school-address">Διεύθυνση</InputLabel>
+
+            <Input placeholder={address} value={edit ? newAddress : address} readOnly={!edit}  onChange={(e) => {setNewAddress(e.target.value)}} id='school-address'>
+            </Input>    
+            </FormControl>
+
+
+            <FormControl>
+            <InputLabel htmlFor="school-email">Email</InputLabel>
+
+            <Input placeholder={email} value={edit ? newEmail : email} readOnly={!edit} onChange={(e) => {setNewEmail(e.target.value)}} id='school-email'>
             </Input>
+            </FormControl>
+    
+
+            <FormControl>
+            <InputLabel htmlFor="school-headmaster">Διευθυντής</InputLabel>
+            <Input placeholder={headmaster} value={edit ? newHeadmaster : headmaster} readOnly={!edit} onChange={(e) => {setNewHeadmaster(e.target.value)}}>
+            </Input>
+            </FormControl>
+
+
         </form>
       </CardContent>
       <CardActions>

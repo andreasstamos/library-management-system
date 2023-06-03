@@ -13,9 +13,10 @@ INSERT_SCHOOL_JSONSCHEMA = {
             "city": {"type": "string", "maxLength": 50},
             "phone": {"type": "string", "pattern": "^\+[0-9]+", "maxLength": 15},
             "email": {"type": "string", "pattern": "^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-z]{2,}$", "maxLength": 256},
+            "headmaster": {"type": "string", "maxLength": 100, 'minLength': 3},
             },
         "additionalProperties": False,
-        "required": ["name", "address", "city", "phone", "email"]
+        "required": ["name", "address", "city", "phone", "email", 'headmaster']
         }
 
 @bp.route('/insert-school/', methods=["POST"])
@@ -29,9 +30,9 @@ def insert_school():
 
     try:
         with g.db_conn.cursor() as cur:
-            cur.execute("INSERT INTO school (name, address, city, phone, email)\
-                    VALUES (%s, %s, %s, %s, %s) RETURNING school_id",\
-                    (data["name"], data["address"], data["city"], data["phone"], data["email"]))
+            cur.execute("INSERT INTO school (name, address, city, phone, email, headmaster)\
+                    VALUES (%s, %s, %s, %s, %s, %s) RETURNING school_id",\
+                    (data["name"], data["address"], data["city"], data["phone"], data["email"].lower(), data['headmaster'].title()))
             g.db_conn.commit()
             school_id = cur.fetchall()[0]
             return {"success": True, "school_id": school_id}, 201
@@ -47,7 +48,7 @@ GET_SCHOOLS_JSON = {
     'type': 'object',
     "properties": {
         "fetch_fields": {"type": "array", "minItems": 1, "items": {"type": "string", "enum":\
-                    ["name", "city", "address", "phone", 'school_id', 'email']}}
+                    ["name", "city", "address", "phone", 'school_id', 'email', 'headmaster']}}
     },
         "required": ["fetch_fields"],
         "additionalProperties": False,
@@ -90,6 +91,7 @@ UPDATE_SCHOOL_JSONSCHEMA = {
                 "city": {"type": "string", "maxLength": 50},
                 "phone": {"type": "string", "pattern": "^\+[0-9]+", "maxLength": 15},
                 "email": {"type": "string", "pattern": "^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-z]{2,}$", "maxLength": 256},
+                "headmaster": {"type": "string", "maxLength": 100},
                 }
             },
         "required": ["school_id", 'new_school'],

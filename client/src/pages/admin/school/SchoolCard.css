@@ -1,3 +1,13 @@
 #change-school-form input:read-only::placeholder{
     color: #000!important;
 }
+#change-school-form .MuiFormControl-root {
+    margin-block:0.25rem;
+}
+
+#change-school-form .MuiFormLabel-root {
+    -webkit-transform: translate(0, -2px) scale(0.75);
+    -moz-transform: translate(0, -2px) scale(0.75);
+    -ms-transform: translate(0, -2px) scale(0.75);
+    transform: translate(0, -2px) scale(0.75);
+}

@@ -212,7 +212,6 @@ def get_book():
         with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
             cur.execute(query, data)
             results = cur.fetchall()
-            print(results)
             return {"success": True, "books": results}, 200
     except psycopg2.Error as err:
         print(err.pgerror)

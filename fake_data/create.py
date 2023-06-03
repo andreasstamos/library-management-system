@@ -100,7 +100,8 @@ def fake_schools(f):
         city = fake.city()
         phone = fake.unique.msisdn()
         email = fake.unique.company_email()
-        return f"INSERT INTO school (name, address, city, phone, email) VALUES ('{name}', '{address}', '{city}', '{phone}', '{email}');\n"
+        headmaster = fake.name()
+        return f"INSERT INTO school (name, address, city, phone, email, headmaster) VALUES ('{name}', '{address}', '{city}', '{phone}', '{email}', '{headmaster}');\n"
     
     schools = (build_school() for _ in range(N_SCHOOLS))
 

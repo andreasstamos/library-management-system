@@ -12,6 +12,8 @@ function AddSchool() {
     const [schoolEmail, setSchoolEmail] = useState('');
     const [schoolCity, setSchoolCity] = useState('');
     const [schoolPhone, setSchoolPhone] = useState('');
+    const [schoolHeadmaster, setSchoolHeadmaster] = useState('');
+
     const [succ, setSucc] = useState(null);
     const [err, setErr] = useState(null);
 
@@ -20,13 +22,13 @@ function AddSchool() {
         setSucc(null);
         setErr(null);
         e.preventDefault();
-        console.log(schoolName);
         const payload = {
             name: schoolName,
             address: schoolAddress,
             email: schoolEmail,
             city: schoolCity,
             phone: schoolPhone,
+            headmaster: schoolHeadmaster,
         }
         try{
             const response = await axios.post('http://localhost:5000/school/insert-school/', payload, {
@@ -74,6 +76,12 @@ function AddSchool() {
                 <label for='school-phone'>Τηλέφωνο</label>
                 <input value={schoolPhone} onChange={(e) => {setSchoolPhone(e.target.value)}} required type='text' name='school-phone' />
             </div>
+
+            <div className='form-input'>
+                <label for='school-headmaster'>Διευθυντής</label>
+                <input value={schoolHeadmaster} onChange={(e) => {setSchoolHeadmaster(e.target.value)}} required type='text' name='school-headmaster' />
+            </div>
+
             {err && <Alert severity="error">{err}</Alert>}
             {succ && <Alert severity="success">{succ}</Alert>}
 
