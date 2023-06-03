@@ -33,7 +33,7 @@ CREATE TABLE book (
 	page_number SMALLINT NOT NULL CHECK (page_number > 0),
 	summary VARCHAR(10000) NOT NULL,
 	language VARCHAR(30) NOT NULL ,
-	publisher_id INTEGER NOT NULL REFERENCES publisher,
+	publisher_id INTEGER NOT NULL REFERENCES publisher ON DELETE CASCADE,
 	image_uri VARCHAR(1000) NOT NULL
 );
 
@@ -49,8 +49,8 @@ CREATE TABLE author (
 CREATE INDEX index_author ON author USING GIST (author_name gist_trgm_ops);
 
 CREATE TABLE book_author (
-	isbn VARCHAR(13) NOT NULL REFERENCES book ON UPDATE CASCADE,
-	author_id INTEGER NOT NULL REFERENCES author,
+	isbn VARCHAR(13) NOT NULL REFERENCES book ON UPDATE CASCADE ON DELETE CASCADE,
+	author_id INTEGER NOT NULL REFERENCES author ON DELETE CASCADE,
 	UNIQUE(isbn, author_id) --builts index
 );
 
@@ -62,8 +62,8 @@ CREATE TABLE category (
 CREATE INDEX index_category ON category USING GIST (category_name gist_trgm_ops);
 
 CREATE TABLE book_category (
-	isbn VARCHAR(13) NOT NULL REFERENCES book,
-	category_id INTEGER NOT NULL REFERENCES category,
+	isbn VARCHAR(13) NOT NULL REFERENCES book ON UPDATE CASCADE ON DELETE CASCADE,
+	category_id INTEGER NOT NULL REFERENCES category ON DELETE CASCADE,
 	UNIQUE(isbn, category_id)
 );
 
@@ -73,8 +73,8 @@ CREATE TABLE keyword (
 );
 
 CREATE TABLE book_keyword (
-	isbn VARCHAR(13) NOT NULL REFERENCES book,
-	keyword_id INTEGER NOT NULL REFERENCES keyword,
+	isbn VARCHAR(13) NOT NULL REFERENCES book ON UPDATE CASCADE ON DELETE CASCADE,
+	keyword_id INTEGER NOT NULL REFERENCES keyword ON DELETE CASCADE,
 	UNIQUE(isbn, keyword_id)
 );
 
@@ -99,6 +99,7 @@ CREATE TABLE "user" (
 	active BOOLEAN NOT NULL DEFAULT FALSE
 );
 
+CREATE INDEX index_user_email ON "user" (email);
 CREATE INDEX index_user_username ON "user" (username);
 CREATE INDEX index_user_active ON "user" (active);
 CREATE INDEX index_user_school_id ON "user" (school_id);
@@ -111,19 +112,19 @@ CREATE TABLE "admin" (
 CREATE INDEX index_admin ON "admin" (user_id);
 
 CREATE TABLE lib_user (
-	user_id INT NOT NULL UNIQUE REFERENCES "user" ON DELETE CASCADE
+	user_id INTEGER NOT NULL UNIQUE REFERENCES "user" ON DELETE CASCADE
 );
 
 CREATE INDEX index_lib_user ON lib_user (user_id);
 
 CREATE TABLE student (
-	user_id INT NOT NULL UNIQUE REFERENCES "user" ON DELETE CASCADE
+	user_id INTEGER NOT NULL UNIQUE REFERENCES "user" ON DELETE CASCADE
 );
 
 CREATE INDEX index_student ON student (user_id);
 
 CREATE TABLE teacher (
-	user_id INT NOT NULL UNIQUE REFERENCES "user" ON DELETE CASCADE
+	user_id INTEGER NOT NULL UNIQUE REFERENCES "user" ON DELETE CASCADE
 );
 
 CREATE INDEX index_teacher ON teacher (user_id);
@@ -138,8 +139,8 @@ CREATE INDEX index_item ON item (isbn, school_id);
 
 CREATE TABLE review (
 	review_id SERIAL PRIMARY KEY,
-	isbn VARCHAR(13) NOT NULL REFERENCES "book" ON DELETE CASCADE,
-	user_id INT NOT NULL REFERENCES "user" ON DELETE CASCADE,
+	isbn VARCHAR(13) NOT NULL REFERENCES "book" ON UPDATE CASCADE ON DELETE CASCADE,
+	user_id INTEGER NOT NULL REFERENCES "user" ON DELETE CASCADE,
 	rate SMALLINT NOT NULL CHECK (rate >= 1 AND rate <= 5),
 	body VARCHAR(500) NOT NULL,
 	active BOOLEAN NOT NULL DEFAULT FALSE,
@@ -148,7 +149,6 @@ CREATE TABLE review (
 );
 
 CREATE INDEX index_review ON review (isbn, active);
-
 
 CREATE TABLE borrow (
 	borrow_id SERIAL PRIMARY KEY,
@@ -166,8 +166,8 @@ CREATE INDEX index_borrow_borrower_id ON borrow (borrower_id);
 CREATE TABLE booking (
  	booking_id SERIAL PRIMARY KEY,
 	borrow_id INTEGER REFERENCES borrow ON DELETE CASCADE UNIQUE NULLS DISTINCT,
- 	isbn VARCHAR(13) NOT NULL REFERENCES book,
- 	user_id INTEGER NOT NULL REFERENCES "user",
+ 	isbn VARCHAR(13) NOT NULL REFERENCES book ON UPDATE CASCADE ON DELETE CASCADE,
+ 	user_id INTEGER NOT NULL REFERENCES "user" ON DELETE CASCADE,
  	period TSTZRANGE NOT NULL DEFAULT (TSTZRANGE(NOW(), NOW() + INTERVAL '1 week')) CHECK (NOT ISEMPTY(period)),
 	EXCLUDE USING GIST (user_id WITH =, isbn WITH =, period WITH &&)
 );
