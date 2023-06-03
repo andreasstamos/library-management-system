@@ -235,30 +235,55 @@ def delete_user():
 #         return {"success": False, "error": "unknown"}, 400
 
 
+GET_BORROWS_JSONSCHEMA = {
+        "type": "object",
+        "properties": {
+            "first_name": {"type": "string"},
+            "last_name": {"type": "string"},
+            },
+        "additionalProperties": False,
+        "required": []
+        }
 
 @bp.route('/get-borrows/', methods=['POST'])
 @check_roles(['lib_editor'])
 def get_borrows():
+    data = request.get_json()
+    try:
+        jsonschema.validate(data, GET_BORROWS_JSONSCHEMA)
+    except jsonschema.ValidationError as err:
+        return {"success": False, "error": err.message}, 400
+
     user = get_jwt_identity()
     try:
         with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
+            where_clause = []
+            if 'first_name' in data:
+                where_clause.append("borrower.first_name %% %(first_name)s")
+            if 'last_name' in data:
+                where_clause.append("borrower.last_name %% %(last_name)s")
+            where_clause = ' AND '.join(where_clause)
+            if where_clause: where_clause = f"WHERE {where_clause}"
+
             # Get all bookings from specific school
-            cur.execute("""
+            cur.execute(f"""
                 SELECT borrow.borrow_id, borrow.item_id,
                 lender_id, lender.username AS lender_username, lender.first_name AS lender_first_name, lender.last_name AS lender_last_name,
                 borrower_id, borrower.username AS borrower_username, borrower.first_name as borrower_first_name, borrower.last_name AS borrower_last_name,
                 LOWER(borrow.period) AS borrowed_on, UPPER(borrow.period) as returned_on, expected_return, book.title, book.isbn,
                 NOW()::date <= expected_return as time_valid
                 FROM borrow
-                INNER JOIN "user" AS lender ON borrow.lender_id = lender.user_id AND lender.school_id = (%s)
-                INNER JOIN "user" AS borrower ON borrow.borrower_id = borrower.user_id AND borrower.school_id = (%s)
+                INNER JOIN "user" AS lender ON borrow.lender_id = lender.user_id AND lender.school_id = %(school_id)s
+                INNER JOIN "user" AS borrower ON borrow.borrower_id = borrower.user_id AND borrower.school_id = %(school_id)s
                 INNER JOIN item ON item.item_id = borrow.item_id
                 INNER JOIN book ON item.isbn = book.isbn
-            """, [user['school_id'], user['school_id']])
+                {where_clause}
+            """, {'school_id': user['school_id'], **data})
             borrows = cur.fetchall()
             return {"success": True, "borrows": borrows}, 200
     except psycopg2.Error as err:
-        print(err.pgerror)
+        raise err
+        print(err)
         return {"success": False, "error": "unknown"}
 
 @bp.route('/get-reviews/', methods=['POST'])

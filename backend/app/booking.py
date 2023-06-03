@@ -10,32 +10,47 @@ from .roles_decorators import check_roles
 
 bp = Blueprint("booking", __name__)
 
-GET_BOOKINGS_JSON = {
+GET_BOOKINGS_JSONSCHEMA = {
         "type": "object",
         "properties": {
-            "isbn": {"type": "string", "pattern": "^[0-9]{13}$"},
+            "first_name": {"type": "string"},
+            "last_name": {"type": "string"},
             },
         "additionalProperties": False,
-        "required": ["isbn"] 
+        "required": [] 
         }
 
 @bp.route("/get-bookings/", methods=['POST'])
 @check_roles(['lib_editor'])
 def get_bookings():
+    data = request.get_json()
+    try:
+        jsonschema.validate(data, GET_BOOKINGS_JSONSCHEMA)
+    except jsonschema.ValidationError as err:
+        return {"success": False, "error": err.message}, 400
+
     user = get_jwt_identity()
     
     try:
         with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
-            # Get all non active reviews from users that are in the same school as the lib editor.
-            cur.execute("""
+            where_clause = []
+            if 'first_name' in data:
+                where_clause.append("first_name %% %(first_name)s")
+            if 'last_name' in data:
+                where_clause.append("last_name %% %(last_name)s")
+            where_clause = ' AND '.join(where_clause)
+            if where_clause: where_clause = f"WHERE {where_clause}"
+
+            cur.execute(f"""
                 SELECT booking_id, booking.isbn, book.title, "user".user_id, first_name, last_name, username,
                 LOWER(period) AS booked_on,
                 (borrow_id IS NOT NULL) AS lent,
                 (NOW() <@ period) AS time_valid
                 FROM booking
-                INNER JOIN "user" ON booking.user_id = "user".user_id AND "user".school_id = (%s)
+                INNER JOIN "user" ON booking.user_id = "user".user_id AND "user".school_id = %(school_id)s
                 INNER JOIN "book" ON booking.isbn = book.isbn
-            """, [user['school_id']])
+                {where_clause}
+            """, {'school_id': user['school_id'], **data})
             bookings = cur.fetchall()
             return {"success": True, "bookings": bookings}, 200
     except psycopg2.Error as err:
