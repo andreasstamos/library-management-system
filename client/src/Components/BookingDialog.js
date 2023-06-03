@@ -13,7 +13,8 @@ function BookingDialog({open, isbn, onClose}) {
   const [userid, setUserid] = useState('');
   const [bookingExists, setBookingExists] = useState(null);
   const [bookingExceededMax, setBookingExceededMax] = useState(null);
- 
+  const [bookingLateBorrows, setBookingLateBorrows] = useState(null);
+
   const auth = useContext(AuthContext);
 
   const handleBooking = async () => {
@@ -45,6 +46,7 @@ function BookingDialog({open, isbn, onClose}) {
   const fetchUser = async () => {
     setBookingExists(null);
     setBookingExceededMax(null); 
+    setBookingLateBorrows(null); 
     setUser(null);
     if (!userid) return;
     try {
@@ -89,6 +91,7 @@ function BookingDialog({open, isbn, onClose}) {
       }
       setBookingExists(response?.data?.exists_booking);
       setBookingExceededMax(response?.data?.exceeded_max);
+      setBookingLateBorrows(response?.data?.late_borrows);
     } catch(e) {
       setError("Κάτι πήγε λάθος. Παρακολούμε προσπαθήστε ξανά.");
     }
@@ -104,7 +107,7 @@ function BookingDialog({open, isbn, onClose}) {
   }, [userid]);
 
   useEffect(() => {if (!isbn) return; fetchBooking();}, [forMe, isbn, user]);
-  useEffect(() => {setBookingExists(null);setBookingExceededMax(null);}, [forMe]);
+  useEffect(() => {setBookingExists(null);setBookingExceededMax(null);setBookingLateBorrows(null);}, [forMe]);
  
 
   return (
@@ -118,6 +121,10 @@ function BookingDialog({open, isbn, onClose}) {
         {bookingExists === true && <Alert severity="error"> {forMe === "me" ? 'Έχετε' : 'Ο χρήστης έχει'} ήδη κράτηση για το βιβλίο.</Alert>}
         {bookingExists === false && bookingExceededMax === true &&
           <Alert severity="error"> {forMe === "me" ? 'Έχετε' : 'Ο χρήστης έχει'} εκτελέσει ήδη το μέγιστο αριθμό επιτρεπτών κρατήσεων.</Alert>}
+        {bookingExists === false && bookingExceededMax === false && bookingLateBorrows === true &&
+          <Alert severity="error">
+            {forMe === "me" ? 'Έχετε καθυστερήσει να επιστρέψετε' : 'Ο χρήστης έχει καθυστερήσει να επιστρέψει'} ένα δανεισμένο αντίτυπο, οπότε δεν επιτρέπεται η κράτηση.
+          </Alert>}
         
         {forMe === "other" &&
         <>
@@ -134,7 +141,8 @@ function BookingDialog({open, isbn, onClose}) {
       </DialogContent>
       <DialogActions sx={{display: 'flex', justifyContent: 'space-around'}}>
         <Button color="secondary" onClick={onClose}>ΑΚΥΡΟ</Button>
-        {(forMe === "me" || user) && bookingExists === false && bookingExceededMax === false && <Button onClick={handleBooking}>ΚΡΑΤΗΣΗ</Button>}
+        {(forMe === "me" || user) && bookingExists === false && bookingExceededMax === false && bookingLateBorrows === false &&
+        <Button onClick={handleBooking}>ΚΡΑΤΗΣΗ</Button>}
       </DialogActions>
     </Dialog>
   );

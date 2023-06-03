@@ -79,13 +79,17 @@ END
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION booking_book(v_isbn VARCHAR(13), v_user_id INTEGER,
-	OUT v_booking_number_constraint BOOLEAN) AS $$
+	OUT v_booking_number_constraint BOOLEAN, OUT v_borrow_late_constraint BOOLEAN) AS $$
 BEGIN
 	INSERT INTO booking (isbn, user_id) VALUES (v_isbn, v_user_id);
 
 	v_booking_number_constraint := (SELECT (COUNT(1) <= quota(v_user_id)) FROM booking WHERE user_id = v_user_id AND lower(period) > NOW() - INTERVAL '7 days');
 
 	IF NOT v_booking_number_constraint THEN RETURN;
+	END IF;
+
+	v_borrow_late_constraint := (SELECT NOT EXISTS(SELECT 1 FROM borrow WHERE borrower_id = v_user_id AND NOW() <@ period AND NOW()::date > expected_return));
+	IF NOT v_borrow_late_constraint THEN RETURN;
 	END IF;
 END
 $$ LANGUAGE plpgsql;

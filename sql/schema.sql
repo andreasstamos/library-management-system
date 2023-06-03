@@ -17,12 +17,13 @@ DROP TABLE IF EXISTS "admin";
 DROP TABLE IF EXISTS "user";
 DROP TABLE IF EXISTS school;
 
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+CREATE EXTENSION IF NOT EXISTS btree_gist;
+
 CREATE TABLE publisher (
 	publisher_id SERIAL PRIMARY KEY,
 	publisher_name VARCHAR(50) NOT NULL UNIQUE
 );
-
-CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 CREATE INDEX index_publisher ON publisher USING GIST (publisher_name gist_trgm_ops);
 
@@ -101,6 +102,7 @@ CREATE TABLE "user" (
 CREATE INDEX index_user_username ON "user" (username);
 CREATE INDEX index_user_active ON "user" (active);
 CREATE INDEX index_user_school_id ON "user" (school_id);
+CREATE INDEX index_user_fullname ON "user" USING GIST (first_name gist_trgm_ops, last_name gist_trgm_ops);
 
 CREATE TABLE "admin" (
 	user_id INT NOT NULL UNIQUE REFERENCES "user" ON DELETE CASCADE
@@ -147,7 +149,6 @@ CREATE TABLE review (
 
 CREATE INDEX index_review ON review (isbn, active);
 
-CREATE EXTENSION IF NOT EXISTS btree_gist;
 
 CREATE TABLE borrow (
 	borrow_id SERIAL PRIMARY KEY,
@@ -164,7 +165,7 @@ CREATE INDEX index_borrow_borrower_id ON borrow (borrower_id);
 
 CREATE TABLE booking (
  	booking_id SERIAL PRIMARY KEY,
-	borrow_id INTEGER REFERENCES borrow ON DELETE CASCADE,
+	borrow_id INTEGER REFERENCES borrow ON DELETE CASCADE UNIQUE NULLS DISTINCT,
  	isbn VARCHAR(13) NOT NULL REFERENCES book,
  	user_id INTEGER NOT NULL REFERENCES "user",
  	period TSTZRANGE NOT NULL DEFAULT (TSTZRANGE(NOW(), NOW() + INTERVAL '1 week')) CHECK (NOT ISEMPTY(period)),

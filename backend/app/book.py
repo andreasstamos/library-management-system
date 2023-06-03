@@ -55,41 +55,46 @@ def insert_update_book():
         insert_item = True
     
     try:
-        with g.db_conn.cursor() as cur:           
-            cur.execute("INSERT INTO publisher (publisher_name) VALUES (%s) ON CONFLICT DO NOTHING",\
-                    (data["publisher"],))
-             
-            cur.execute("INSERT INTO book (isbn, title, page_number, summary, language, image_uri, publisher_id)\
-                    SELECT %s, %s, %s, %s, %s, %s, publisher_id\
-                    FROM publisher\
-                    WHERE publisher_name = %s\
-                    ON CONFLICT (isbn) DO UPDATE SET\
-                        title = EXCLUDED.title,\
-                        page_number = EXCLUDED.page_number,\
-                        summary = EXCLUDED.summary,\
-                        language = EXCLUDED.language,\
-                        publisher_id = EXCLUDED.publisher_id,\
-                        image_uri = EXCLUDED.image_uri",
-                    (data["isbn"], data["title"], data["page_number"], data["summary"], data["language"], data["publisher"], data["image_uri"]))
+        for _ in range(3): #attempt 3 times if serialization failure
+            try:
+                with g.db_conn.cursor() as cur:
+                    cur.execute("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE") #ensuring that the whole book will be updated as given.
+                    cur.execute("INSERT INTO publisher (publisher_name) VALUES (%s) ON CONFLICT DO NOTHING",\
+                            (data["publisher"],))
+                     
+                    cur.execute("INSERT INTO book (isbn, title, page_number, summary, language, image_uri, publisher_id)\
+                            SELECT %(isbn)s, %(title)s, %(page_number)s, %(summary)s, %(language)s, %(image_uri)s,\
+                            (SELECT publisher_id FROM publisher WHERE publisher_name = %(publisher_name)s)\
+                            ON CONFLICT (isbn) DO UPDATE SET\
+                            title = EXCLUDED.title,\
+                            page_number = EXCLUDED.page_number,\
+                            summary = EXCLUDED.summary,\
+                            language = EXCLUDED.language,\
+                            publisher_id = EXCLUDED.publisher_id,\
+                            image_uri = EXCLUDED.image_uri",
+                            {'isbn': data["isbn"], 'title': data["title"], 'page_number': data["page_number"], 'summary': data["summary"],\
+                                    'language': data["language"], 'publisher_name': data["publisher"], 'image_uri': data["image_uri"]})
 
-            if "new_isbn" in data.keys():
-                cur.execute("UPDATE book SET isbn = %s WHERE isbn = %s", (data["new_isbn"], data["isbn"]))
+                    if "new_isbn" in data.keys():
+                        cur.execute("UPDATE book SET isbn = %s WHERE isbn = %s", (data["new_isbn"], data["isbn"]))
 
-            insert_multiple_entity_relationship_book(cur, "author", "VARCHAR(100)", data["authors"], data["isbn"])
-            insert_multiple_entity_relationship_book(cur, "category", "VARCHAR(100)", data["categories"], data["isbn"])
-            insert_multiple_entity_relationship_book(cur, "keyword", "VARCHAR(100)", data["keywords"], data["isbn"])
+                    insert_multiple_entity_relationship_book(cur, "author", "VARCHAR(100)", data["authors"], data["isbn"])
+                    insert_multiple_entity_relationship_book(cur, "category", "VARCHAR(20)", data["categories"], data["isbn"])
+                    insert_multiple_entity_relationship_book(cur, "keyword", "VARCHAR(20)", data["keywords"], data["isbn"])
 
-            if insert_item:
-                cur.execute("INSERT INTO item (isbn, school_id) VALUES (%s, %s) RETURNING item_id", (data["isbn"], school_id))
-                item_id = cur.fetchone()[0]
+                    if insert_item:
+                        cur.execute("INSERT INTO item (isbn, school_id) VALUES (%s, %s) RETURNING item_id", (data["isbn"], school_id))
+                        item_id = cur.fetchone()[0]
 
-            g.db_conn.commit()
+                    g.db_conn.commit()
 
-            if insert_item:
-                return {"success": True, "item_id": item_id}, 201
+                    if insert_item:
+                        return {"success": True, "item_id": item_id}, 201
 
-            return {"success": True}, 201
- 
+                    return {"success": True}, 201
+            except psycopg2.errors.SerializationFailure as err:
+                g.db_conn.rollback()
+                #will try again totally 3 times
     except psycopg2.Error as err:
         g.db_conn.rollback()
         print(err)
@@ -207,7 +212,6 @@ def get_book():
             {'ORDER BY (title <-> %(title)s)' if 'title' in data.keys() else ''}\
             {'OFFSET %(offset)s' if 'offset' in data.keys() else ''}\
             {'LIMIT %(limit)s' if 'limit' in data.keys() else ''}"""
-    print(query)
     try:
         with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
             cur.execute(query, data)

@@ -15,6 +15,7 @@ function Book() {
     const [book, setBook] = useState(null);
     const [bookingExists, setBookingExists] = useState(null);
     const [bookingExceededMax, setBookingExceededMax] = useState(null);
+    const [bookingLateBorrows, setBookingLateBorrows] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [openBookingDialog, setOpenBookingDialog] = useState(false);
@@ -59,6 +60,7 @@ function Book() {
             setBook(response_book.data.books[0]);
             setBookingExists(response_booking?.data?.exists_booking);
             setBookingExceededMax(response_booking?.data?.exceeded_max);
+            setBookingLateBorrows(response_booking?.data?.late_borrows);
         } catch (e) {
             setLoading(false);
             setError("Κάτι πήγε λάθος. Παρακαλούμε δοκιμάστε ξανά.");
@@ -169,7 +171,7 @@ function Book() {
                         </div>
 
                         {!isLibEditor && <>
-                            {bookingExists === false && bookingExceededMax === false &&
+                            {bookingExists === false && bookingExceededMax === false && bookingLateBorrows === false &&
                             <Button variant="contained" sx={{mr: 'auto'}} onClick={handleBooking}>ΚΡΑΤΗΣΗ</Button>}
                             {bookingExists === true && <Alert severity="info" sx={{mr: 'auto'}}>
                                 Έχετε ήδη ενεργή κράτηση για το συγκεκριμένο βιβλίο.
@@ -177,6 +179,10 @@ function Book() {
                             {bookingExists === false && bookingExceededMax === true && <Alert severity="info" sx={{mr: 'auto'}}>
                                 Έχετε ήδη εκτελέσει τον μέγιστο αριθμό επιτρεπτών κρατήσεων.
                             </Alert>}
+                            {bookingExists === false && bookingExceededMax === false && bookingLateBorrows === true &&
+                                <Alert severity="error"> Έχετε καθυστερήσει να επιστρέψετε ένα δανεισμένο αντίτυπο, οπότε δεν επιτρέπεται η κράτηση.
+                                </Alert>}
+
                         </>}
 
                         {isLibEditor && <Button variant="contained" sx={{mr: 'auto'}} onClick={() => {setOpenBookingDialog(true);}}>ΚΡΑΤΗΣΗ (ΓΙΑ ΕΣΑΣ/ΧΡΗΣΤΗ)</Button>}

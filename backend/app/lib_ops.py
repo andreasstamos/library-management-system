@@ -446,10 +446,10 @@ def get_late_borrowers():
     last_name_where_clause = ''
     
     if 'first_name' in data.keys():
-        first_name_where_clause = 'AND first_name ILIKE %s'
+        first_name_where_clause = 'AND first_name %% %s'
         params.append(f"%{data['first_name']}%")
     if 'last_name' in data.keys():
-        last_name_where_clause = 'AND last_name ILIKE %s'
+        last_name_where_clause = 'AND last_name %% %s'
         params.append(f"%{data['last_name']}%")
 
     try:
@@ -541,7 +541,7 @@ def average_rating_per_borrower():
     where_clause = []
     params = {'school_id': user['school_id']}
     for fieldname in data.keys():
-        where_clause.append(f"{fieldname} ILIKE %({fieldname})s")
+        where_clause.append(f"{fieldname} %% %({fieldname})s")
         params[fieldname] = data[fieldname]
 
     where_clause.append("school_id = %(school_id)s")

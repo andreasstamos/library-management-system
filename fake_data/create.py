@@ -28,6 +28,8 @@ P_LATEBORROW = 0.05
 N_DAYSBORROW = 7
 N_DAYSLATEBORROW = 30
 
+N_BOOKINGS = 1500
+
 random.seed(42)
 faker.Faker.seed(42)
 
@@ -187,6 +189,25 @@ def fake_borrows(f):
         if borrow is None: continue
         f.write(borrow)
 
+def fake_bookings(f):
+    fake = faker.Faker()
+
+    def build_booking():
+        start = fake.date_time_between_dates(START_DATE, END_DATE)
+        end = start + datetime.timedelta(days=7)
+        
+        user_id = random.randint(1, N_USERS)
+        isbn = random.choice(isbns)
+        
+        return f"""INSERT INTO booking (isbn, user_id, period) VALUES\
+ ('{isbn}', {user_id}, TSTZRANGE('{start.isoformat()}', '{end.isoformat()}'))\
+ ON CONFLICT DO NOTHING;\n"""
+
+
+    bookings = (build_booking() for _ in range(N_BOOKINGS))
+    for booking in bookings:
+        f.write(booking)
+
 
 with open("fake_data.sql", "w") as f:
     f.write("BEGIN;\n")
@@ -199,4 +220,6 @@ with open("fake_data.sql", "w") as f:
     fake_reviews(f)
     f.write("\n")
     fake_borrows(f)
+    f.write("\n")
+    fake_bookings(f)
     f.write("COMMIT;\n")

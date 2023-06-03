@@ -132,13 +132,18 @@ def exists_booking():
 
     try:
         with g.db_conn.cursor() as cur:
-            cur.execute("SELECT 1 FROM booking WHERE user_id = %s AND isbn = %s AND NOW() <@ period",\
+            cur.execute("SELECT EXISTS(SELECT 1 FROM booking WHERE user_id = %s AND isbn = %s AND NOW() <@ period)",\
                     (user_id, data["isbn"]))
-            exists_booking = bool(cur.fetchone())
+            exists_booking = cur.fetchone()[0]
+            
             cur.execute("SELECT COUNT(1) >= quota(%(user_id)s) FROM booking WHERE user_id = %(user_id)s AND lower(period) > NOW() - INTERVAL '7 days'",\
                     {'user_id': user_id})
             exceeded_max = cur.fetchone()[0]
-            return {"success": True, "exists_booking": exists_booking, "exceeded_max": exceeded_max}, 200
+            
+            cur.execute("SELECT EXISTS(SELECT 1 FROM borrow WHERE borrower_id = %s AND NOW() <@ period AND NOW()::date > expected_return)", (user_id))
+            late_borrows = cur.fetchone()[0]
+
+            return {"success": True, "exists_booking": exists_booking, "exceeded_max": exceeded_max, "late_borrows": late_borrows}, 200
     except psycopg2.Error as err:
         print(err)
         return {"success": False, "error": "unknown"}, 400
