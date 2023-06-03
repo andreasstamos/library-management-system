@@ -63,8 +63,8 @@ def login():
             role = 'lib_editor'
 
         cur.execute('SELECT EXISTS(SELECT 1 FROM "user" AS t1 INNER JOIN admin AS t2 ON t1.user_id = t2.user_id WHERE t1.username = (%s))', (username, ))
-        is_lib_editor = cur.fetchone()[0]
-        if is_lib_editor:
+        is_admin = cur.fetchone()[0]
+        if is_admin:
             role = 'admin'
 
         if not role:
@@ -151,6 +151,7 @@ def register():
                 cur.execute('INSERT INTO student (user_id) VALUES (%s)', (user_id,))
             elif data['user_type'].lower() == 'lib_editor':
                 cur.execute('INSERT INTO lib_user (user_id) VALUES (%s)', (user_id,))
+                cur.execute('INSERT INTO teacher (user_id) VALUES (%s)', (user_id,))
             else:
                 return {"success": False, "error": 'Wrong user type.'}, 400
 
