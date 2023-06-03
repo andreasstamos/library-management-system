@@ -188,11 +188,11 @@ function BookAdd() {
             >
                 <CircularProgress/>
             </Backdrop>
-            <InsertedDialog
+            {openInsertedDialog && <InsertedDialog
                 open={openInsertedDialog}
                 itemid={itemid}
                 onClose={() => {navigate("/");}}
-            />
+            />}
             <Box sx={{display: 'flex', flexDirection: 'column', rowGap: '1rem'}}>
                 {!loading && errorInsert && <Alert severity="error" sx={{mr: 'auto'}}>{errorInsert}</Alert>}
                 {!loading && exists && !editing && <Alert severity="success" sx={{mr: 'auto'}}>

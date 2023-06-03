@@ -150,8 +150,8 @@ def register():
             elif data['user_type'].lower() == 'student':
                 cur.execute('INSERT INTO student (user_id) VALUES (%s)', (user_id,))
             elif data['user_type'].lower() == 'lib_editor':
-                cur.execute('INSERT INTO lib_user (user_id) VALUES (%s)', (user_id,))
                 cur.execute('INSERT INTO teacher (user_id) VALUES (%s)', (user_id,))
+                cur.execute('INSERT INTO lib_user (user_id) VALUES (%s)', (user_id,))
             else:
                 return {"success": False, "error": 'Wrong user type.'}, 400
 

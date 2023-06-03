@@ -111,8 +111,14 @@ CREATE TABLE "admin" (
 
 CREATE INDEX index_admin ON "admin" (user_id);
 
-CREATE TABLE lib_user (
+CREATE TABLE teacher (
 	user_id INTEGER NOT NULL UNIQUE REFERENCES "user" ON DELETE CASCADE
+);
+
+CREATE INDEX index_teacher ON teacher (user_id);
+
+CREATE TABLE lib_user (
+	user_id INTEGER NOT NULL UNIQUE REFERENCES "user" ON DELETE CASCADE REFERENCES teacher(user_id) ON DELETE CASCADE
 );
 
 CREATE INDEX index_lib_user ON lib_user (user_id);
@@ -122,12 +128,6 @@ CREATE TABLE student (
 );
 
 CREATE INDEX index_student ON student (user_id);
-
-CREATE TABLE teacher (
-	user_id INTEGER NOT NULL UNIQUE REFERENCES "user" ON DELETE CASCADE
-);
-
-CREATE INDEX index_teacher ON teacher (user_id);
 
 CREATE TABLE item (
 	item_id SERIAL PRIMARY KEY,

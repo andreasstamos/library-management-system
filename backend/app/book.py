@@ -176,9 +176,6 @@ def get_book():
                 GROUP BY isbn) AS rate\
                 USING (isbn)""")
 
-    if 'all_schools' not in data or not data["all_schools"]:
-        join_clause.append("INNER JOIN item USING (isbn)")
-
     if 'publishers' in data.keys() or 'publisher_name' in data["fetch_fields"]:
         join_clause.append('LEFT JOIN publisher USING (publisher_id)') 
 
@@ -195,9 +192,8 @@ def get_book():
     if 'item_id' in data.keys():
         where_clause = ["isbn = (SELECT isbn FROM item WHERE item_id = %(item_id)s)"]
 
-
     if 'all_schools' not in data or not data["all_schools"]:
-        where_clause.append("school_id = %(school_id)s")
+        where_clause.append("EXISTS (SELECT 1 FROM item WHERE item.isbn = book.isbn AND school_id = %(school_id)s)")
         data["school_id"] = get_jwt_identity()["school_id"]
 
     where_clause = ' AND '.join(where_clause)
@@ -216,6 +212,7 @@ def get_book():
         with g.db_conn.cursor(cursor_factory = psycopg2.extras.RealDictCursor) as cur:
             cur.execute(query, data)
             results = cur.fetchall()
+            print(results)
             return {"success": True, "books": results}, 200
     except psycopg2.Error as err:
         print(err.pgerror)

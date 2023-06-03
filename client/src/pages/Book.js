@@ -106,7 +106,7 @@ function Book() {
                 <CircularProgress/>
             </Backdrop>
 
-            {isLibEditor && <BookingDialog open={openBookingDialog} isbn={book?.isbn} onClose={() => {setOpenBookingDialog(false);}} />}
+            {isLibEditor && openBookingDialog && <BookingDialog open={openBookingDialog} isbn={book?.isbn} onClose={() => {setOpenBookingDialog(false);}} />}
 
             <div className='book-page-container'>
                 {error && <Alert severity="error" sx={{mr: 'auto'}}>{error}</Alert>}

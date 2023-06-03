@@ -124,7 +124,7 @@ def fake_users(f):
         role = random.random()
         if role < P_ADMIN: role = ['admin']
         elif role < P_ADMIN+P_LIBEDITOR:
-            role = ['lib_user', 'teacher']
+            role = ['teacher', 'lib_user']
             lib_editors.add(user_id)
         else: role = ['teacher' if random.random() < P_TEACHER else 'student']
 

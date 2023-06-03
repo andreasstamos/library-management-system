@@ -140,7 +140,7 @@ def exists_booking():
                     {'user_id': user_id})
             exceeded_max = cur.fetchone()[0]
             
-            cur.execute("SELECT EXISTS(SELECT 1 FROM borrow WHERE borrower_id = %s AND NOW() <@ period AND NOW()::date > expected_return)", (user_id))
+            cur.execute("SELECT EXISTS(SELECT 1 FROM borrow WHERE borrower_id = %s AND NOW() <@ period AND NOW()::date > expected_return)", (user_id,))
             late_borrows = cur.fetchone()[0]
 
             return {"success": True, "exists_booking": exists_booking, "exceeded_max": exceeded_max, "late_borrows": late_borrows}, 200
