@@ -425,7 +425,6 @@ def lib_editors_count_borrows():
             GROUP BY "user".user_id) editors_with_count
             WHERE cnt > 20
             GROUP BY cnt
-            HAVING COUNT(1) >= 2
             ORDER BY cnt""", [str(data['year'])])
 
             editors = cur.fetchall()
