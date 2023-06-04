@@ -72,6 +72,8 @@ CREATE TABLE keyword (
 	keyword_name VARCHAR(20) NOT NULL UNIQUE
 );
 
+CREATE INDEX index_keyword ON keyword USING GIST (keyword_name gist_trgm_ops);
+
 CREATE TABLE book_keyword (
 	isbn VARCHAR(13) NOT NULL REFERENCES book ON UPDATE CASCADE ON DELETE CASCADE,
 	keyword_id INTEGER NOT NULL REFERENCES keyword ON DELETE CASCADE,
@@ -136,7 +138,8 @@ CREATE TABLE item (
 	school_id INTEGER NOT NULL REFERENCES school ON DELETE CASCADE
 );
 
-CREATE INDEX index_item ON item (isbn, school_id);
+CREATE INDEX index_item_isbn ON item (isbn);
+CREATE INDEX index_item_school ON item (school_id);
 
 CREATE TABLE review (
 	review_id SERIAL PRIMARY KEY,

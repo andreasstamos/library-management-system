@@ -7,8 +7,9 @@ import debounce from "lodash/debounce";
 function BookingDialog({open, isbn, onClose}) {
   const [forMe, setForMe] = useState('me');
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [bookingLoading, setBookingLoading] = useState(false);
+  const [loadingUser, setLoadingUser] = useState(false);
+  const [loadingBooking, setLoadingBooking] = useState(false);
+  const [loadingHandleBooking, setLoadingHandleBooking] = useState(false);
   const [user, setUser] = useState(null);
   const [userid, setUserid] = useState('');
   const [bookingExists, setBookingExists] = useState(null);
@@ -18,7 +19,7 @@ function BookingDialog({open, isbn, onClose}) {
   const auth = useContext(AuthContext);
 
   const handleBooking = async () => {
-    setBookingLoading(true);
+    setLoadingHandleBooking(true);
     setError(null);
     try {
       const payload = {
@@ -30,7 +31,7 @@ function BookingDialog({open, isbn, onClose}) {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${auth.authTokens}`,
       }});
-      setBookingLoading(false);
+      setLoadingHandleBooking(false);
       if (response?.data?.success) {
         onClose();
         fetchBooking();
@@ -38,45 +39,46 @@ function BookingDialog({open, isbn, onClose}) {
       }
       else setError("Κάτι πήγε λάθος. Παρακαλούμε δοκιμάστε ξανά.");
     } catch (e) {
-      setBookingLoading(false);
+      setLoadingHandleBooking(false);
       setError("Κάτι πήγε λάθος. Παρακαλούμε δοκιμάστε ξανά.");
     }
   };
 
   const fetchUser = async () => {
-    setBookingExists(null);
-    setBookingExceededMax(null); 
-    setBookingLateBorrows(null); 
     setUser(null);
     if (!userid) return;
+    setLoadingUser(true);
     try {
       const response = await axios.post('http://127.0.0.1:5000/user/get-details/', {user_id: parseInt(userid)}, {headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${auth.authTokens}`,
       }});
-
+      setLoadingUser(false);
       if (!response?.data?.success) {
         setError("Κάτι πήγε λάθος. Παρακαλούμε προσπαθήστε ξανά.");
         return;
       }
 
-      setLoading(false);
       if (response?.data?.user) {
         setUser(response?.data?.user);
       }
       else {
-        setLoading(false);
         setError("Δυστυχώς ο χρήστης δεν βρέθηκε στο σχολείο σας.");
         return;
       }
     } catch (e) {
-      setLoading(false);
+      setLoadingUser(false);
       setError("Κάτι πήγε λάθος. Παρακολούμε προσπαθήστε ξανά.");
     }
   };
 
   const fetchBooking = async () => {
+    setBookingExists(null);
+    setBookingExceededMax(null);
+    setBookingLateBorrows(null);
+    if (!isbn) return;
     if (forMe === "other" && (!userid || userid?.length === 0 || !user)) return;
+    setLoadingBooking(true);
     try {
       const payload = {
         isbn: isbn,
@@ -86,6 +88,7 @@ function BookingDialog({open, isbn, onClose}) {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${auth.authTokens}`,
       }});
+      setLoadingBooking(false);
       if (!response?.data?.success) {
         setError("Κάτι πήγε λάθος. Παρακολούμε προσπαθήστε ξανά.");
       }
@@ -93,6 +96,7 @@ function BookingDialog({open, isbn, onClose}) {
       setBookingExceededMax(response?.data?.exceeded_max);
       setBookingLateBorrows(response?.data?.late_borrows);
     } catch(e) {
+      setLoadingBooking(false);
       setError("Κάτι πήγε λάθος. Παρακολούμε προσπαθήστε ξανά.");
     }
   }
@@ -106,10 +110,9 @@ function BookingDialog({open, isbn, onClose}) {
     return () => {debounced_fetchUser.cancel();}
   }, [userid]);
 
-  useEffect(() => {if (!isbn) return; fetchBooking();}, [forMe, isbn, user]);
-  useEffect(() => {setBookingExists(null);setBookingExceededMax(null);setBookingLateBorrows(null);}, [forMe]);
- 
+  useEffect(() => {fetchBooking();}, [forMe, userid]);
 
+  console.log(loadingUser, loadingBooking, forMe);
   return (
     <Dialog open={open}>
       <DialogContent sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', rowGap: '1rem'}}>
@@ -118,30 +121,30 @@ function BookingDialog({open, isbn, onClose}) {
           <FormControlLabel value="other" control={<Radio />} label="Για άλλον/άλλη" />
         </RadioGroup>
 
-        {bookingExists === true && <Alert severity="error"> {forMe === "me" ? 'Έχετε' : 'Ο χρήστης έχει'} ήδη κράτηση για το βιβλίο.</Alert>}
-        {bookingExists === false && bookingExceededMax === true &&
+        {(forMe === 'me' || user) && !loadingUser && !loadingBooking && bookingExists === true && <Alert severity="error"> {forMe === "me" ? 'Έχετε' : 'Ο χρήστης έχει'} ήδη κράτηση για το βιβλίο.</Alert>}
+        {(forMe === 'me' || user) && !loadingUser && !loadingBooking && bookingExists === false && bookingExceededMax === true &&
           <Alert severity="error"> {forMe === "me" ? 'Έχετε' : 'Ο χρήστης έχει'} εκτελέσει ήδη το μέγιστο αριθμό επιτρεπτών κρατήσεων.</Alert>}
-        {bookingExists === false && bookingExceededMax === false && bookingLateBorrows === true &&
+        {(forMe === 'me' || user) && !loadingUser && !loadingBooking && bookingExists === false && bookingExceededMax === false && bookingLateBorrows === true &&
           <Alert severity="error">
             {forMe === "me" ? 'Έχετε καθυστερήσει να επιστρέψετε' : 'Ο χρήστης έχει καθυστερήσει να επιστρέψει'} ένα δανεισμένο αντίτυπο, οπότε δεν επιτρέπεται η κράτηση.
           </Alert>}
-        
+
         {forMe === "other" &&
-        <>
-          {!loading && !user && userid?.length > 0 && <Alert severity="warning">Δυστυχώς ο χρήστης δεν βρέθηκε στο σχολείο σας.</Alert>}
-          <TextField required label="Αριθμός χρήστη" value={userid} onChange={(e) => {setUserid(e.target.value);}} />
-          {user &&
           <>
-            <TextField label="Username" InputProps={{readOnly: true}} value={user?.username} />
-            <TextField label="Όνομα" InputProps={{readOnly: true}} value={user?.first_name} />
-            <TextField label="Επώνυμο" InputProps={{readOnly: true}} value={user?.last_name} />
-          </>
-          }
-        </>}
+            {!loadingUser && !user && userid?.length > 0 && <Alert severity="warning">Δυστυχώς ο χρήστης δεν βρέθηκε στο σχολείο σας.</Alert>}
+            <TextField required label="Αριθμός χρήστη" value={userid} onChange={(e) => {setUserid(e.target.value);}} />
+            {!loadingUser && user &&
+            <>
+              <TextField label="Username" InputProps={{readOnly: true}} value={user?.username} />
+              <TextField label="Όνομα" InputProps={{readOnly: true}} value={user?.first_name} />
+              <TextField label="Επώνυμο" InputProps={{readOnly: true}} value={user?.last_name} />
+            </>
+            }
+          </>}
       </DialogContent>
       <DialogActions sx={{display: 'flex', justifyContent: 'space-around'}}>
         <Button color="secondary" onClick={onClose}>ΑΚΥΡΟ</Button>
-        {(forMe === "me" || user) && bookingExists === false && bookingExceededMax === false && bookingLateBorrows === false &&
+        {(forMe === "me" || user) && !loadingUser && !loadingBooking && bookingExists === false && bookingExceededMax === false && bookingLateBorrows === false &&
         <Button onClick={handleBooking}>ΚΡΑΤΗΣΗ</Button>}
       </DialogActions>
     </Dialog>
