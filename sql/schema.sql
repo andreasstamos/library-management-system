@@ -152,7 +152,8 @@ CREATE TABLE review (
 	-- One user can do only one review on a specific book
 );
 
-CREATE INDEX index_review ON review (isbn, active);
+CREATE INDEX index_review_active ON review (active);
+CREATE INDEX index_review_isbn ON review (isbn);
 
 CREATE TABLE borrow (
 	borrow_id SERIAL PRIMARY KEY,

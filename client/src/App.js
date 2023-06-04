@@ -47,6 +47,7 @@ import CategoryControl from './pages/lib_editor/CategoryControl';
 import KeywordControl from './pages/lib_editor/KeywordControl';
 import PublisherControl from './pages/lib_editor/PublisherControl';
 import Backup from './pages/admin/Backup';
+import CopyrightNotice from './Components/CopyrightNotice';
 
 function App() {
   return (
@@ -125,6 +126,7 @@ function App() {
 
           </Routes>
         </AuthProvider>
+        <CopyrightNotice />
       </Router>
     </div>
   );
