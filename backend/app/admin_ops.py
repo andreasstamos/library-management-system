@@ -355,7 +355,7 @@ def get_most_borrows_young_teachers():
             WHERE NOW() - dob < INTERVAL '40 years'
             ORDER BY cnt DESC""")
             teachers = cur.fetchall()
-            
+
             return {"success": True, "teachers": teachers}, 200
     except psycopg2.Error as err:
         print(err.pgerror)

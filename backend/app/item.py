@@ -154,11 +154,13 @@ def return_item():
         jsonschema.validate(data, RETURN_ITEM_JSONSCHEMA)
     except jsonschema.ValidationError as err:
         return {"success": False, "error": err.message}, 400
-
+    user = get_jwt_identity()
     try:
         with g.db_conn.cursor() as cur:
+            # check if item is in lib_editor's school!!!
             cur.execute("UPDATE borrow SET period = TSTZRANGE(LOWER(period), NOW(), '[]')\
-                    WHERE item_id = %s AND UPPER_INF(period)", (data["item_id"],))
+                    WHERE item_id = %s AND UPPER_INF(period)\
+                    AND EXISTS( SELECT 1 FROM item WHERE item.item_id = %s AND item.school_id = %s)", (data["item_id"],data['item_id'], user['school_id']))
             g.db_conn.commit()
             return {"success": cur.rowcount > 0}, 200
     except psycopg2.IntegrityError as err:

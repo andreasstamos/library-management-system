@@ -108,7 +108,6 @@ def delete_category():
     try:
         with g.db_conn.cursor() as cur:
 
-            # Library editor needs to be at the same school as the user that has his review deleted!
             query = psycopg2.sql.SQL("""
             DELETE FROM category
             WHERE category_id = (%s)
