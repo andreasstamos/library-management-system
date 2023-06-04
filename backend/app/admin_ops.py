@@ -352,7 +352,7 @@ def get_most_borrows_young_teachers():
             COALESCE((SELECT COUNT(1) FROM borrow WHERE borrower_id = "user".user_id), 0) as cnt
             FROM teacher
             INNER JOIN "user" USING (user_id)
-            WHERE NOW() - dob < '40 years'
+            WHERE NOW() - dob < INTERVAL '40 years'
             ORDER BY cnt DESC""")
             teachers = cur.fetchall()
             

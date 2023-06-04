@@ -59,7 +59,8 @@ BEGIN
 	IF NOT v_item_school_constraint THEN RETURN;
 	END IF;
 
-	v_borrow_number_constraint := (SELECT (count(1) <= quota(v_user_id)) FROM borrow WHERE borrower_id = v_borrower_id AND lower(period) > NOW() - INTERVAL '7 days');
+	-- v_borrow_number_constraint := (SELECT (count(1) <= quota(v_user_id)) FROM borrow WHERE borrower_id = v_borrower_id AND lower(period) > NOW() - INTERVAL '7 days');
+	v_borrow_number_constraint := (SELECT (count(1) <= quota(v_borrower_id)) FROM borrow WHERE borrower_id = v_borrower_id AND lower(period) > NOW() - INTERVAL '7 days');
 
 	IF NOT v_borrow_number_constraint THEN RETURN;
 	END IF;
