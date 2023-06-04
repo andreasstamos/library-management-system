@@ -124,21 +124,11 @@ def delete_user():
     user = get_jwt_identity()
     try:
         with g.db_conn.cursor() as cur:
-            #We must make sure the user being delete is actually a library editor!
             query = psycopg2.sql.SQL("""
             DELETE FROM "user" 
             WHERE "user".user_id = (%s) AND "user".school_id = (%s)
-            AND EXISTS (
-            SELECT 1
-            FROM teacher
-            WHERE teacher.user_id = (%s)
-            UNION
-            SELECT 1
-            FROM student
-            WHERE student.user_id = (%s)
-            )
            """)
-            cur.execute(query, [data['user_id'], user['school_id'], data['user_id'], data['user_id']])
+            cur.execute(query, [data['user_id'], user['school_id']])
             g.db_conn.commit()
             return {'success': True,}, 200
     except (Exception, psycopg2.DatabaseError) as error:
