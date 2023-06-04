@@ -246,7 +246,7 @@ def get_filtered_borrows():
     except jsonschema.ValidationError as err:
         return {"success": False, "error": err.message}, 400
     
-    group_by_clause = "GROUP BY school.school_id, school.name"
+    group_by_clause = "GROUP BY school.school_id"
     params = []
     where_clause = ""
     if 'school_id' in data.keys():
@@ -308,8 +308,7 @@ def get_authors_teacher():
             FROM author
             INNER JOIN book_author ON author.author_id = book_author.author_id
             INNER JOIN book_category ON book_category.isbn = book_author.isbn
-            INNER JOIN category ON book_category.category_id = category.category_id
-            WHERE category.category_id = (%s)
+            WHERE book_category.category_id = (%s)
             """, [data['category']])
             authors = cur.fetchall()
             
