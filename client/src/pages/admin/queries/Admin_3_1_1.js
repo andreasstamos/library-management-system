@@ -88,9 +88,9 @@ function Admin_3_1_1() {
           <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
             <TableHead>
               <TableRow>
-                <TableCell>School ID</TableCell>
-                <TableCell>School Name</TableCell>
-                <TableCell>Borrows Count</TableCell>
+                <TableCell>Αναγνωριστικό Σχολείων</TableCell>
+                <TableCell>Σχολείο</TableCell>
+                <TableCell>Αριθμός Δανεισμών</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>

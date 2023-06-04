@@ -35,13 +35,14 @@ function UsersControl() {
 
   return (
     <div className='dashboard-component'>
-        <h2 className='component-title'>Users</h2>
+        <h2 className='component-title'>Χρήστες</h2>
         <div className='component-details users-control'>
         <div className='queries-filter'>
+            <p>{activeUsers ? "Προβολή ενεργών χρηστών": "Προβολή ανενεργών χρηστών"}</p>
             <Switch label="Active" checked={activeUsers} onChange={(e) => setActiveUsers(!activeUsers)} />
         </div>
             {data && data.map((item) => {return <UserCard key={item?.user_id} data={item} getUsers={getUsers} />})}
-            {data && data.length == 0 && <h3>No Users</h3>}
+            {data && data.length == 0 && <h3>Δεν βρέθηκαν χρήστες</h3>}
         
 
         </div>

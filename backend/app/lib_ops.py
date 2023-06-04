@@ -492,7 +492,7 @@ def average_ratings_per_category():
     user = get_jwt_identity()
 
     params = []
-    where_clause = []
+    where_clause = ["review.active = true"]
     if 'category_id' in data.keys():
         where_clause.append("category.category_id = %s")
         params.append(data['category_id'])
@@ -541,9 +541,10 @@ def average_rating_per_borrower():
     where_clause = []
     params = {'school_id': user['school_id']}
     for fieldname in data.keys():
-        where_clause.append(f"{fieldname} %% %({fieldname})s")
-        params[fieldname] = data[fieldname]
+        where_clause.append(f"{fieldname} ILIKE %({fieldname})s")
+        params[fieldname] = "%" + data[fieldname] + "%"
 
+    where_clause.append("review.active = true")
     where_clause.append("school_id = %(school_id)s")
     where_clause.append("EXISTS (SELECT 1 FROM item JOIN borrow USING (item_id) WHERE review.user_id = borrow.borrower_id AND item.isbn = review.isbn)")
     where_clause = ' AND '.join(where_clause)

@@ -54,7 +54,7 @@ export default function AuthorCard({data, getAuthors}) {
   <TextField
           required
           id="filled-required"
-          label="full_name"
+          label="Όνομα συγγραφέα"
           defaultValue={data.author_name}
           onChange={(e) => setNewAuthorName(e.target.value)}
           variant={edit ? 'outlined' : 'filled'}
@@ -64,9 +64,9 @@ export default function AuthorCard({data, getAuthors}) {
 
 </CardContent>
 <CardActions>
-  <Button size="small" variant="contained" onClick={(e) => {updateAuthor(data.author_id)}} disabled={!edit}>Ενημέρωση Author</Button>
-  <Button size="small" variant="contained" color="secondary" onClick={() => setEdit(!edit)}>Επεξεργασία</Button>
-  <Button size="small" variant="contained" color="error" onClick={deleteAuthor}>Διαγραφή</Button>
+  <Button size="small" variant="contained" onClick={(e) => {updateAuthor(data.author_id)}} disabled={!edit}>Ενημερωση</Button>
+  <Button size="small" variant="contained" color="secondary" onClick={() => setEdit(!edit)}>Επεξεργασια</Button>
+  <Button size="small" variant="contained" color="error" onClick={deleteAuthor}>Διαγραφη</Button>
 
 </CardActions>
 </Card>

@@ -36,7 +36,7 @@ function ForgotPassword() {
 
   return (
     <>
-        <h3 className='auth-title'>Forgot your password?</h3>
+        <h3 className='auth-title'>Ξεχάσατε τον κωδικό σας;</h3>
     <form className='auth-inputs' onSubmit={(e) => handleEmailSend(e)}>
         <div className='auth-input'>
             <label for='email'>Email:</label>
@@ -46,9 +46,8 @@ function ForgotPassword() {
         {err && <p className='form-error message'>{err}</p>}
         {succ && <p className='form-success message'>{succ}</p>}
 
-        <button type='submit'>Send Link</button>
-        <p className='auth-alternate'>We will send you a link to change your password. Please check your spam!</p>
-
+        <button type='submit'>Στείλτε μου το link</button>
+        <p className='auth-alternate'>Θα σας στείλουμε ενα link προκειμένου να αλλάξετε τον κωδικό σας. Παρακαλούμε ελέγξτε τα σπαμ!</p>
     </form>
 
     </>

@@ -46,7 +46,7 @@ function Admin_3_1_5() {
 
   return (
     <Box sx={{display: 'flex', flexDirection: 'column'}}>  
-      <h2 className='title-with-hr'>Χειριστές βιβλίων ανά πλήθος δανεισμών (>=20)</h2>
+      <h2 className='title-with-hr'>Χειριστές βιβλίων ανά πλήθος δανεισμών (>20)</h2>
 
       {editors && (editors?.length > 0 ?
         <Box sx={{mr: 'auto'}}><TableContainer component={Paper}>

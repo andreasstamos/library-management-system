@@ -38,7 +38,7 @@ function AuthorControl() {
 
   return (
     <div className='dashboard-component'>
-        <h2 className='component-title title-with-hr'>Authors</h2>
+        <h2 className='component-title title-with-hr'>Συγγραφείς</h2>
         <AddAuthor getAuthors={fetchAuthors}/>
 
         <div className='component-details users-control'>
@@ -77,7 +77,7 @@ function AddAuthor({getAuthors}) {
     return (
         <>
         <TextField id="outlined-basic" label="Συγγραφέας" variant="outlined" size="small" value={authorName} onChange={(e) => setAuthorName(e.target.value)} sx={{mr:2}} />
-        <Button variant="contained"  onClick={addAuthor} endIcon={<PersonAddIcon />}>Προσθήκη</Button>
+        <Button variant="contained"  onClick={addAuthor} endIcon={<PersonAddIcon />}>Προσθηκη</Button>
         </>
 
 

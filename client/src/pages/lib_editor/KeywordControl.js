@@ -109,9 +109,9 @@ function KeywordCard({data, getKeywords}) {
         
         </CardContent>
         <CardActions>
-            <Button size="small" variant="contained" onClick={updateKeyword} disabled={!edit}>Ενημέρωση</Button>
-            <Button size="small" variant="contained" color="secondary" onClick={() => setEdit(!edit)}>Επεξεργασία</Button>
-            <Button size="small" variant="contained" color="error" onClick={deleteKeyword}>Διαγραφή</Button>
+            <Button size="small" variant="contained" onClick={updateKeyword} disabled={!edit}>Ενημερωση</Button>
+            <Button size="small" variant="contained" color="secondary" onClick={() => setEdit(!edit)}>Επεξεργασια</Button>
+            <Button size="small" variant="contained" color="error" onClick={deleteKeyword}>Διαγραφη</Button>
         </CardActions>
     </Card>
     )

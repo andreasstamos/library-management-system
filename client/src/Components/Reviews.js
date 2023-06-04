@@ -54,7 +54,7 @@ function Row(props) {
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 1 }}>
               <Typography variant="h6" gutterBottom component="div">
-                Review
+                Αξιολόγηση
               </Typography>
               
                     <Typography>{row.body}</Typography>
@@ -124,10 +124,10 @@ export default function Reviews({bookISBN}) {
 
   return (
     <>
-    <h2 className='title-with-hr'>Reviews</h2>
+    <h2 className='title-with-hr'>Αξιολογήσεις</h2>
     {loading && <CircularProgress/>}
-    {err && <Alert severity='error'>Something went wrong :(</Alert>}
-    { reviews && 
+    {err && <Alert severity='error'>Κατι πήγε λάθος :(</Alert>}
+    { reviews &&
     <TableContainer component={Paper}>
         <Table aria-label="collapsible table">
             <TableHead>

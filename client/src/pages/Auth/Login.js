@@ -61,7 +61,7 @@ function Login() {
 
   return (
     <>
-    <h3 className='auth-title'>Login</h3>
+    <h3 className='auth-title'>Σύνδεση</h3>
     <form className='auth-inputs' onSubmit={(e) => handleLogin(e)}>
         <div className='auth-input'>
             <label for='username'>Username:</label>
@@ -69,7 +69,7 @@ function Login() {
         </div>
 
         <div className='auth-input'>
-            <label for='password'>Password:</label>
+            <label for='password'>Κωδικός:</label>
             <input type='password' name='password' value={password} onChange={(e) => {setPassword(e.target.value)}} />
         </div>
 
@@ -77,9 +77,9 @@ function Login() {
         {err && <p className='form-error message'>{err}</p>}
         {succ && <p className='form-success message'>{succ}</p>}
 
-        <p className='auth-alternate'>Forgot your password? Click <Link to='/auth/forgot-password/' >here</Link>.</p>
-        <button type='submit'>Login</button>
-        <p className='auth-alternate'>Don't have an account? Please register <Link to='/auth/register/' >here</Link>.</p>
+        <p className='auth-alternate'>Ξεχάσατε τον κωδικό σας? Πατήστε <Link to='/auth/forgot-password/'>εδώ</Link>.</p>
+        <button type='submit'>Σύνδεση</button>
+        <p className='auth-alternate'>Δέν έχετε λογαριασμό? Παρακαλούμε εγγραφείτε <Link to='/auth/register/' >εδώ</Link>.</p>
 
     </form>
     </>

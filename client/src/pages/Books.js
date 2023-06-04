@@ -107,7 +107,7 @@ function Books() {
                 <FilterBarPublisher value={publishersValue}     handleChangeValue={(value) => {setPublishersValue(value);}} />
                 <FilterBarCategory  value={categoriesValue}     handleChangeValue={(value) => {setCategoriesValue(value);}} />
                 <FilterBarKeyword   value={keywordsValue}       handleChangeValue={(value) => {setKeywordsValue(value);}}   />
-                {auth.user.sub.role === 'lib_editor' &&   
+                {auth.user.sub.role === 'lib_editor' &&
                 <Box sx={{display: 'flex', alignItems:'flex-end'}}>
                     <TextField
                     id="standard-search"
@@ -119,10 +119,8 @@ function Books() {
                     helperText={searchError}
                     error={searchError != ''}
                     />
-                    <Button variant="text" sx={{padding:'0'}} onClick={getBookByItemId}>Αναζητηση Item</Button>
-                    </Box>      
-                   
-                          }
+                    <Button variant="text" sx={{padding:'0'}} onClick={getBookByItemId}>Αναζητηση Αντιτυπου</Button>
+                    </Box>}
                 
                 <Box sx={{ml: 'auto'}}>
                     <SearchBarBooks value={searchValue} handleChangeValue={(value) => {setSearchValue(value)}} />

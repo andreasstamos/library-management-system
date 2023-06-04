@@ -188,7 +188,7 @@ function UserTable({data}) {
         <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
           <TableHead>
             <TableRow>
-                <TableCell>ID</TableCell>
+                <TableCell>Αναγνωριστικό</TableCell>
               <TableCell>Όνομα</TableCell>
             </TableRow>
           </TableHead>

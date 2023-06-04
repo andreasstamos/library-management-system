@@ -8,13 +8,13 @@ function Dropdown({userSelected, setUserSelected}) {
   return (
     <>
 <div class="select" for="user_select">
-  <label for="user">Select user type:    </label>
+  <label for="user">Επιλέξτε ιδιότητα:    </label>
   <select id="user_select" name="user" required="required" value={userSelected} onChange={(e) => setUserSelected(e.target.value)}>
-  <option value="" disabled="disabled" >Select option:</option>
+  <option value="" disabled="disabled" >Επιλέξτε:</option>
 
-  <option value="student">Student</option>
-  <option value="teacher">Teacher</option>
-  <option value="lib_editor">Library Editor</option>
+  <option value="student">Μαθητής</option>
+  <option value="teacher">Εκπαιδευτικός</option>
+  <option value="lib_editor">Χειριστής</option>
    
   
   </select>

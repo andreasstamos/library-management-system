@@ -7,9 +7,9 @@ function Dropdown({schools, schoolSelected, setSchoolSelected}) {
   return (
     <>
 <div class="select" for="school_select">
-  <label for="school">Select your school:    </label>
+  <label for="school">Επιλέξτε σχολείο:    </label>
   <select id="school_select" name="school" required="required" value={schoolSelected} onChange={(e) => setSchoolSelected(e.target.value)}>
-  <option value="" disabled="disabled">Select option:</option>
+  <option value="" disabled="disabled">Επιλέξτε:</option>
 
     {schools.map((school) => {
         return <option key={school?.school_id} value={school?.school_id}>{school?.name}</option>

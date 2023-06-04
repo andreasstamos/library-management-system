@@ -62,7 +62,7 @@ export default function QueriesMenu() {
               <ListItemIcon>
                 <NumbersIcon fontSize="small" />
               </ListItemIcon>
-              <ListItemText>Χειριστές βιβλίων ανά πλήθος δανεισμών (>=20)</ListItemText>
+              <ListItemText>Χειριστές βιβλίων ανά πλήθος δανεισμών (>20)</ListItemText>
             </MenuItem>
           </NavLink>
           <NavLink to="/admin/queries/3_1_6/">

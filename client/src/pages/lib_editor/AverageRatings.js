@@ -16,6 +16,8 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
+import Rating from '@mui/material/Rating';
+
 import { CircularProgress } from '@mui/material';
 
 
@@ -182,11 +184,11 @@ function RatingsPerUserTable({data}) {
       <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
         <TableHead>
           <TableRow>
-            <TableCell>ID</TableCell>
-            <TableCell>First Name</TableCell>
-            <TableCell>Last Name</TableCell>
+            <TableCell>Αναγνωριστικό</TableCell>
+            <TableCell>Όνομα</TableCell>
+            <TableCell>Επίθετο</TableCell>
             <TableCell>Username</TableCell>
-            <TableCell>Average Rating</TableCell>
+            <TableCell>Μέση Αξιολόγηση</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -201,7 +203,7 @@ function RatingsPerUserTable({data}) {
               <TableCell>{row.first_name}</TableCell>
               <TableCell>{row.last_name}</TableCell>
               <TableCell>{row.username}</TableCell>
-              <TableCell>{parseInt(row.avg)}</TableCell>
+              <TableCell><Rating name="read-only" value={parseInt(row.avg)} readOnly /></TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -218,9 +220,9 @@ function RatingsPerCategoryTable({data}) {
       <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
         <TableHead>
           <TableRow>
-            <TableCell>Category ID</TableCell>
-            <TableCell>Category Name</TableCell>
-            <TableCell>Average Rating</TableCell>
+            <TableCell>Αναγνωριστικό Κατηγορίας</TableCell>
+            <TableCell>Όνομα Κατηγορίας</TableCell>
+            <TableCell>Μέσος Όρος Αξιολόγησης</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -233,7 +235,7 @@ function RatingsPerCategoryTable({data}) {
                 {row.category_id}
               </TableCell>
               <TableCell>{row.category_name}</TableCell>
-              <TableCell>{parseInt(row.avg)}</TableCell>
+              <TableCell><Rating name="read-only" value={parseInt(row.avg)} readOnly /></TableCell>
             </TableRow>
           ))}
         </TableBody>

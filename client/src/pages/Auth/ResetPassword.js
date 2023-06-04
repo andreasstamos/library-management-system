@@ -18,7 +18,7 @@ function ResetPassword() {
         setErr('');
         e.preventDefault();
         if (password != passwordConfirm) {
-            setErr('Passwords should be matching!!!');
+            setErr('Οι κωδικοί πρέπει να είναι ίδιοι!!!');
             return;
         }
 
@@ -35,11 +35,11 @@ function ResetPassword() {
         e.target.reset();
 
         if (response.status == 200) {
-            setSucc("Password successfully changed!")
+            setSucc("Ο κωδικός σας άλλαξε επιτυχώς!")
             return;
         }
 
-        setErr("Something went terribly wrong");
+        setErr("Κάτι πήγε λάθος");
 
 
 
@@ -50,16 +50,16 @@ function ResetPassword() {
 
   return (
     <>
-        <h3 className='auth-title'>Verify its you!</h3>
+        <h3 className='auth-title'>Αλλαγή Κωδικού</h3>
         <form className='auth-inputs' onSubmit={(e) => resetPassword(e)}>
 
         <div className='auth-input'>
-            <label for='password'>New Password:</label>
+            <label for='password'>Νέος Κωδικός:</label>
             <input type='password' name='password' value={password} onChange={(e) => {setPassword(e.target.value)}}/>
         </div>
 
         <div className='auth-input'>
-            <label for='password-conf'>Confirm new Password:</label>
+            <label for='password-conf'>Επιβεβαίωση νέου κωδικού:</label>
             <input type='password' name='password-conf' value={passwordConfirm} onChange={(e) => {setPasswordConfirm(e.target.value)}}/>
         </div>
 
@@ -67,7 +67,7 @@ function ResetPassword() {
         {err && <p className='form-error message'>{err}</p>}
         {succ && <p className='form-success message'>{succ}</p>}
 
-        <button type='submit'>Change Password</button>
+        <button type='submit'>Αλλαγή Κωδικού</button>
         {/* <p className='auth-alternate'>We will send you a link to change your password. Please check your spam!</p> */}
 
     </form>

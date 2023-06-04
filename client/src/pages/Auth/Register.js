@@ -91,7 +91,7 @@ function Register() {
 
     
     <>
-    <h3 className='auth-title'>Register</h3>
+    <h3 className='auth-title'>Εγγραφή</h3>
 
 
     <form className='auth-inputs' onSubmit={(e) => handleRegister(e)}>
@@ -100,11 +100,11 @@ function Register() {
             <input type='text' name='username' required value={username} onChange={(e) => setUsername(e.target.value)} />
         </div>
         <div className='auth-input'>
-            <label for='first_name'>First Name:</label>
+            <label for='first_name'>Όνομα:</label>
             <input type='text' name='first_name' required value={firstName} onChange={(e) => setFirstName(e.target.value)}/>
         </div>
         <div className='auth-input'>
-            <label for='last_name'>Last Name:</label>
+            <label for='last_name'>Επίθετο:</label>
             <input type='text' name='last_name' required value={lastName} onChange={(e) => setLastName(e.target.value)}/>
         </div>
 
@@ -119,25 +119,25 @@ function Register() {
         </div>
 
         <div className='auth-input'>
-          <label htmlFor="birthdate">Date of Birth:</label>
+          <label htmlFor="birthdate">Ημερομηνία Γέννησης:</label>
           <input type="date" id="birthdate" required name="birthdate" value={dob} onChange={(e) => {setDob(e.target.value)}} />
       </div>
 
         <UserDropdown setUserSelected={setUserSelected} userSelected={userSelected}/>
 
         <div className='auth-input'>
-            <label for='password'>Password:</label>
+            <label for='password'>Κωδικός:</label>
             <input type='password' name='password' required value={password} onChange={(e) => setPassword(e.target.value)}/>
         </div>
         <div className='auth-input'>
-            <label for='password-conf'>Confirm Password:</label>
+            <label for='password-conf'>Επιβεβαίωση Κωδικού:</label>
             <input type='password' name='password-conf' required value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}/>
         </div>
         {err && <p className='form-error message'>{err}</p>}
         {succ && <p className='form-success message'>{succ}</p>}
 
-        <button type='submit'>Register</button>
-        <p className='auth-alternate'>Already have an account? Please login <Link to='/auth/login/' >here</Link>.</p>
+        <button type='submit'>Εγγραφή</button>
+        <p className='auth-alternate'>Έχετε ήδη λογαριασμό? Παρακαλώ συνδεθείτε <Link to='/auth/login/' >εδώ</Link>.</p>
     </form>
     </>
   )

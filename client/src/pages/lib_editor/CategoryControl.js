@@ -32,7 +32,7 @@ function CategoryControl() {
 
   return (
     <div className='dashboard-component'>
-    <h2 className='component-title title-with-hr'>Categories</h2>
+    <h2 className='component-title title-with-hr'>Κατηγορίες</h2>
     <AddCategory getCategories={fetchCategories}/>
 
     <div className='component-details users-control'>
@@ -99,7 +99,7 @@ function CategoryCard({data, getCategories}) {
             <TextField
                     required
                     id="filled-required"
-                    label="category name"
+                    label="Όνομα κατηγορίας"
                     defaultValue={data.category_name}
                     onChange={(e) => setNewCategoryName(e.target.value)}
                     variant={edit ? 'outlined' : 'filled'}
@@ -109,7 +109,7 @@ function CategoryCard({data, getCategories}) {
         
         </CardContent>
         <CardActions>
-            <Button size="small" variant="contained" onClick={updateCategory} disabled={!edit}>Ενημερωση Συγγραφεα</Button>
+            <Button size="small" variant="contained" onClick={updateCategory} disabled={!edit}>Ενημερωση</Button>
             <Button size="small" variant="contained" color="secondary" onClick={() => setEdit(!edit)}>Επεξεργασια</Button>
             <Button size="small" variant="contained" color="error" onClick={deleteCategory}>Διαγραφη</Button>
         </CardActions>
@@ -149,7 +149,7 @@ function AddCategory({getCategories}) {
         onChange={(e) => setCategoryName(e.target.value)}
         />
        <Button variant="contained" endIcon={<AddCircleOutlineIcon />} onClick={addCategory}>
-        Προσθήκη Κατηγορίας
+        Προσθηκη
        </Button>
         </>
 
