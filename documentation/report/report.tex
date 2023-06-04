@@ -25,13 +25,18 @@
 \fancyfoot[R]{\copyright\ \the\year\ Ανδρέας Στάμος - Κωνσταντίνος Πίκουλας}
 
 
-\title{Τεχνική αναφορά\\\Large Πληροφοριακό σύστημα Δικτύου Σχολικών Βιβλιοθηκών}
+\title{Τεχνική αναφορά\\\Large Πληροφοριακό σύστημα Δικτύου Σχολικών Βιβλιοθηκών\\\vspace{1em} \normalsize \url{https://github.com/andreasstamos/library-management-system}}
 \author{Ανδρέας Στάμος - Κωνσταντίνος Πίκουλας}
 \date{}
 
 \hypersetup{
+        pdfinfo={
+            Title={Τεχνική Αναφορά - Πληροφοριακό σύστημα Δικτύου Σχολικών Βιβλιοθηκών},
+            Author={Ανδρέας Στάμος - Κωνσταντίνος Πίκουλας}
+        },
 	colorlinks=true,
 	linkcolor=blue,
+        urlcolor=blue,
 }
 
  
@@ -163,7 +168,7 @@
         \item jsonschema
         \item bcrypt
         \item latex (βιβλιοθήκη της python για παραγωγή pdf αρχείου από LaTeX, χρησιμοποιείται για την δημιουργία κάρτας βιβλιοθήκης)
-    \item TeX Live - LaTeX (για την δημιουργία κάρτας βιβλιοθήκης)
+    \item TeX Live - LaTeX + package ``qrcode'' (για την δημιουργία κάρτας βιβλιοθήκης)
     \end{enumerate}   
     \item React
     \item React Router DOM
@@ -180,12 +185,19 @@
 
 \section{DDL Script}
 \label{appendix_ddl}
+Το DDL Script που κατασκευάζει τους πίνακες τις βάσεις (και τα σχετικά ευρετήρια) βρίσκεται στο αποθετήριο GitHub στο path:
+\mint{bash}|sql/schema.sql|
+Επιπλέον ο διαδικτυακός υπερσύνδεσμος για το DDL Script απευθείας στο GitHub αποθετήριο είναι:\\
+\url{https://github.com/andreasstamos/library-management-system/blob/master/sql/schema.sql}
+
 \inputminted[breaklines,linenos]{sql}{../../sql/schema.sql}
 
 \section{DML Script}
 
-\par Το DML Script που εισάγει τα Mock Data στην βάση, τα οποία δημιουργήθηκαν σύμφωνα με την διαδικασία που αναφέρθηκε στην ενότητα \ref{mock_data} βρίσκεται στο αποθετήριο GitHub της εφαρμογής στο path:
-\mint{bash}|fakedata/fakedata.sql|
+\par Το DML Script που εισάγει τα Mock Data στην βάση, τα οποία δημιουργήθηκαν σύμφωνα με την διαδικασία που αναφέρθηκε στην ενότητα \ref{mock_data} βρίσκεται στο αποθετήριο GitHub στο path:
+\mint{bash}|fake_data/fake_data.sql|
+Επιπλέον ο διαδικτυακός υπερσύνδεσμος για το DDL Script απευθείας στο GitHub αποθετήριο είναι:\\
+\url{https://github.com/andreasstamos/library-management-system/blob/master/fake_data/fake_data.sql}
 
 \par Το αρχείο αυτό δημιουργείται αυτόματα αν (αφού εγκαταστήσετε την βιβλιοθήκη Faker) τρέξετε την εντολή:
 \mint{bash}|python3 create.py|
@@ -202,7 +214,7 @@
 
 \subsection{Backend (API)}
 
-\par Αρχικά πρέπει να εγκαταστήσετε την python3. Προτείνουμε την χρήση του Package Manager του λειτουργικού σας συστήματος αν δουλεύετε σε υπολογιστικό σύστημα Linux, διαφορετικά ακολουθήστε τις οδηγίες που προτείνονται στις ιστοσελίδες τους για την εγκατάστασή τους στο σύστημα σας.
+\par Αρχικά πρέπει να εγκαταστήσετε την python3. Επίσης πρέπει να εγκαταστήσετε το pdflatex του TexLive καθώς επίσης και να εξασφαλίσετε ότι το package qrcode του LaTex είναι εγκατεστημένο. Προτείνουμε την χρήση του Package Manager του λειτουργικού σας συστήματος αν δουλεύετε σε υπολογιστικό σύστημα Linux (για το LaTeX και το package του qrcode σε περιβάλλον Ubuntu/Debian τα πακέτα texlive-latex-recommended και texlive-pictures επαρκούν), διαφορετικά ακολουθήστε τις οδηγίες που προτείνονται στις επίσημες ιστοσελίδες των λογισμικών για την εγκατάστασή τους στο σύστημά σας.
 
 \par Προτείνουμε η εγκατάσταση των βιβλιοθηκών Python να γίνει σε Virtual Environment και με χρήση pip3 για αποφυγή προβλημάτων συμβατότητας. Αν επιθυμείτε να εγκαταστήσετε με διαφορετικό τρόπο τις προαπαιτούμενες βιβλιοθήκες ή το σύστημα σας δεν υποστηρίζει Python Virtual Environment και pip3, σας παραπέμπουμε στο παράρτημα \ref{used_software} καθώς και στο αρχείο \mintinline{bash}{backend/requirements.txt} για τις σχετικές απαιτήσεις.
 

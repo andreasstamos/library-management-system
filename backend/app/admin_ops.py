@@ -425,6 +425,7 @@ def lib_editors_count_borrows():
             GROUP BY "user".user_id) editors_with_count
             WHERE cnt > 20
             GROUP BY cnt
+            HAVING COUNT(1) >= 2
             ORDER BY cnt""", [str(data['year'])])
 
             editors = cur.fetchall()
@@ -495,11 +496,7 @@ def query_3_1_7():
             JOIN author USING (author_id)
             GROUP BY author.author_id
             HAVING COUNT(1) <=
-                (SELECT COUNT(1) AS cnt
-                FROM book_author
-                GROUP BY author_id
-                ORDER BY cnt DESC
-                LIMIT 1) - 5
+                (SELECT MAX(cnt) FROM (SELECT COUNT(1) AS cnt FROM book_author GROUP BY author_id) t) - 5
             """)
 
             authors = cur.fetchall()
