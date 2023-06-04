@@ -32,7 +32,7 @@ CREATE TABLE book (
 	title VARCHAR(200) NOT NULL,
 	page_number SMALLINT NOT NULL CHECK (page_number > 0),
 	summary VARCHAR(10000) NOT NULL,
-	language VARCHAR(30) NOT NULL ,
+	language VARCHAR(30) NOT NULL,
 	publisher_id INTEGER NOT NULL REFERENCES publisher ON DELETE CASCADE,
 	image_uri VARCHAR(1000) NOT NULL
 );
@@ -43,7 +43,7 @@ CREATE INDEX index_book_publisher_id ON book (publisher_id);
 
 CREATE TABLE author (
 	author_id SERIAL PRIMARY KEY,
-	author_name VARCHAR(100) UNIQUE NOT NULL UNIQUE
+	author_name VARCHAR(100) NOT NULL UNIQUE
 );
 
 CREATE INDEX index_author ON author USING GIST (author_name gist_trgm_ops);
@@ -102,8 +102,6 @@ CREATE TABLE "user" (
 	active BOOLEAN NOT NULL DEFAULT FALSE
 );
 
-CREATE INDEX index_user_email ON "user" (email);
-CREATE INDEX index_user_username ON "user" (username);
 CREATE INDEX index_user_active ON "user" (active);
 CREATE INDEX index_user_school_id ON "user" (school_id);
 CREATE INDEX index_user_fullname ON "user" USING GIST (first_name gist_trgm_ops, last_name gist_trgm_ops);
@@ -112,25 +110,17 @@ CREATE TABLE "admin" (
 	user_id INT NOT NULL UNIQUE REFERENCES "user" ON DELETE CASCADE
 );
 
-CREATE INDEX index_admin ON "admin" (user_id);
-
 CREATE TABLE teacher (
 	user_id INTEGER NOT NULL UNIQUE REFERENCES "user" ON DELETE CASCADE
 );
-
-CREATE INDEX index_teacher ON teacher (user_id);
 
 CREATE TABLE lib_user (
 	user_id INTEGER NOT NULL UNIQUE REFERENCES "user" ON DELETE CASCADE REFERENCES teacher(user_id) ON DELETE CASCADE
 );
 
-CREATE INDEX index_lib_user ON lib_user (user_id);
-
 CREATE TABLE student (
 	user_id INTEGER NOT NULL UNIQUE REFERENCES "user" ON DELETE CASCADE
 );
-
-CREATE INDEX index_student ON student (user_id);
 
 CREATE TABLE item (
 	item_id SERIAL PRIMARY KEY,
