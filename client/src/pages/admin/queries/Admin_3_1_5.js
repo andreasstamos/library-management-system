@@ -1,9 +1,9 @@
 import { useState, useContext } from 'react'
-import { CircularProgress } from '@mui/material';
+import { Button, CircularProgress } from '@mui/material';
 import { useEffect } from 'react';
 import axios from 'axios';
 
-import {Box} from '@mui/material';
+import {Box, TextField} from '@mui/material';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -20,11 +20,16 @@ function Admin_3_1_5() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const [yearSearch, setYearSearch] = useState(new Date().getFullYear());
+
   const auth = useContext(AuthContext);
 
   const fetchEditors = async () => {
+    const payload = {
+      'year': parseInt(yearSearch)
+    }
     try {
-      const response = await axios.post('http://localhost:5000/admin-api/queries/3_1_5/', {}, {headers: {
+      const response = await axios.post('http://localhost:5000/admin-api/queries/3_1_5/', payload, {headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${auth.authTokens}`,
       }});
@@ -47,7 +52,23 @@ function Admin_3_1_5() {
   return (
     <Box sx={{display: 'flex', flexDirection: 'column'}}>  
       <h2 className='title-with-hr'>Χειριστές βιβλίων ανά πλήθος δανεισμών (>20)</h2>
-
+      <div className='queries-filter'>
+        <TextField 
+        id="outlined-basic" 
+        label="Έτος" 
+        variant="outlined" 
+        value={yearSearch} 
+        onChange={(e) => setYearSearch(e.target.value)}
+        type='number'
+        InputProps={{
+          inputProps: {
+            min: 2000,
+            max: new Date().getFullYear(),
+          },
+        }}
+        />
+        <Button variant="contained" onClick={fetchEditors}>ΑΝΑΖΗΤΗΣΗ</Button>
+      </div>
       {editors && (editors?.length > 0 ?
         <Box sx={{mr: 'auto'}}><TableContainer component={Paper}>
           <Table size="small" aria-label="a dense table">

@@ -400,8 +400,10 @@ def get_authors_without_borrowed_books():
 def lib_editors_count_borrows():
     LIB_EDITORS_COUNT_BORROWS_JSONSCHEMA = {
         "type": "object",
-        "properties": {},
-        "required": [],
+        "properties": {
+            "year": {'type':'integer', 'minValue': 2000, 'maxValue':  datetime.now().year}
+        },
+        "required": ['year'],
         "additionalProperties": False,
     }
     data = request.get_json()
@@ -419,10 +421,11 @@ def lib_editors_count_borrows():
             FROM lib_user
             INNER JOIN "user" USING (user_id)
             INNER JOIN borrow ON user_id = lender_id
+            WHERE EXTRACT(YEAR FROM LOWER(borrow.period)) = %s 
             GROUP BY "user".user_id) editors_with_count
             WHERE cnt > 20
             GROUP BY cnt
-            ORDER BY cnt""")
+            ORDER BY cnt""", [str(data['year'])])
 
             editors = cur.fetchall()
             

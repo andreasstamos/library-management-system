@@ -136,7 +136,7 @@ export default function LibraryUserCard({data, fetchUsers}) {
                   onChange={() => setNewActive(!newActive)}
                   inputProps={{ 'aria-label': 'controlled' }}
               />}
-              label={newActive ? "Ενεργός" : "Ανενεργός"} 
+              label={newActive ? "Ενεργός" : "Ανενεργός"}
           />
       </form>
       

@@ -53,16 +53,8 @@ def edit_user():
                 last_name = (%s),
                 dob = (%s),
                 active = (%s)
-                WHERE "user".user_id = (%s) AND "user".school_id = (%s) AND "user".user_id IN (
-                    SELECT "user".user_id
-                    FROM "user"
-                    INNER JOIN teacher ON "user".user_id = teacher.user_id AND "user".school_id = (%s)
-                    UNION
-                    SELECT "user".user_id
-                    FROM "user"
-                    INNER JOIN student ON "user".user_id = student.user_id AND "user".school_id=(%s)
-                )
-            """, [data['username'], data['email'].lower(),data['first_name'].title(), data['last_name'].title(), normalized_date,data['active'],data['user_id'], user['school_id'], user['school_id'], user['school_id']])
+                WHERE "user".user_id = (%s) AND "user".school_id = (%s)
+            """, [data['username'], data['email'].lower(),data['first_name'].title(), data['last_name'].title(), normalized_date,data['active'],data['user_id'], user['school_id']])
             g.db_conn.commit() 
     except psycopg2.IntegrityError as err:
         g.db_conn.rollback()

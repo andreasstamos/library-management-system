@@ -89,6 +89,14 @@ export default function UserCard({data,  getUsers}) {
           disabled
 
         />
+  <TextField
+          id="filled-required"
+          label="Ρόλος"
+          defaultValue={data.role === 'teacher' ? 'Εκπαιδευτικός': 'Μαθητής'}
+          variant="filled"
+          disabled
+
+        />
    <TextField
           required
           id="filled-required"
