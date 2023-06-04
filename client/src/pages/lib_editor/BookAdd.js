@@ -128,7 +128,7 @@ function BookAdd() {
                         'Authorization': `Bearer ${auth.authTokens}`,
                     }});
                 } else {
-                    const payload = {
+                    let payload = {
                         "isbn": isbn,
                         "title": title,
                         "publisher": publisher,
@@ -139,8 +139,13 @@ function BookAdd() {
                         "keywords": keywords,
                         "categories": categories,
                         "image_uri": imageURI,
-                        "insert_item": doInsertItem,
+                        // "insert_item": doInsertItem,
                     }
+                    /* kostas code begin */
+                    if (doInsertItem) payload['insert_item'] = doInsertItem
+                    console.log(payload)
+                    /* kostas code end */
+                    
                     if (!(Object.values(payload).every((value) => value && !(Array.isArray(value) && value?.length === 0)))) {
                         setErrorInsert("Παρακαλούμε συμπληρώστε όλα τα πεδία.")
                         return;
